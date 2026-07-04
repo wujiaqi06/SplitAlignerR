@@ -1,0 +1,20 @@
+citHeader("To cite SplitAlignerR in publications, please cite the SplitAligner preprint; a software DOI will be added on the first tagged release.")
+
+bibentry(
+  bibtype  = "Article",
+  title    = "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping",
+  author   = person("Jiaqi", "Wu"),
+  year     = "2026",
+  journal  = "bioRxiv",
+  doi      = "10.64898/2026.02.24.707838",
+  note     = "Preprint"
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "SplitAlignerR: Split-Based Branch Mapping and Coordinate Auditing for Phylogenomics",
+  author   = person("Jiaqi", "Wu"),
+  year     = "2026",
+  note     = "R package version 0.0.1 (scaffold); software DOI to be assigned",
+  url      = "https://github.com/wujiaqi06/SplitAlignerR"
+)
