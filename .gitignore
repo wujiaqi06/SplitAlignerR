@@ -7,5 +7,9 @@
 # build artefacts
 *.tar.gz
 *.Rcheck/
+# pkgdown site (built and deployed by CI to the gh-pages branch)
+docs/
+# coverage
+cobertura.xml
 # OS
 .DS_Store

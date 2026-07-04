@@ -22,6 +22,10 @@ test_that("catnip10_expected validates the regime argument", {
   expect_error(catnip10_expected("nope"))
 })
 
+test_that("align_branches() is a documented stub that signals not-implemented", {
+  expect_error(align_branches(), "not implemented")
+})
+
 test_that("bundled oracle has both regimes and the benchmark truth identity holds", {
   expect_true(all(c("global", "local") %in% names(catnip10_oracle)))
   # NA_topo never arises in this discordance-free benchmark

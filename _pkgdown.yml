@@ -1,0 +1,19 @@
+url: https://wujiaqi06.github.io/SplitAlignerR/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Branch mapping
+    desc: The split-based mapping interface (under development).
+    contents:
+      - align_branches
+  - title: Benchmark data
+    desc: The bundled Catnip10 coordinate-audit benchmark expected outputs.
+    contents:
+      - catnip10_expected
+      - catnip10_oracle
+  - title: Package
+    contents:
+      - splitalignerR_scaffold
+      - SplitAlignerR-package

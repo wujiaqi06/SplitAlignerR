@@ -12,6 +12,7 @@ An R implementation, currently a scaffold, of the SplitAligner branch-identity c
 Useful links:
 \itemize{
   \item \url{https://github.com/wujiaqi06/SplitAlignerR}
+  \item \url{https://wujiaqi06.github.io/SplitAlignerR/}
   \item Report bugs at \url{https://github.com/wujiaqi06/SplitAlignerR/issues}
 }
 
