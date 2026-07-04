@@ -7,9 +7,9 @@
 #' axis.
 #'
 #' @section Status:
-#' **Not implemented yet.** This is a stub that fixes the intended interface for
-#' the `v0.0.1` scaffold; calling it raises a clear not-implemented error. The
-#' split-projection engine will be added in a later version.
+#' **Not implemented yet.** This is an interface preview in the public seed
+#' release; calling it raises a clear not-implemented error. The split-projection
+#' engine is under active development.
 #'
 #' @param species_tree Reference species tree: an `ape::phylo` object, or a
 #'   Newick string / file path.
@@ -25,7 +25,7 @@
 #' @seealso [catnip10_expected()] for the bundled benchmark expected output.
 #' @examples
 #' \dontrun{
-#' # Interface preview (not implemented in v0.0.1):
+#' # Interface preview (not implemented in the public seed release):
 #' m <- align_branches(species_tree, gene_trees, mode = "free")
 #' }
 #' @export
@@ -33,8 +33,8 @@ align_branches <- function(species_tree, gene_trees,
                            mode = c("free", "fixed"), ...) {
   mode <- match.arg(mode)
   stop(
-    "align_branches() is not implemented in this scaffold (v0.0.1). ",
-    "The split-projection engine is planned for a later release.",
+    "align_branches() is not implemented in this public seed release. ",
+    "The split-projection engine is under active development.",
     call. = FALSE
   )
 }

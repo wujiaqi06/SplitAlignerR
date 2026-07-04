@@ -1,19 +1,18 @@
-#' SplitAlignerR scaffold placeholder
+#' SplitAlignerR seed-release status
 #'
-#' A temporary placeholder that reports the scaffold status of the package.
-#' It exists so that the `v0.0.1` scaffold installs, documents, and passes
-#' `R CMD check` while the split-based branch-mapping engine is still under
-#' development. It will be removed once the mapping functions land.
+#' Report the current seed-release status of the package. This helper is kept
+#' for early users who install the public seed before the split-based empirical
+#' gene-tree mapping engine is available.
 #'
-#' @return A length-one character string describing the scaffold status.
+#' @return A length-one character string describing the seed-release status.
 #' @examples
 #' splitalignerR_scaffold()
 #' @export
 splitalignerR_scaffold <- function() {
   paste0(
     "SplitAlignerR ", utils::packageVersion("SplitAlignerR"),
-    " scaffold: the split-based branch-mapping engine is not implemented yet. ",
-    "Bundled Catnip10 benchmark oracle output is available via catnip10_expected()."
+    " public seed release: Catnip10 graph-oracle benchmark data and accessors ",
+    "are available; the empirical split-mapping engine is under active development."
   )
 }
 
@@ -39,6 +38,5 @@ splitalignerR_scaffold <- function() {
 #' g[["gene_id"]]
 #' @export
 catnip10_expected <- function(regime = c("global", "local")) {
-  regime <- match.arg(regime)
-  catnip10_oracle[[regime]]$matrix
+  catnip10_matrix(regime)
 }

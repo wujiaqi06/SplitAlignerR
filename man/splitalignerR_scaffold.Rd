@@ -2,18 +2,17 @@
 % Please edit documentation in R/scaffold.R
 \name{splitalignerR_scaffold}
 \alias{splitalignerR_scaffold}
-\title{SplitAlignerR scaffold placeholder}
+\title{SplitAlignerR seed-release status}
 \usage{
 splitalignerR_scaffold()
 }
 \value{
-A length-one character string describing the scaffold status.
+A length-one character string describing the seed-release status.
 }
 \description{
-A temporary placeholder that reports the scaffold status of the package.
-It exists so that the \code{v0.0.1} scaffold installs, documents, and passes
-\verb{R CMD check} while the split-based branch-mapping engine is still under
-development. It will be removed once the mapping functions land.
+Report the current seed-release status of the package. This helper is kept
+for early users who install the public seed before the split-based empirical
+gene-tree mapping engine is available.
 }
 \examples{
 splitalignerR_scaffold()

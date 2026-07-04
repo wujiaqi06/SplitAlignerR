@@ -4,9 +4,9 @@
 \name{SplitAlignerR-package}
 \alias{SplitAlignerR}
 \alias{SplitAlignerR-package}
-\title{SplitAlignerR: Split-Based Branch Mapping and Coordinate Auditing for Phylogenomics}
+\title{SplitAlignerR: Catnip10 Graph-Oracle Benchmark Accessors for SplitAligner}
 \description{
-An R implementation, currently a scaffold, of the SplitAligner branch-identity coordinate system for phylogenomics under missing taxa and gene-tree discordance. This release ships the deterministic Catnip10 10-tip coordinate-audit benchmark expected oracle outputs as bundled data and a placeholder function so the package installs and checks cleanly. The split-based branch-mapping engine will be added in later versions. See the SplitAligner preprint (Wu 2026, \doi{10.64898/2026.02.24.707838}).
+Initial R reference implementation track for the SplitAligner branch-coordinate framework. This public seed release ships deterministic Catnip10 10-tip graph-oracle benchmark data, audit-ready accessors, and validation helpers for the primitive branch-coordinate ledger. The current manuscript title is "SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance". The split-based empirical gene-tree mapping engine is under active development. See the SplitAligner preprint (Wu 2026, \doi{10.64898/2026.02.24.707838}).
 }
 \seealso{
 Useful links:

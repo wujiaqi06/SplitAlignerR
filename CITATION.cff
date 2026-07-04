@@ -1,9 +1,9 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite the SplitAligner preprint below. A software DOI will be minted at the first tagged release (placeholder recorded under identifiers)."
-title: "SplitAlignerR: Split-Based Branch Mapping and Coordinate Auditing for Phylogenomics"
-abstract: "An R implementation (scaffold, v0.0.1) of the SplitAligner branch-identity coordinate system for phylogenomics under missing taxa and gene-tree discordance. Ships the deterministic Catnip10 10-tip coordinate-audit benchmark expected oracle outputs as bundled data."
+message: "If you use this software, please cite the SplitAligner preprint below. A software DOI will be minted after the first tagged release."
+title: "SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance"
+abstract: "Initial R reference implementation track for the SplitAligner branch-coordinate framework. This public seed release ships deterministic Catnip10 10-tip graph-oracle benchmark data, audit-ready accessors, and validation helpers for the primitive branch-coordinate ledger."
 type: software
-version: 0.0.1
+version: 0.0.2
 date-released: "2026-07-04"
 license: GPL-3.0-only
 repository-code: "https://github.com/wujiaqi06/SplitAlignerR"
@@ -12,13 +12,9 @@ authors:
     given-names: Jiaqi
     email: wujiaqi@hiroshima-u.ac.jp
     affiliation: "Graduate School of Integrated Sciences for Life, Hiroshima University"
-identifiers:
-  - type: doi
-    value: "10.5281/zenodo.PLACEHOLDER"
-    description: "Placeholder for the future software DOI, to be assigned at the first tagged release."
 preferred-citation:
   type: article
-  title: "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping"
+  title: "SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance"
   authors:
     - family-names: Wu
       given-names: Jiaqi

@@ -2,4 +2,8 @@
 
 export(align_branches)
 export(catnip10_expected)
+export(catnip10_fusion_groups)
+export(catnip10_matrix)
+export(catnip10_summary_counts)
 export(splitalignerR_scaffold)
+export(validate_catnip10_oracle)

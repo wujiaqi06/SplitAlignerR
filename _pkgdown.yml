@@ -9,9 +9,13 @@ reference:
     contents:
       - align_branches
   - title: Benchmark data
-    desc: The bundled Catnip10 coordinate-audit benchmark expected outputs.
+    desc: Catnip10 graph-oracle benchmark accessors and validation helpers.
     contents:
       - catnip10_expected
+      - catnip10_matrix
+      - catnip10_summary_counts
+      - catnip10_fusion_groups
+      - validate_catnip10_oracle
       - catnip10_oracle
   - title: Package
     contents:

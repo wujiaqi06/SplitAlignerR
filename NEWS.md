@@ -1,3 +1,14 @@
+# SplitAlignerR 0.0.2
+
+* Prepared the package as a public seed release for the SplitAligner R
+  reference implementation track.
+* Reframed the README and package metadata around bundled Catnip10 graph-oracle
+  benchmark data, audit-ready accessors, and validation helpers.
+* Added `catnip10_summary_counts()`, `validate_catnip10_oracle()`,
+  `catnip10_fusion_groups()`, and `catnip10_matrix()`.
+* Removed placeholder software DOI metadata and private local paths from
+  public-facing source files.
+
 # SplitAlignerR 0.0.1
 
 * Initial package scaffold (`v0.0.1-scaffold`).

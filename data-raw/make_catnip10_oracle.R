@@ -10,11 +10,15 @@
 
 bench <- Sys.getenv(
   "CATNIP10_BENCHMARK_DIR",
-  unset = file.path(
-    "/Users/jiaqiwu/Documents/work/Bird_mammal/Mammal517_alignment",
-    "SplitAligner/SplitAligner-main/benchmark/outputs"
-  )
+  unset = NA_character_
 )
+
+if (is.na(bench) || !nzchar(bench)) {
+  stop(
+    "Please set CATNIP10_BENCHMARK_DIR to the benchmark output directory.",
+    call. = FALSE
+  )
+}
 
 read_tsv <- function(path) {
   utils::read.delim(
