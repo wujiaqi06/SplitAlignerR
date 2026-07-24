@@ -1,3 +1,51 @@
+# SplitAlignerR 0.0.2.9001
+
+* Added per-gene retained-taxon provenance and exact fixed/free taxon-set
+  pairing gates.
+* Restored the frozen paired-finalize rule from SAR-V1-SEM-002: literal `NA`
+  is an intentional finalized token, and `residual_NA` is only its summary
+  name rather than a graph state or recovery-scoped subtype.
+* Added explicit pre-promotion/final-token provenance and enforced that only
+  finite fixed primitive evidence can promote `NA_topo`; finite fused evidence
+  never substitutes for that primitive gate.
+* Strengthened persisted-result object invariants and aligned Oracle numeric
+  merging with the production core's all-or-none finite-evidence policy.
+* Replaced the unreachable singleton-side structural fallback with a loud
+  internal invariant failure and added non-vacuous boundary tests.
+
+# SplitAlignerR 0.0.2.9000
+
+* Implemented the C++17 graph-first empirical mapper exposed by
+  `align_branches()`, with separate primitive-state and numeric-evidence layers.
+* Added deterministic composite-coordinate provenance and recovery ledgers;
+  fused numeric values live on composite coordinates rather than being copied
+  into primitive cells.
+* Added Newick, line-based file, `phylo`, `multiPhylo`, and list input adapters,
+  with fixed-mode mismatch diagnostics and strict taxon/ID validation.
+* Added regression coverage reproducing all 272 Catnip10 primitive cells and
+  all 19 frozen fusion events across both deletion regimes.
+* Added result summaries, member-set provenance queries, checked RDS
+  save/reload, a quick-start vignette, and deterministic random-tree property
+  tests for pruning, terminal, root-representation, and wrapper/core invariants.
+* Added a separate paired-bookkeeping API that preserves frozen fixed/free
+  numeric promotion gates and records residual `NA` without changing semantic
+  single-tree states.
+* Added an opt-in external regression hook for the frozen 302-mammal example,
+  covering 6,010 fixed/free legacy cell classes without embedding local paths
+  or duplicating the publication authority into the package.
+* Added the first C++17 core boundary with strict whole-token, finite-range
+  branch-length validation and structured diagnostics.
+* Added C++ reference-tree parsing and canonical unrooted coordinate tables with
+  root-representation normalization, quoted-label/annotation handling, and
+  retained multifurcations.
+* Added a pure R node-edge implementation that independently recomputes both
+  bundled Catnip10 graph-oracle scenarios without calling the C++ core or using
+  projected splits.
+* Recorded the V1 scientific, numeric, provenance, and paired-bookkeeping
+  contracts under `inst/spec/`.
+* Clarified that paired `residual_NA` summarizes finalized literal `NA` and is
+  not a fifth graph state.
+
 # SplitAlignerR 0.0.2
 
 * Prepared the package as a public seed release for the SplitAligner R

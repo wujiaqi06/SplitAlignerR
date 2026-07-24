@@ -1,0 +1,151 @@
+---
+title: "SplitAlignerR Quick Start"
+vignette: >
+  %\VignetteIndexEntry{SplitAlignerR Quick Start}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+SplitAlignerR aligns empirical gene trees to the primitive branch-coordinate
+axis of one reference tree. The production state logic is implemented once in
+C++17. R converts inputs, calls that core, and wraps the result. The bundled
+Catnip10 Oracle is deliberately separate pure R node-edge graph surgery; it is
+benchmark evidence, not a second production implementation.
+
+## The three result layers
+
+Keep these questions separate:
+
+1. `state_matrix`: what happened to each primitive reference coordinate after
+   taxon restriction and empirical split recovery?
+2. `numeric_matrix`: which primitive or composite coordinates have accepted
+   finite branch-length evidence?
+3. provenance: which frozen primitive members define each composite coordinate?
+
+The single-tree states are `mapped`, `NA_struct`, `NA_fuse`, and `NA_topo`.
+Paired `residual_NA` is the summary name for finalized literal `NA`; it is not
+a fifth graph state and it is never written into a finalized matrix.
+
+## Align one or more gene trees
+
+```{r align}
+library(SplitAlignerR)
+
+species <- "((A:1,B:1):1,(C:1,D:1):1);"
+genes <- c(
+  concordant = "((A:1,B:1):1,(C:1,D:1):1);",
+  discordant = "((A:1,C:1):1,(B:1,D:1):1);",
+  marker = "((A:NaN,B:1):1,(C:1,D:1):1);"
+)
+
+result <- align_branches(species, genes, mode = "free")
+result
+result$state_matrix
+result$numeric_matrix
+```
+
+The discordant tree lacks the reference internal split, so that primitive cell
+is `NA_topo`. The `marker` tree still recovers the terminal split for `A`, so
+its state is `mapped`; only its numeric value is unavailable. Software failure
+markers are never converted to zero and never manufacture topological absence.
+
+`species_tree` may also be one `ape::phylo` object or a file containing one
+Newick tree. `gene_trees` may be a character vector, one `phylo`, a named list
+of `phylo` objects, an `ape::multiPhylo`, or a line-based file. File records may
+be plain Newick or use the bounded `gene_id(tree);` form.
+
+## Optional paired bookkeeping
+
+Fixed and free single-tree results remain independent objects. Pair them only
+when their ordered gene and coordinate axes and conventions agree.
+
+```{r paired}
+fixed <- align_branches(species, genes["concordant"], mode = "fixed",
+                         gene_ids = "g1")
+free <- align_branches(species, genes["discordant"], mode = "free",
+                        gene_ids = "g1")
+paired <- pair_alignment_results(fixed, free)
+paired$semantic_state_matrix
+paired$free_pre_promotion_matrix
+paired$final_matrix
+paired$residual_NA
+```
+
+The semantic state matrix is the unchanged free single-tree ledger. The paired
+ledger separately records the free pre-promotion token, fixed primitive and
+fused numeric availability, final matrix token, and summary class. Only finite
+fixed primitive evidence can promote generic free `NA` to `NA_topo`; a finite
+fixed fused coordinate cannot satisfy that gate. Final literal `NA` is retained
+as `NA` and summarized as `residual_NA`. Empirical split conflict or adjacent
+side-clade loss may explain a frozen data set, but neither is a classification
+predicate.
+
+## Structural restriction and composite provenance
+
+With only `A` and `B` retained, their primitive terminal coordinates form one
+composite path while coordinates on the lost side become structural absence.
+
+```{r provenance}
+pruned <- align_branches(species, c(two_taxa = "(A:4,B:5);"))
+pruned$state_matrix
+pruned$composite_ledger
+coordinate_provenance(pruned, "F[B1|B2]")
+```
+
+Numeric evidence for a fused path lives on the composite column in
+`numeric_matrix`. It is not copied back into its primitive `NA_fuse` cells.
+Composite coordinates are provenance-bearing member sets; this package does not
+claim that they form an orthogonal, additive, or independent basis.
+
+## Summaries and diagnostics
+
+```{r summary}
+summary(result)
+subset(result$diagnostics, count > 0L)
+```
+
+Species-tree branch lengths, internal support/labels, annotation blocks, and a
+representation-root length are parsed and ignored with structured diagnostics.
+Gene-tree internal support/labels and annotation blocks are also ignored. Gene
+tip labels, topology, and branch-length evidence are retained. Duplicate taxa,
+unexpected taxa, invalid numeric tokens, parse failures, and incompatible
+result schemas fail loudly.
+
+Finite negative values are retained with a diagnostic because the nonnegative
+theorem scope does not cover them. Decimal overflow and underflow to zero are
+rejected. Conventional textual spellings such as `NaN` and `Inf` are recognized
+before numeric conversion and classified as unavailable software evidence.
+
+```{r numeric-policy}
+validate_branch_length_tokens(c("0", "-0.1", "NaN", "Inf", "1e9999"))
+```
+
+## Save and reload without flattening layers
+
+```{r persistence}
+path <- tempfile(fileext = ".rds")
+save_splitaligner_result(result, path)
+restored <- read_splitaligner_result(path)
+identical(result, restored)
+```
+
+Reload checks the stored core and result-schema versions by default. Existing
+files are not overwritten unless `overwrite = TRUE` is explicit.
+
+## Benchmark track
+
+```{r benchmark}
+validate_catnip10_oracle()
+rebuilt <- recompute_catnip10_oracle("global")
+identical(rebuilt$matrix, catnip10_matrix("global"))
+```
+
+The Catnip10 benchmark is discordance-free. Its two cumulative deletion regimes
+contain 272 frozen primitive cells in total. The pure R Oracle recomputes their
+graph states independently of the C++ mapper. Development tests additionally
+cross-check the mapper against every cell and frozen fusion member set. These
+are implementation gates, not final release certification.

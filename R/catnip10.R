@@ -38,11 +38,12 @@ catnip10_summary_counts <- function(regime = c("all", "global", "local")) {
 
 #' Validate the bundled Catnip10 oracle data
 #'
-#' Run deterministic sanity checks for the Catnip10 graph-oracle data bundled in
-#' this public seed release. The checks are intentionally narrow: they validate
-#' package data loading, status accounting, and the absence of `NA_topo` in the
-#' discordance-free benchmark. They do not claim that the empirical
-#' split-mapping engine is implemented.
+#' Run deterministic checks for the bundled Catnip10 graph-oracle data. In
+#' addition to data loading and accounting checks, the pure R node-edge oracle is
+#' rerun for both deletion regimes and compared exactly with the frozen matrix,
+#' per-cell ledger, and fusion groups. The Oracle remains independent of the
+#' production C++ mapper; this helper validates the Oracle track, not final
+#' release certification.
 #'
 #' @return A base `data.frame` with columns `check`, `status`, and `details`.
 #'   `status` is one of `PASS`, `FAIL`, or `DEFERRED`.
@@ -120,6 +121,30 @@ validate_catnip10_oracle <- function() {
     if (dims_ok) "PASS" else "FAIL",
     "Expected each regime matrix to be 8 rows x 18 columns"
   )
+
+  for (regime in c("global", "local")) {
+    rebuilt <- tryCatch(
+      recompute_catnip10_oracle(regime),
+      error = function(e) e
+    )
+    frozen <- if (data_loaded) catnip10_oracle[[regime]] else NULL
+    exact <- is.list(rebuilt) && is.list(frozen) &&
+      identical(rebuilt$matrix, frozen$matrix) &&
+      identical(rebuilt$status_long, frozen$status_long) &&
+      identical(rebuilt$fusion_groups, frozen$fusion_groups)
+    details <- if (inherits(rebuilt, "error")) {
+      conditionMessage(rebuilt)
+    } else if (exact) {
+      "136/136 primitive cells and all fusion groups match the frozen oracle"
+    } else {
+      "Recomputed matrix, cell ledger, or fusion groups differ from the frozen oracle"
+    }
+    add(
+      paste0("pure_R_graph_oracle_exact_", regime),
+      if (exact) "PASS" else "FAIL",
+      details
+    )
+  }
 
   do.call(rbind, rows)
 }

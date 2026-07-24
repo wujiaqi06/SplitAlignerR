@@ -2,48 +2,58 @@
 % Please edit documentation in R/align.R
 \name{align_branches}
 \alias{align_branches}
-\title{Map gene trees onto the species-tree branch-coordinate system}
+\title{Align gene trees to the species-tree branch-coordinate system}
 \usage{
-align_branches(species_tree, gene_trees, mode = c("free", "fixed"), ...)
+align_branches(
+  species_tree,
+  gene_trees,
+  mode = c("free", "fixed"),
+  gene_ids = NULL,
+  ...
+)
 }
 \arguments{
-\item{species_tree}{Reference species tree: an \code{ape::phylo} object, or a
-Newick string / file path.}
+\item{species_tree}{Reference species tree: one \code{ape::phylo}, a Newick
+string, or a file path. Reference lengths, internal labels/support, and
+annotation blocks are ignored with diagnostics.}
 
-\item{gene_trees}{Gene trees: an \code{ape::multiPhylo}, a list of \code{phylo}
-objects, or a path to a SplitAligner line-based Newick file.}
+\item{gene_trees}{One or more empirical gene trees supplied as Newick text,
+a SplitAligner line-based file, one \code{ape::phylo}, an \code{ape::multiPhylo}, or
+a list of \code{phylo} objects. A line-based record may be \code{gene_id(tree);} or a
+plain Newick tree.}
 
-\item{mode}{Character; \code{"free"} for free-topology gene trees (which enables
-the \code{NA_topo} category) or \code{"fixed"} for topology-constrained gene trees.}
+\item{mode}{Character; \code{"free"} for free-topology trees or \code{"fixed"} for
+topology-constrained trees. Both modes use the same state semantics;
+fixed-mode topology mismatches are additionally diagnosed.}
 
-\item{...}{Reserved for future arguments.}
+\item{gene_ids}{Optional character vector overriding inferred/file IDs.}
+
+\item{...}{Reserved; additional arguments currently signal an error.}
 }
 \value{
-(Planned) a gene-by-branch matrix / object in which each
-\verb{(gene, branch)} cell holds either a numeric branch value or one of the
-explicit missingness labels. Nothing is returned yet: the stub signals a
-not-implemented error.
+A \code{splitaligner_result} list containing the primitive \code{state_matrix},
+primitive-plus-composite \code{numeric_matrix}, long state and composite
+ledgers, coordinate provenance, structured diagnostics, validated species
+tree, and versioned metadata.
 }
 \description{
-Project the species-tree splits onto each gene's taxon set and classify every
-gene-by-branch cell as mapped or as one of the explicit missingness
-categories (\code{NA_struct}, \code{NA_fuse}, \code{NA_topo}, residual \code{NA}), yielding a
-standardized gene-by-branch matrix on the frozen primitive branch-coordinate
-axis.
+Restrict the reference tree to each gene's retained taxa, classify every
+primitive coordinate by graph-first semantics, and then query the empirical
+gene-tree splits. Structural state is kept separate from finite numeric
+evidence: a recovered split with a software failure marker remains \code{mapped}
+while its numeric value is unavailable.
 }
-\section{Status}{
-
-\strong{Not implemented yet.} This is an interface preview in the public seed
-release; calling it raises a clear not-implemented error. The split-projection
-engine is under active development.
+\details{
+The single-tree state alphabet is exactly \code{mapped}, \code{NA_struct},
+\code{NA_fuse}, and \code{NA_topo}. Legacy paired-workflow \code{residual_NA} is not a
+fifth state. Failure markers are never converted to zero.
 }
-
 \examples{
-\dontrun{
-# Interface preview (not implemented in the public seed release):
-m <- align_branches(species_tree, gene_trees, mode = "free")
-}
+species <- "((A:1,B:1):1,(C:1,D:1):1);"
+genes <- c(g1 = "((A:1,B:1):1,(C:1,D:1):1);")
+aligned <- align_branches(species, genes)
+aligned$state_matrix
 }
 \seealso{
-\code{\link[=catnip10_expected]{catnip10_expected()}} for the bundled benchmark expected output.
+\code{\link[=validate_species_tree]{validate_species_tree()}}, \code{\link[=validate_branch_length_tokens]{validate_branch_length_tokens()}}
 }

@@ -11,11 +11,12 @@ A base \code{data.frame} with columns \code{check}, \code{status}, and \code{det
 \code{status} is one of \code{PASS}, \code{FAIL}, or \code{DEFERRED}.
 }
 \description{
-Run deterministic sanity checks for the Catnip10 graph-oracle data bundled in
-this public seed release. The checks are intentionally narrow: they validate
-package data loading, status accounting, and the absence of \code{NA_topo} in the
-discordance-free benchmark. They do not claim that the empirical
-split-mapping engine is implemented.
+Run deterministic checks for the bundled Catnip10 graph-oracle data. In
+addition to data loading and accounting checks, the pure R node-edge oracle is
+rerun for both deletion regimes and compared exactly with the frozen matrix,
+per-cell ledger, and fusion groups. The Oracle remains independent of the
+production C++ mapper; this helper validates the Oracle track, not final
+release certification.
 }
 \examples{
 validate_catnip10_oracle()

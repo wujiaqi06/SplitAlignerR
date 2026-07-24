@@ -1,8 +1,8 @@
 #' SplitAlignerR seed-release status
 #'
-#' Report the current seed-release status of the package. This helper is kept
-#' for early users who install the public seed before the split-based empirical
-#' gene-tree mapping engine is available.
+#' Report the current development status of the package. This helper is kept
+#' for early users of the public seed while the C++ mapper proceeds through the
+#' V1 audit and certification gates.
 #'
 #' @return A length-one character string describing the seed-release status.
 #' @examples
@@ -11,8 +11,8 @@
 splitalignerR_scaffold <- function() {
   paste0(
     "SplitAlignerR ", utils::packageVersion("SplitAlignerR"),
-    " public seed release: Catnip10 graph-oracle benchmark data and accessors ",
-    "are available; the empirical split-mapping engine is under active development."
+    " public seed release: the C++ graph-first mapper and independent Catnip10 ",
+    "R Oracle are available for V1 development audit; release certification is pending."
   )
 }
 

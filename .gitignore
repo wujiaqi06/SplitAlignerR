@@ -7,6 +7,9 @@
 # build artefacts
 *.tar.gz
 *.Rcheck/
+src/*.o
+src/*.so
+src/*.dll
 # pkgdown site (built and deployed by CI to the gh-pages branch)
 docs/
 # coverage

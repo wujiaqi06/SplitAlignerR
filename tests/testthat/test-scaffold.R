@@ -41,12 +41,19 @@ test_that("catnip10_summary_counts returns required accounting columns", {
   expect_true(all(counts$NA_topo == 0L))
 })
 
-test_that("validate_catnip10_oracle returns PASS or DEFERRED checks", {
+test_that("validate_catnip10_oracle reruns both pure R oracle scenarios", {
   checks <- validate_catnip10_oracle()
   expect_s3_class(checks, "data.frame")
   expect_true(all(c("check", "status", "details") %in% names(checks)))
   expect_true(all(checks$status %in% c("PASS", "DEFERRED")))
   expect_false(any(checks$status == "FAIL"))
+  oracle_checks <- checks[grepl("^pure_R_graph_oracle_exact_", checks$check), ]
+  expect_identical(oracle_checks$check, c(
+    "pure_R_graph_oracle_exact_global",
+    "pure_R_graph_oracle_exact_local"
+  ))
+  expect_true(all(oracle_checks$status == "PASS"))
+  expect_true(all(grepl("136/136", oracle_checks$details, fixed = TRUE)))
 })
 
 test_that("bundled oracle has both regimes and no NA_topo", {
@@ -79,6 +86,6 @@ test_that("public metadata does not contain fake DOI or private path placeholder
   expect_true(any(grepl("Catnip10 graph-oracle benchmark", readme, fixed = TRUE)))
 })
 
-test_that("align_branches() is a documented interface preview", {
-  expect_error(align_branches(), "not implemented")
+test_that("align_branches() requires explicit tree inputs", {
+  expect_error(align_branches(), "species_tree.*missing|argument.*missing")
 })

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0-draft.2",
+  "core_version": "0.1.0-dev.2",
+  "production_core": "C++17",
+  "oracle": {
+    "language": "R",
+    "method": "node-edge graph surgery",
+    "may_call_production_core": false,
+    "may_use_projected_splits_for_structural_states": false
+  },
+  "tree": {
+    "branch_identity": "canonical_unrooted_split",
+    "root_treatment": "representation_only",
+    "suppress_degree2_internal_nodes": true,
+    "silently_resolve_multifurcations": false,
+    "reference_uses_branch_lengths": false,
+    "gene_tree_uses_branch_lengths": true,
+    "ignore_internal_support_and_annotations": true,
+    "ignore_root_length": true
+  },
+  "states": [
+    "mapped",
+    "NA_struct",
+    "NA_fuse",
+    "NA_topo"
+  ],
+  "state_numeric_independence": {
+    "mapped_requires_topology_recovery": true,
+    "mapped_requires_numeric_evidence": false,
+    "failure_marker_changes_topology_state": false
+  },
+  "paired_bookkeeping": {
+    "paired_schema": "paired-finalized-output-v1",
+    "residual_NA_is_graph_state": false,
+    "residual_NA_is_summary_name_for_literal_NA": true,
+    "finalized_generic_NA_is_intentional": true,
+    "NA_topo_requires_finite_fixed_primitive_numeric_evidence": true,
+    "fixed_fused_numeric_does_not_satisfy_primitive_gate": true,
+    "finalized_perl_matrices_are_authoritative": true,
+    "empirical_conflict_is_classification_predicate": false,
+    "round_trip_literal_NA_with_na_strings_character0": true,
+    "actual_R_missing_is_data_quality_error": true
+  },
+  "numeric": {
+    "policy_id": "finite-double-v1",
+    "consume_entire_token": true,
+    "allow_explicit_zero": true,
+    "allow_finite_negative_with_diagnostic": true,
+    "reject_nonfinite": true,
+    "reject_overflow": true,
+    "reject_underflow_to_zero": true,
+    "failure_markers_are_zero": false
+  },
+  "retained_taxa_key_schema": "length-prefixed-UTF8-bytes-RT1",
+  "ordering": "deterministic"
+}

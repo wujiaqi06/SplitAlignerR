@@ -5,9 +5,17 @@ template:
 
 reference:
   - title: Branch mapping
-    desc: The split-based mapping interface (under development).
+    desc: C++ graph-first alignment, result inspection, and persistence.
     contents:
       - align_branches
+      - coordinate_provenance
+      - summary.splitaligner_result
+      - save_splitaligner_result
+      - read_splitaligner_result
+      - pair_alignment_results
+      - validate_branch_length_tokens
+      - validate_species_tree
+      - splitaligner_core_info
   - title: Benchmark data
     desc: Catnip10 graph-oracle benchmark accessors and validation helpers.
     contents:
@@ -16,6 +24,7 @@ reference:
       - catnip10_summary_counts
       - catnip10_fusion_groups
       - validate_catnip10_oracle
+      - recompute_catnip10_oracle
       - catnip10_oracle
   - title: Package
     contents:

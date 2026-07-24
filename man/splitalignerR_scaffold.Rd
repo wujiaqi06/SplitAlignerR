@@ -10,9 +10,9 @@ splitalignerR_scaffold()
 A length-one character string describing the seed-release status.
 }
 \description{
-Report the current seed-release status of the package. This helper is kept
-for early users who install the public seed before the split-based empirical
-gene-tree mapping engine is available.
+Report the current development status of the package. This helper is kept
+for early users of the public seed while the C++ mapper proceeds through the
+V1 audit and certification gates.
 }
 \examples{
 splitalignerR_scaffold()
