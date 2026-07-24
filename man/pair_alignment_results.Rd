@@ -24,11 +24,14 @@ graph/fiber provenance. Literal \code{"NA"} is an intentional finalized token;
 \code{residual_NA} is only its descriptive summary name, not a graph state.
 }
 \details{
-Only finite numeric evidence on the fixed primitive coordinate may
-promote an eligible free generic \code{NA} to \code{NA_topo}. Finite evidence on a
-fixed fused coordinate never satisfies that primitive gate. A literal
-finalized \code{NA} remains \code{NA} on serialization and is summarized as
-\code{residual_NA}.
+The free pre-promotion layer contains a numeric token only for a
+mapped primitive with finite evidence, \code{NA_fuse} only for a fused state
+with finite composite evidence, and literal \code{NA} otherwise. Paired
+finalization then promotes graph-state \code{NA_struct} to \code{NA_struct}, and
+promotes graph-state \code{NA_topo} to \code{NA_topo} only when the fixed primitive
+is mapped with finite evidence. Finite evidence on a fixed fused
+coordinate never satisfies that primitive gate. A literal finalized \code{NA}
+remains \code{NA} on serialization and is summarized as \code{residual_NA}.
 }
 \examples{
 species <- "(((A,B),C),((D,E),F));"

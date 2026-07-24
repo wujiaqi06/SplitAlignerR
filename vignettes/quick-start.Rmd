@@ -75,14 +75,15 @@ paired$final_matrix
 paired$residual_NA
 ```
 
-The semantic state matrix is the unchanged free single-tree ledger. The paired
-ledger separately records the free pre-promotion token, fixed primitive and
-fused numeric availability, final matrix token, and summary class. Only finite
-fixed primitive evidence can promote generic free `NA` to `NA_topo`; a finite
-fixed fused coordinate cannot satisfy that gate. Final literal `NA` is retained
-as `NA` and summarized as `residual_NA`. Empirical split conflict or adjacent
-side-clade loss may explain a frozen data set, but neither is a classification
-predicate.
+The semantic state matrix is the unchanged free single-tree ledger. Before
+paired promotion, both `NA_struct` and `NA_topo` graph states are represented
+by literal `NA`; only mapped finite evidence becomes numeric and only a fused
+state with finite composite evidence becomes `NA_fuse`. The paired gate then
+uses the graph state to assign `NA_struct`, or assigns `NA_topo` only when the
+fixed primitive is mapped with finite evidence. A finite fixed fused coordinate
+cannot satisfy that gate. Final literal `NA` is retained as `NA` and summarized
+as `residual_NA`. Empirical split conflict or adjacent side-clade loss may
+explain a frozen data set, but neither is a classification predicate.
 
 ## Structural restriction and composite provenance
 

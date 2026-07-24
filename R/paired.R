@@ -155,81 +155,56 @@ recycle_paired_finalize_inputs <- function(...) {
   lapply(values, rep_len, length.out = size)
 }
 
-classify_fixed_finalize_tokens <- function(tokens) {
-  if (!is.character(tokens)) {
-    stop("Fixed primitive tokens must be character.", call. = FALSE)
+validate_paired_graph_state <- function(state, argument) {
+  if (!is.character(state)) {
+    stop(sprintf("`%s` must be character.", argument), call. = FALSE)
   }
-  if (anyNA(tokens)) {
-    stop("Actual R missing values are invalid paired-finalize input.",
-         call. = FALSE)
+  if (anyNA(state)) {
+    stop(
+      sprintf("Actual R missing values are invalid in `%s`.", argument),
+      call. = FALSE
+    )
   }
-  stripped <- trimws(tokens)
-  if (any(!nzchar(stripped))) {
-    stop("Empty or whitespace-only fixed primitive tokens are invalid.",
-         call. = FALSE)
+  if (any(!nzchar(state)) || any(state != trimws(state))) {
+    stop(
+      sprintf("`%s` graph-state tokens must be nonempty and unpadded.",
+              argument),
+      call. = FALSE
+    )
   }
-
-  kind <- rep("invalid", length(stripped))
-  kind[stripped == "NA"] <- "generic_NA"
-  state_token <- grepl("^NA_.+$", stripped)
-  kind[state_token] <- "nonnumeric"
-
-  marker <- tolower(stripped) %in% c(
-    "n/a", ".", "?", "null", "none", "nan", "+nan", "-nan",
-    "inf", "+inf", "-inf", "infinity", "+infinity", "-infinity"
-  )
-  kind[marker] <- "nonnumeric"
-
-  remaining <- kind == "invalid"
-  if (any(remaining)) {
-    checked <- validate_branch_length_tokens(stripped[remaining])
-    accepted <- checked$accepted
-    remaining_index <- which(remaining)
-    kind[remaining_index[accepted]] <- "finite_numeric"
-  }
-  if (any(kind == "invalid")) {
-    bad <- unique(stripped[kind == "invalid"])
+  allowed <- c("mapped", "NA_struct", "NA_fuse", "NA_topo")
+  invalid <- !state %in% allowed
+  if (any(invalid)) {
+    bad <- unique(state[invalid])
     stop(
       sprintf(
-        "Invalid fixed primitive token(s): %s.",
-        paste(sprintf("`%s`", bad), collapse = ", ")
+        "Unknown `%s` graph-state token(s): %s; input-quality error.",
+        argument, paste(sprintf("`%s`", bad), collapse = ", ")
       ),
       call. = FALSE
     )
   }
-  kind
+  state
 }
 
-validate_free_pre_tokens <- function(tokens) {
-  if (!is.character(tokens)) {
-    stop("Free pre-promotion tokens must be character.", call. = FALSE)
+validate_paired_numeric_evidence <- function(value, argument) {
+  if (!is.numeric(value)) {
+    stop(sprintf("`%s` must be numeric.", argument), call. = FALSE)
   }
-  if (anyNA(tokens)) {
-    stop("Actual R missing values are invalid paired-finalize input.",
-         call. = FALSE)
-  }
-  stripped <- trimws(tokens)
-  if (any(!nzchar(stripped))) {
-    stop("Empty or whitespace-only free pre-promotion tokens are invalid.",
-         call. = FALSE)
-  }
-  state <- stripped %in% c("NA", "NA_struct", "NA_fuse", "NA_topo")
-  numeric <- rep(FALSE, length(stripped))
-  if (any(!state)) {
-    checked <- validate_branch_length_tokens(stripped[!state])
-    numeric[!state] <- checked$accepted
-  }
-  if (any(!state & !numeric)) {
-    bad <- unique(stripped[!state & !numeric])
+  invalid <- !is.na(value) & !is.finite(value)
+  if (any(invalid)) {
     stop(
       sprintf(
-        "Invalid free pre-promotion token(s): %s.",
-        paste(sprintf("`%s`", bad), collapse = ", ")
+        paste0(
+          "`%s` must contain only finite values or R missing values; ",
+          "raw failure markers must be normalized before paired finalization."
+        ),
+        argument
       ),
       call. = FALSE
     )
   }
-  stripped
+  value
 }
 
 summary_class_from_final_token <- function(token) {
@@ -240,35 +215,79 @@ summary_class_from_final_token <- function(token) {
   output
 }
 
-finalize_paired_tokens <- function(fixed_primitive_token,
-                                   free_pre_promotion_token,
-                                   fixed_fused_numeric_available = FALSE) {
+finalize_paired_cells <- function(fixed_state,
+                                  fixed_primitive_numeric,
+                                  fixed_fused_numeric,
+                                  free_state,
+                                  free_primitive_numeric,
+                                  free_fused_numeric) {
   recycled <- recycle_paired_finalize_inputs(
-    fixed_primitive_token,
-    free_pre_promotion_token,
-    fixed_fused_numeric_available
+    fixed_state,
+    fixed_primitive_numeric,
+    fixed_fused_numeric,
+    free_state,
+    free_primitive_numeric,
+    free_fused_numeric
   )
-  fixed_primitive_token <- recycled[[1L]]
-  free_pre_promotion_token <- recycled[[2L]]
-  fixed_fused_numeric_available <- recycled[[3L]]
-  if (!is.logical(fixed_fused_numeric_available) ||
-      anyNA(fixed_fused_numeric_available)) {
-    stop("`fixed_fused_numeric_available` must be non-missing logical.",
-         call. = FALSE)
+  fixed_state <- validate_paired_graph_state(recycled[[1L]], "fixed_state")
+  fixed_primitive_numeric <- validate_paired_numeric_evidence(
+    recycled[[2L]], "fixed_primitive_numeric"
+  )
+  fixed_fused_numeric <- validate_paired_numeric_evidence(
+    recycled[[3L]], "fixed_fused_numeric"
+  )
+  free_state <- validate_paired_graph_state(recycled[[4L]], "free_state")
+  free_primitive_numeric <- validate_paired_numeric_evidence(
+    recycled[[5L]], "free_primitive_numeric"
+  )
+  free_fused_numeric <- validate_paired_numeric_evidence(
+    recycled[[6L]], "free_fused_numeric"
+  )
+
+  fixed_primitive_available <- is.finite(fixed_primitive_numeric)
+  fixed_fused_available <- is.finite(fixed_fused_numeric)
+  free_primitive_available <- is.finite(free_primitive_numeric)
+  free_fused_available <- is.finite(free_fused_numeric)
+  inconsistent <-
+    fixed_primitive_available & fixed_state != "mapped" |
+    fixed_fused_available & fixed_state != "NA_fuse" |
+    free_primitive_available & free_state != "mapped" |
+    free_fused_available & free_state != "NA_fuse"
+  if (any(inconsistent)) {
+    stop(
+      paste0(
+        "Paired graph states and numeric-evidence layers are inconsistent; ",
+        "primitive evidence requires `mapped` and fused evidence requires ",
+        "`NA_fuse`."
+      ),
+      call. = FALSE
+    )
   }
 
-  fixed_kind <- classify_fixed_finalize_tokens(fixed_primitive_token)
-  free_token <- validate_free_pre_tokens(free_pre_promotion_token)
-  final_token <- free_token
-  generic_free <- free_token == "NA"
-  final_token[generic_free & fixed_kind == "generic_NA"] <- "NA_struct"
-  final_token[generic_free & fixed_kind == "finite_numeric"] <- "NA_topo"
+  fixed_output <- rep("NA", length(fixed_state))
+  fixed_mapped <- fixed_state == "mapped" & fixed_primitive_available
+  fixed_output[fixed_mapped] <- legacy_numeric_text(
+    fixed_primitive_numeric[fixed_mapped]
+  )
+  fixed_output[fixed_state == "NA_struct"] <- "NA_struct"
+  fixed_output[fixed_state == "NA_fuse" & fixed_fused_available] <- "NA_fuse"
+
+  free_pre <- rep("NA", length(free_state))
+  free_mapped <- free_state == "mapped" & free_primitive_available
+  free_pre[free_mapped] <- legacy_numeric_text(
+    free_primitive_numeric[free_mapped]
+  )
+  free_pre[free_state == "NA_fuse" & free_fused_available] <- "NA_fuse"
+
+  final_token <- free_pre
+  final_token[free_state == "NA_struct"] <- "NA_struct"
+  topo <- free_state == "NA_topo" & fixed_state == "mapped" &
+    fixed_primitive_available
+  final_token[topo] <- "NA_topo"
 
   data.frame(
-    fixed_primitive_token = trimws(fixed_primitive_token),
-    fixed_primitive_numeric_available = fixed_kind == "finite_numeric",
-    fixed_fused_numeric_available = fixed_fused_numeric_available,
-    free_pre_promotion_token = free_token,
+    fixed_output_token = fixed_output,
+    free_pre_promotion_token = free_pre,
     final_matrix_token = final_token,
     summary_class = summary_class_from_final_token(final_token),
     stringsAsFactors = FALSE,
@@ -319,11 +338,14 @@ validate_finalized_token_matrix <- function(matrix) {
 #'   free pre-promotion matrices, the finalized free matrix, a per-cell ledger,
 #'   literal-`NA` summary rows, conventions, and versioned metadata. The input
 #'   single-tree results are not modified.
-#' @details Only finite numeric evidence on the fixed primitive coordinate may
-#'   promote an eligible free generic `NA` to `NA_topo`. Finite evidence on a
-#'   fixed fused coordinate never satisfies that primitive gate. A literal
-#'   finalized `NA` remains `NA` on serialization and is summarized as
-#'   `residual_NA`.
+#' @details The free pre-promotion layer contains a numeric token only for a
+#'   mapped primitive with finite evidence, `NA_fuse` only for a fused state
+#'   with finite composite evidence, and literal `NA` otherwise. Paired
+#'   finalization then promotes graph-state `NA_struct` to `NA_struct`, and
+#'   promotes graph-state `NA_topo` to `NA_topo` only when the fixed primitive
+#'   is mapped with finite evidence. Finite evidence on a fixed fused
+#'   coordinate never satisfies that primitive gate. A literal finalized `NA`
+#'   remains `NA` on serialization and is summarized as `residual_NA`.
 #' @examples
 #' species <- "(((A,B),C),((D,E),F));"
 #' fixed <- align_branches(
@@ -371,32 +393,18 @@ pair_alignment_results <- function(fixed, free) {
     free, free_composite
   )
 
-  fixed_final_value <- rep("NA", length(cell_gene))
-  mapped_fixed <- fixed_state == "mapped" & fixed_numeric_available
-  fixed_final_value[mapped_fixed] <- legacy_numeric_text(
-    fixed_numeric[mapped_fixed]
+  finalized <- finalize_paired_cells(
+    fixed_state = fixed_state,
+    fixed_primitive_numeric = fixed_numeric,
+    fixed_fused_numeric = fixed_composite_evidence$value,
+    free_state = free_state,
+    free_primitive_numeric = free_numeric,
+    free_fused_numeric = free_composite_evidence$value
   )
-  fixed_final_value[fixed_state == "NA_struct"] <- "NA_struct"
-  fixed_final_value[
-    fixed_state == "NA_fuse" & fixed_composite_evidence$available
-  ] <- "NA_fuse"
-
-  free_pre_value <- rep("NA", length(cell_gene))
-  mapped_free <- free_state == "mapped" & free_numeric_available
-  free_pre_value[mapped_free] <- legacy_numeric_text(free_numeric[mapped_free])
-  free_pre_value[free_state == "NA_struct"] <- "NA_struct"
-  free_pre_value[
-    free_state == "NA_fuse" & free_composite_evidence$available
-  ] <- "NA_fuse"
-
-  final_value <- free_pre_value
-  generic_free <- free_pre_value == "NA"
-  structural_pair <- generic_free & fixed_state == "NA_struct"
-  finite_primitive_pair <- generic_free & free_state == "NA_topo" &
-    fixed_state == "mapped" & fixed_numeric_available
-  final_value[structural_pair] <- "NA_struct"
-  final_value[finite_primitive_pair] <- "NA_topo"
-  summary_class <- summary_class_from_final_token(final_value)
+  fixed_final_value <- finalized$fixed_output_token
+  free_pre_value <- finalized$free_pre_promotion_token
+  final_value <- finalized$final_matrix_token
+  summary_class <- finalized$summary_class
 
   fixed_final <- matrix(
     fixed_final_value, gene_count, coordinate_count, byrow = TRUE,
@@ -435,7 +443,6 @@ pair_alignment_results <- function(fixed, free) {
     final_matrix_token = final_value,
     summary_class = summary_class,
     residual_NA = final_value == "NA",
-    legacy_gate_failed = final_value == "NA",
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
@@ -458,7 +465,7 @@ pair_alignment_results <- function(fixed, free) {
     coordinate_table = free$coordinate_table,
     conventions = list(
       graph_layer = "unchanged_single_tree_state_v1",
-      paired_finalize_rule = "frozen_perl_paired_finalize_v1",
+      paired_finalize_rule = "structured_sem_003_v1",
       residual_NA_is_graph_state = FALSE,
       residual_NA_is_summary_name_for_literal_NA = TRUE,
       finalized_generic_NA_is_intentional = TRUE,
@@ -470,7 +477,7 @@ pair_alignment_results <- function(fixed, free) {
     metadata = list(
       core_version = free$metadata$core_version,
       schema_version = free$metadata$schema_version,
-      paired_schema = "paired-finalized-output-v1",
+      paired_schema = "1.0.0-draft.3",
       gene_count = gene_count,
       primitive_coordinate_count = coordinate_count,
       residual_NA_count = nrow(residual_rows),

@@ -65,7 +65,7 @@ between a 7-decimal expected value and the retained 10-decimal input value.
    frozen Perl program and manuscripts.
 2. Review C++ state logic in `src/tree_core.cpp` separately from the pure R
    Oracle in `R/oracle.R`.
-3. Review paired finalize gates in `R/paired.R` against SAR-V1-SEM-002 and the
+3. Review paired finalize gates in `R/paired.R` against SAR-V1-SEM-003 and the
    residual-NA authority.
 4. Re-run self-contained tests plus both opt-in mammal regressions from a clean
    source archive.

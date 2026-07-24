@@ -1,3 +1,13 @@
+# SplitAlignerR 0.0.2.9002
+
+* Unified paired finalization under SAR-V1-SEM-003: production and unit tests
+  now use one graph-state/numeric-evidence finalizer.
+* Corrected `free_pre_promotion_matrix` so structural and topological states
+  remain literal `NA` until the paired graph-state gate is applied.
+* Rejected unknown or padded graph/finalized tokens as input-quality errors.
+* Removed the redundant `legacy_gate_failed` ledger field; literal `NA` and
+  `residual_NA` remain the only finalized-token and summary representations.
+
 # SplitAlignerR 0.0.2.9001
 
 * Added per-gene retained-taxon provenance and exact fixed/free taxon-set

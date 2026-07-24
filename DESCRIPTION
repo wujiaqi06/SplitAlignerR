@@ -1,6 +1,6 @@
 Package: SplitAlignerR
 Title: R Interface and Independent Graph Oracle for SplitAligner
-Version: 0.0.2.9001
+Version: 0.0.2.9002
 Authors@R:
     person("Jiaqi", "Wu", email = "wujiaqi@hiroshima-u.ac.jp", role = c("aut", "cre"))
 Description: R interface and independent benchmark track for the SplitAligner
@@ -9,8 +9,8 @@ Description: R interface and independent benchmark track for the SplitAligner
     and a C++17 graph-first mapper with strict finite-range branch-length
     parsing, explicit structural/topological states, and composite-coordinate
     provenance. A separate R paired-finalization layer retains the frozen
-    output-token rules and literal-NA provenance. See the SplitAligner preprint (Wu 2026,
-    <doi:10.64898/2026.02.24.707838>).
+    structured output-token rules and literal-NA provenance. See the
+    SplitAligner preprint (Wu 2026, <doi:10.64898/2026.02.24.707838>).
 License: GPL-3
 Encoding: UTF-8
 Depends:

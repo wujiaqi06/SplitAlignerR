@@ -1,50 +1,97 @@
-test_that("finite fixed primitive evidence promotes generic NA", {
-  finalized <- SplitAlignerR:::finalize_paired_tokens(
-    c("0", "-0", "1.2e-8"), "NA"
+test_that("canonical paired finalizer implements every SEM-003 boundary", {
+  finalized <- SplitAlignerR:::finalize_paired_cells(
+    fixed_state = c(
+      "NA_struct", "mapped", "mapped", "mapped", "NA_fuse", "NA_fuse",
+      "mapped"
+    ),
+    fixed_primitive_numeric = c(NA, NA, 1, 2, NA, NA, 0),
+    fixed_fused_numeric = c(NA, NA, NA, NA, 4, NA, NA),
+    free_state = c(
+      "NA_struct", "NA_topo", "mapped", "NA_topo", "NA_fuse", "NA_fuse",
+      "mapped"
+    ),
+    free_primitive_numeric = c(NA, NA, NA, NA, NA, NA, 1.2e-8),
+    free_fused_numeric = c(NA, NA, NA, NA, NA, 5, NA)
+  )
+
+  expect_identical(
+    finalized$fixed_output_token,
+    c("NA_struct", "NA", "1", "2", "NA_fuse", "NA", "0")
+  )
+  expect_identical(
+    finalized$free_pre_promotion_token,
+    c("NA", "NA", "NA", "NA", "NA", "NA_fuse", "1.2e-08")
   )
   expect_identical(
     finalized$final_matrix_token,
-    rep("NA_topo", 3L)
+    c("NA_struct", "NA", "NA", "NA_topo", "NA", "NA_fuse", "1.2e-08")
   )
-  expect_true(all(finalized$fixed_primitive_numeric_available))
-})
-
-test_that("generic fixed and free NA finalize as NA_struct", {
-  finalized <- SplitAlignerR:::finalize_paired_tokens("NA", "NA")
-  expect_identical(finalized$final_matrix_token, "NA_struct")
-  expect_identical(finalized$summary_class, "NA_struct")
-})
-
-test_that("nonnumeric fixed primitive states never promote NA_topo", {
-  fixed <- c("NA_fuse", "NA_struct", "NA_topo", "NA_other",
-             "NaN", "Inf", "-Inf")
-  finalized <- SplitAlignerR:::finalize_paired_tokens(fixed, "NA")
-  expect_identical(finalized$final_matrix_token, rep("NA", length(fixed)))
-  expect_false(any(finalized$fixed_primitive_numeric_available))
-  expect_identical(finalized$summary_class, rep("residual_NA", length(fixed)))
-
-  expect_error(
-    SplitAlignerR:::finalize_paired_tokens("", "NA"),
-    "Empty or whitespace"
-  )
-  expect_error(
-    SplitAlignerR:::finalize_paired_tokens("   ", "NA"),
-    "Empty or whitespace"
-  )
-  expect_error(
-    SplitAlignerR:::finalize_paired_tokens(NA_character_, "NA"),
-    "Actual R missing"
+  expect_identical(
+    finalized$summary_class,
+    c(
+      "NA_struct", "residual_NA", "residual_NA", "NA_topo",
+      "residual_NA", "NA_fuse", "numeric"
+    )
   )
 })
 
-test_that("fixed fused numeric evidence cannot replace the primitive gate", {
-  finalized <- SplitAlignerR:::finalize_paired_tokens(
-    "NA_fuse", "NA", fixed_fused_numeric_available = TRUE
+test_that("canonical paired finalizer exhausts legal state-evidence inputs", {
+  legal <- data.frame(
+    state = c("mapped", "mapped", "NA_struct", "NA_fuse", "NA_fuse",
+              "NA_topo"),
+    primitive = c(NA, 1, NA, NA, NA, NA),
+    fused = c(NA, NA, NA, NA, 2, NA),
+    stringsAsFactors = FALSE
   )
-  expect_false(finalized$fixed_primitive_numeric_available)
-  expect_true(finalized$fixed_fused_numeric_available)
-  expect_identical(finalized$final_matrix_token, "NA")
-  expect_identical(finalized$summary_class, "residual_NA")
+  grid <- expand.grid(
+    fixed = seq_len(nrow(legal)), free = seq_len(nrow(legal)),
+    KEEP.OUT.ATTRS = FALSE
+  )
+  fixed <- legal[grid$fixed, , drop = FALSE]
+  free <- legal[grid$free, , drop = FALSE]
+  finalized <- SplitAlignerR:::finalize_paired_cells(
+    fixed$state, fixed$primitive, fixed$fused,
+    free$state, free$primitive, free$fused
+  )
+
+  expected_pre <- rep("NA", nrow(grid))
+  expected_pre[free$state == "mapped" & is.finite(free$primitive)] <- "1"
+  expected_pre[free$state == "NA_fuse" & is.finite(free$fused)] <- "NA_fuse"
+  expected_final <- expected_pre
+  expected_final[free$state == "NA_struct"] <- "NA_struct"
+  expected_final[
+    free$state == "NA_topo" & fixed$state == "mapped" &
+      is.finite(fixed$primitive)
+  ] <- "NA_topo"
+
+  expect_identical(finalized$free_pre_promotion_token, expected_pre)
+  expect_identical(finalized$final_matrix_token, expected_final)
+  expect_identical(
+    finalized$summary_class,
+    SplitAlignerR:::summary_class_from_final_token(expected_final)
+  )
+})
+
+test_that("canonical paired finalizer rejects unknown or padded states", {
+  call_finalizer <- function(fixed_state = "mapped", free_state = "mapped",
+                             fixed_numeric = 1, free_numeric = 1) {
+    SplitAlignerR:::finalize_paired_cells(
+      fixed_state, fixed_numeric, NA_real_,
+      free_state, free_numeric, NA_real_
+    )
+  }
+  expect_error(call_finalizer("NA_other"), "input-quality error")
+  expect_error(call_finalizer(free_state = "NA_topoo"), "input-quality error")
+  expect_error(call_finalizer(" mapped"), "unpadded")
+  expect_error(call_finalizer(free_state = "NA_struct "), "unpadded")
+  expect_error(call_finalizer(NA_character_), "Actual R missing")
+  expect_error(call_finalizer(fixed_numeric = Inf), "finite values")
+  expect_error(
+    SplitAlignerR:::finalize_paired_cells(
+      "NA_struct", 1, NA_real_, "NA_struct", NA_real_, NA_real_
+    ),
+    "layers are inconsistent"
+  )
 })
 
 test_that("paired result separates graph state, pre-token, and final token", {
@@ -111,6 +158,14 @@ test_that("numeric composite evidence yields NA_fuse finalized tokens", {
   expect_true(all(fused$fixed_fused_numeric_available))
   expect_true(all(fused$free_fused_numeric_available))
   expect_false(any(fused$residual_NA))
+
+  structural <- subset(
+    paired$paired_ledger, free_primitive_state == "NA_struct"
+  )
+  expect_gt(nrow(structural), 0L)
+  expect_true(all(structural$free_pre_promotion_token == "NA"))
+  expect_true(all(structural$final_matrix_token == "NA_struct"))
+  expect_true(all(structural$summary_class == "NA_struct"))
 })
 
 test_that("fixed fused recovery and free generic NA remain residual NA", {
@@ -190,6 +245,97 @@ test_that("literal NA survives finalized-matrix round trip", {
     SplitAlignerR:::validate_finalized_token_matrix(invalid),
     "Actual R missing"
   )
+
+  unknown <- original
+  unknown["g", "B1"] <- "NA_other"
+  expect_error(
+    SplitAlignerR:::validate_finalized_token_matrix(unknown),
+    "invalid token"
+  )
+
+  padded <- original
+  padded["g", "B1"] <- " NA"
+  expect_error(
+    SplitAlignerR:::validate_finalized_token_matrix(padded),
+    "unpadded"
+  )
+})
+
+test_that("production paired outputs equal the canonical finalizer", {
+  specifications <- list(
+    list(
+      species = "((A:1,B:1):1,(C:1,D:1):1);",
+      fixed = "((A:1,B:1):1,(C:1,D:1):1);",
+      free = "((A:1,C:1):1,(B:1,D:1):1);"
+    ),
+    list(
+      species = "((A:1,B:1):1,(C:1,D:1):1);",
+      fixed = "((A:1,B:1),(C:1,D:1));",
+      free = "((A:1,C:1):1,(B:1,D:1):1);"
+    ),
+    list(
+      species = "((A:1,B:1):1,(C:1,D:1):1);",
+      fixed = "((A:1,B:1):1,(C:1,D:1):1);",
+      free = "((A:NaN,B:1):1,(C:1,D:1):1);"
+    ),
+    list(
+      species = "((A:1,B:2):3,(C:4,D:5):6);",
+      fixed = "(A:4,B:5);",
+      free = "(A:4,B:5);"
+    ),
+    list(
+      species = paste0(
+        "(((A:1,B:1):1,C:1):1,", "((D:1,E:1):1,F:1):1);"
+      ),
+      fixed = "((A:1,B:1):1,(D:1,E:1):1);",
+      free = "((A:1,D:1):1,(B:1,E:1):1);"
+    )
+  )
+
+  for (specification in specifications) {
+    fixed <- align_branches(
+      specification$species, c(g = specification$fixed), mode = "fixed"
+    )
+    free <- align_branches(
+      specification$species, c(g = specification$free), mode = "free"
+    )
+    paired <- pair_alignment_results(fixed, free)
+    coordinates <- colnames(fixed$state_matrix)
+    genes <- rownames(fixed$state_matrix)
+    cell_gene <- rep(genes, each = length(coordinates))
+    fixed_composite <- as.character(fixed$state_ledger$composite_id)
+    free_composite <- as.character(free$state_ledger$composite_id)
+    fixed_fused <- SplitAlignerR:::composite_evidence_vectors(
+      fixed, cell_gene, fixed_composite
+    )$value
+    free_fused <- SplitAlignerR:::composite_evidence_vectors(
+      free, cell_gene, free_composite
+    )$value
+    canonical <- SplitAlignerR:::finalize_paired_cells(
+      as.vector(t(fixed$state_matrix)),
+      as.vector(t(fixed$numeric_matrix[, coordinates, drop = FALSE])),
+      fixed_fused,
+      as.vector(t(free$state_matrix)),
+      as.vector(t(free$numeric_matrix[, coordinates, drop = FALSE])),
+      free_fused
+    )
+
+    expect_identical(
+      as.vector(t(paired$fixed_final_matrix)),
+      canonical$fixed_output_token
+    )
+    expect_identical(
+      as.vector(t(paired$free_pre_promotion_matrix)),
+      canonical$free_pre_promotion_token
+    )
+    expect_identical(
+      as.vector(t(paired$final_matrix)), canonical$final_matrix_token
+    )
+    expect_identical(
+      paired$paired_ledger$summary_class, canonical$summary_class
+    )
+    expect_false("legacy_gate_failed" %in% names(paired$paired_ledger))
+  }
 })
 
 test_that("paired results require matched axes, modes, and conventions", {

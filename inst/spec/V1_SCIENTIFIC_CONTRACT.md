@@ -22,8 +22,9 @@ semantics requires new evidence and explicit approval.
 - SplitAligner manuscript and the branch-coordinate theorem manuscript define
   the scientific interpretation. Audit packages are behavioral evidence, not
   scratch inputs.
-- SAR-V1-SEM-002 supersedes SAR-V1-SEM-001 in full for paired finalized-matrix
-  semantics.
+- SAR-V1-SEM-003 retains the residual-NA conclusions of SAR-V1-SEM-002 and
+  supersedes its token-only paired-finalizer wording with structured graph and
+  numeric rules. SAR-V1-SEM-001 remains withdrawn.
 
 ## Architecture
 
@@ -67,18 +68,26 @@ write `NA`, never `residual_NA`.
 
 `pair_alignment_results()` is a separate paired-output layer. It requires
 matched ordered gene and primitive-coordinate axes plus identical core/schema
-conventions and retains the single-tree graph ledgers unchanged. The frozen
-paired finalize gate is:
+conventions and retains the single-tree graph ledgers unchanged. It calls one
+canonical structured finalizer. The true free pre-promotion token is:
 
-- fixed generic `NA` plus free generic `NA` -> `NA_struct`;
-- finite fixed primitive evidence plus free generic `NA` -> `NA_topo`;
-- a nonnumeric fixed primitive state plus free generic `NA` -> literal `NA`.
+- numeric for graph state `mapped` with finite primitive evidence;
+- `NA_fuse` for graph state `NA_fuse` with finite fused evidence;
+- literal `NA` otherwise, including graph states `NA_struct` and `NA_topo`,
+  mapped but numeric-unavailable, and fused but numeric-unavailable cells.
 
-Only finite numeric evidence on the fixed primitive coordinate satisfies the
-`NA_topo` gate. `NA_fuse`, `NA_struct`, `NA_topo`, other `NA_*` tokens,
-software failure markers, unavailable evidence, and non-finite values do not.
-Finite numeric evidence on a fixed fused coordinate cannot substitute for
-primitive evidence.
+Paired finalization then maps graph state `NA_struct` to `NA_struct`; maps graph
+state `NA_topo` to `NA_topo` only when the fixed graph state is `mapped` and
+its primitive evidence is finite; and otherwise retains the free
+pre-promotion token. Finite fixed fused evidence cannot substitute for fixed
+primitive evidence. Numeric unavailability cannot manufacture topological
+absence.
+
+Only the exact finalized tokens `NA`, `NA_struct`, `NA_fuse`, and `NA_topo`
+are legal alongside finite numeric tokens. Unknown `NA_*` spellings, padded
+biological tokens, and actual R missing values are input-quality errors.
+Recognized raw software failure markers are normalized to unavailable numeric
+evidence before paired finalization.
 
 The frozen 2,275-gene authority contains 407 literal-`NA` cells whose fixed
 primitive graph state is `NA_fuse`, fixed primitive numeric evidence is absent,
@@ -112,9 +121,10 @@ The V1 result object keeps these components separate:
 4. primitive-member provenance for each composite coordinate;
 5. structured diagnostics;
 6. conventions, schema, and core version metadata;
-7. optional paired bookkeeping with graph provenance, free pre-promotion token,
-   fixed primitive/fused numeric availability, final matrix token, and summary
-   class kept in separate fields.
+7. optional paired bookkeeping, schema `1.0.0-draft.3`, with graph provenance,
+   free pre-promotion token, fixed primitive/fused numeric availability, final
+   matrix token, and summary class kept in separate fields. The redundant
+   `legacy_gate_failed` field is not part of this schema.
 
 Literal finalized tokens such as `NA` must be read with
 `na.strings = character(0)` when using base R tabular readers.

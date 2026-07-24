@@ -30,7 +30,10 @@
     "failure_marker_changes_topology_state": false
   },
   "paired_bookkeeping": {
-    "paired_schema": "paired-finalized-output-v1",
+    "paired_schema": "1.0.0-draft.3",
+    "finalizer": "structured_sem_003_v1",
+    "free_pre_promotion_structural_token": "NA",
+    "free_pre_promotion_topological_token": "NA",
     "residual_NA_is_graph_state": false,
     "residual_NA_is_summary_name_for_literal_NA": true,
     "finalized_generic_NA_is_intentional": true,
@@ -39,7 +42,9 @@
     "finalized_perl_matrices_are_authoritative": true,
     "empirical_conflict_is_classification_predicate": false,
     "round_trip_literal_NA_with_na_strings_character0": true,
-    "actual_R_missing_is_data_quality_error": true
+    "actual_R_missing_is_data_quality_error": true,
+    "unknown_or_padded_state_token_is_data_quality_error": true,
+    "legacy_gate_failed_field_present": false
   },
   "numeric": {
     "policy_id": "finite-double-v1",
