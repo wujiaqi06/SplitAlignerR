@@ -1,6 +1,6 @@
 Package: SplitAlignerR
 Title: R Interface and Independent Graph Oracle for SplitAligner
-Version: 0.0.2.9002
+Version: 0.1.0
 Authors@R:
     person("Jiaqi", "Wu", email = "wujiaqi@hiroshima-u.ac.jp", role = c("aut", "cre"))
 Description: R interface and independent benchmark track for the SplitAligner

@@ -1,6 +1,6 @@
 # SplitAlignerR V1 scientific and implementation contract
 
-Status: Phase 1 draft, frozen for the first implementation slice.
+Status: V1 scientific contract frozen for release-candidate verification.
 
 This file records the implementation boundary used by SplitAlignerR. It is not
 a new algorithm specification. Any change that alters the frozen scientific
@@ -121,7 +121,7 @@ The V1 result object keeps these components separate:
 4. primitive-member provenance for each composite coordinate;
 5. structured diagnostics;
 6. conventions, schema, and core version metadata;
-7. optional paired bookkeeping, schema `1.0.0-draft.3`, with graph provenance,
+7. optional paired bookkeeping, schema `1.0.0`, with graph provenance,
    free pre-promotion token, fixed primitive/fused numeric availability, final
    matrix token, and summary class kept in separate fields. The redundant
    `legacy_gate_failed` field is not part of this schema.
@@ -145,7 +145,7 @@ numeric cell is missing, and a structured diagnostic records the marker.
 - Pure R Oracle reproduces every bundled Catnip10 matrix cell and every bundled
   fusion group for both scenarios.
 - The Oracle contains no call into the production C++ core.
-- Existing seed-release tests continue to pass.
+- Existing bundled benchmark and package tests continue to pass.
 
 The next mapper slice additionally requires exact agreement with all 272
 Catnip10 primitive cells and all frozen composite member sets, plus explicit

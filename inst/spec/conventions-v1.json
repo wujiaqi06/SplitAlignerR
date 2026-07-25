@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0.0-draft.2",
-  "core_version": "0.1.0-dev.2",
+  "schema_version": "1.0.0",
+  "core_version": "0.1.0",
   "production_core": "C++17",
   "oracle": {
     "language": "R",
@@ -30,7 +30,7 @@
     "failure_marker_changes_topology_state": false
   },
   "paired_bookkeeping": {
-    "paired_schema": "1.0.0-draft.3",
+    "paired_schema": "1.0.0",
     "finalizer": "structured_sem_003_v1",
     "free_pre_promotion_structural_token": "NA",
     "free_pre_promotion_topological_token": "NA",

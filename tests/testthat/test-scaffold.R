@@ -1,8 +1,9 @@
-test_that("package seed status helper returns a single string", {
+test_that("package release-candidate status helper returns a single string", {
   s <- splitalignerR_scaffold()
   expect_type(s, "character")
   expect_length(s, 1)
-  expect_match(s, "public seed release")
+  expect_match(s, "V1 release candidate")
+  expect_match(s, "not a final release certificate")
 })
 
 test_that("catnip10_expected returns the expected 8 x 18 matrices", {

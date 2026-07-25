@@ -17,7 +17,7 @@ A base \code{data.frame} with columns \code{regime}, \code{observed}, \code{NA_f
 \description{
 Summarize the bundled Catnip10 graph-oracle benchmark by deletion regime and
 primitive-cell status. The benchmark is discordance-free, so \code{NA_topo} is
-expected to be zero in this seed release.
+expected to be zero in this benchmark fixture.
 }
 \examples{
 catnip10_summary_counts()

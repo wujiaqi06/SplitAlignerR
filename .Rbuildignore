@@ -6,6 +6,7 @@
 ^LICENSE\.md$
 ^\.git$
 ^\.gitignore$
+^\.claude$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$

@@ -1,4 +1,4 @@
-citHeader("To cite SplitAlignerR in publications, please cite the SplitAligner preprint; a software DOI will be added after the first tagged release.")
+citHeader("To cite SplitAlignerR in publications, please cite the SplitAligner preprint; package version 0.1.0 is a V1 release candidate, not a final release certificate.")
 
 bibentry(
   bibtype  = "Article",
@@ -15,6 +15,6 @@ bibentry(
   title    = "SplitAlignerR: Catnip10 Graph-Oracle Benchmark Accessors for the SplitAligner Branch-Coordinate Framework",
   author   = person("Jiaqi", "Wu"),
   year     = "2026",
-  note     = "R package version 0.0.2 public seed release; software DOI to be assigned",
+  note     = "R package version 0.1.0 V1 release candidate; independent RECERT pending; software DOI to be assigned",
   url      = "https://github.com/wujiaqi06/SplitAlignerR"
 )

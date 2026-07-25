@@ -1,0 +1,103 @@
+name: SplitAlignerR V1 RC RECERT
+
+on:
+  push:
+    branches:
+      - rc/v0.1.0-rc1
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  rc-recert:
+    name: ${{ matrix.config.label }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 180
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - label: macOS R release full authority
+            os: macos-latest
+            r: release
+          - label: Linux R release full authority
+            os: ubuntu-latest
+            r: release
+          - label: Windows R release full authority
+            os: windows-latest
+            r: release
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - name: Preserve repository bytes across platforms
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out RC source
+        uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 0
+
+      - name: Check out frozen SplitAligner authority
+        uses: actions/checkout@v4
+        with:
+          repository: wujiaqi06/SplitAligner
+          ref: 1aea990946e08d13349bc6a164dc7334d61cae08
+          path: authority-source
+          fetch-depth: 1
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+
+      - name: Install declared and replay dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: source
+          extra-packages: |
+            any::rcmdcheck
+            any::pkgload
+          needs: check
+
+      - name: Run exact-tar RC gates
+        id: rc
+        shell: bash
+        env:
+          SPLITALIGNERR_RESIDUAL_NA_KEYS_B64: ${{ secrets.SPLITALIGNERR_RESIDUAL_NA_KEYS_B64 }}
+        run: |
+          bash "$GITHUB_WORKSPACE/source/.github/recert/run_rc_job.sh" \
+            "$GITHUB_WORKSPACE/source" \
+            "$GITHUB_WORKSPACE/authority-source" \
+            "$GITHUB_SHA"
+
+      - name: Upload platform evidence
+        id: upload
+        if: always() && steps.rc.outputs.artifact_zip != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: splitalignerr-rc-evidence-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            ${{ steps.rc.outputs.artifact_zip }}
+            ${{ steps.rc.outputs.artifact_sidecar }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record GitHub artifact digest
+        if: always() && steps.upload.outputs.artifact-digest != ''
+        shell: bash
+        run: |
+          {
+            echo "artifact_id: ${{ steps.upload.outputs.artifact-id }}"
+            echo "artifact_url: ${{ steps.upload.outputs.artifact-url }}"
+            echo "artifact_digest: ${{ steps.upload.outputs.artifact-digest }}"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -2,7 +2,7 @@
 #'
 #' Summarize the bundled Catnip10 graph-oracle benchmark by deletion regime and
 #' primitive-cell status. The benchmark is discordance-free, so `NA_topo` is
-#' expected to be zero in this seed release.
+#' expected to be zero in this benchmark fixture.
 #'
 #' @param regime Character; `"all"` returns both bundled regimes, otherwise one
 #'   of `"global"` or `"local"`.
@@ -169,7 +169,7 @@ catnip10_fusion_groups <- function(regime = c("all", "global", "local")) {
     groups <- catnip10_oracle[[one_regime]]$fusion_groups
     if (!is.data.frame(groups)) {
       stop(
-        "Fusion-group data are not bundled in this release; planned for v0.1.0-alpha.",
+        "Required fusion-group data are unavailable; the installed package is incomplete.",
         call. = FALSE
       )
     }
@@ -204,7 +204,7 @@ catnip10_matrix <- function(regime = c("global", "local")) {
   matrix <- catnip10_oracle[[regime]]$matrix
   if (!is.data.frame(matrix)) {
     stop(
-      "Catnip10 matrix data are not bundled in this release; planned for v0.1.0-alpha.",
+      "Required Catnip10 matrix data are unavailable; the installed package is incomplete.",
       call. = FALSE
     )
   }

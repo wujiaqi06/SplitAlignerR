@@ -8,10 +8,12 @@
 <!-- badges: end -->
 
 SplitAlignerR is the R interface and independent benchmark track for the
-SplitAligner branch-coordinate framework. The development release provides a
+SplitAligner branch-coordinate framework. Package version 0.1.0 is the first
+V1 release candidate. It provides a
 production C++17 graph-first mapper, strict finite-range branch-length
 validation, and a pure R node-edge implementation that independently recomputes
-the Catnip10 graph-oracle benchmark.
+the Catnip10 graph-oracle benchmark. The candidate is not a final release
+certificate; independent RECERT remains pending.
 
 Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 
@@ -20,6 +22,9 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 ```r
 # install.packages("remotes")
 remotes::install_github("wujiaqi06/SplitAlignerR")
+
+# After the annotated release-candidate tag is published:
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0-rc1")
 ```
 
 ## Minimal Example
@@ -54,16 +59,16 @@ aligned$state_matrix
 aligned$numeric_matrix
 ```
 
-## Current Scope
+## V1 Release-Candidate Scope
 
-This development release combines the production mapper with the independent
+This V1 release candidate combines the production mapper with the independent
 Catnip10 benchmark track. It includes:
 
 - `catnip10_expected()` / `catnip10_matrix()` for the wide primitive-coordinate
   oracle matrix;
 - `catnip10_summary_counts()` for per-regime status accounting;
 - `catnip10_fusion_groups()` for graph-oracle fused-coordinate membership;
-- `validate_catnip10_oracle()` for deterministic seed-release sanity checks;
+- `validate_catnip10_oracle()` for deterministic benchmark sanity checks;
 - `recompute_catnip10_oracle()` for an independent pure R reconstruction of
   every Catnip10 primitive state and fusion group;
 - `validate_branch_length_tokens()` for C++ whole-token and finite-range numeric
@@ -88,13 +93,13 @@ the graph-defined `observed`, `NA_fuse`, and `NA_struct` ledger states under
 taxon pruning. `NA_topo` is not expected in this benchmark because empirical
 gene-tree discordance is outside the Catnip10 oracle fixture.
 
-## Development and audit boundary
+## Release-candidate and audit boundary
 
 The production mapper lives in the C++ core. R converts inputs and wraps the
 result; the Catnip10 Oracle remains a separate pure R node-edge implementation
 that never calls the core or uses projected splits for structural states.
 
-The current development tests reproduce all 272 frozen Catnip10 primitive
+The release-candidate tests reproduce all 272 frozen Catnip10 primitive
 cells and all 19 fusion events, and include explicit discordance and unavailable
 numeric-evidence toys. This is implementation evidence, not final V1 release
 certification. The scientific, numeric, provenance, and paired-bookkeeping
@@ -106,7 +111,7 @@ model, batch input forms, diagnostics, provenance lookup, and save/reload flow.
 ## Citation
 
 If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI
-will be added after a tagged release with clean metadata and tests.
+will be added only after final release approval.
 
 > Wu J. (2026). *SplitAligner: Branch-Identity Coordinate System for
 > Phylogenomics under Missing Taxa and Gene-Tree Discordance.* bioRxiv.

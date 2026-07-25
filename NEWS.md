@@ -1,4 +1,11 @@
-# SplitAlignerR 0.0.2.9002
+# SplitAlignerR 0.1.0
+
+* Froze the first V1 release-candidate identity: package 0.1.0, C++ core
+  0.1.0, general schema 1.0.0, and paired schema 1.0.0.
+* Added release-candidate provenance, dependency, replay, and multi-platform
+  verification metadata without changing the accepted Fix004 scientific logic.
+* Retained v0.1.0-rc1 as a candidate identifier only; independent RECERT and
+  final release approval remain separate gates.
 
 * Unified paired finalization under SAR-V1-SEM-003: production and unit tests
   now use one graph-state/numeric-evidence finalizer.

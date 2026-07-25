@@ -1,18 +1,18 @@
-#' SplitAlignerR seed-release status
+#' SplitAlignerR release-candidate status
 #'
-#' Report the current development status of the package. This helper is kept
-#' for early users of the public seed while the C++ mapper proceeds through the
-#' V1 audit and certification gates.
+#' Report the current V1 release-candidate status of the package.
 #'
-#' @return A length-one character string describing the seed-release status.
+#' @return A length-one character string describing the release-candidate
+#'   status.
 #' @examples
 #' splitalignerR_scaffold()
 #' @export
 splitalignerR_scaffold <- function() {
   paste0(
     "SplitAlignerR ", utils::packageVersion("SplitAlignerR"),
-    " public seed release: the C++ graph-first mapper and independent Catnip10 ",
-    "R Oracle are available for V1 development audit; release certification is pending."
+    " V1 release candidate: the C++ graph-first mapper and independent Catnip10 ",
+    "R Oracle are frozen for audit; independent RECERT is pending and this is ",
+    "not a final release certificate."
   )
 }
 

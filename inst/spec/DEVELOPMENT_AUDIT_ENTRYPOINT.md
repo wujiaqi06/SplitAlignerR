@@ -1,7 +1,8 @@
-# SplitAlignerR V1 development audit entrypoint
+# SplitAlignerR V1 release-candidate audit entrypoint
 
-Status: implementation handoff for joint audit. This document is not a release
-certificate and does not authorize a V1 tag.
+Status: release-candidate source handoff. This document is not an independent
+RECERT verdict, a final release certificate, or authorization for a final V1
+tag.
 
 ## Implemented boundaries
 
@@ -40,11 +41,12 @@ match exactly. The largest numeric absolute difference is below `1e-12` on the
 fixed side and `5e-8` on the free side; the latter is the display-precision gap
 between a 7-decimal expected value and the retained 10-decimal input value.
 
-## Known limits and pending release gates
+## Known limits and RECERT boundary
 
-- Local clean build/check evidence currently covers macOS arm64. The configured
-  GitHub Actions matrix includes macOS, Linux, and Windows, but these uncommitted
-  changes have not been pushed and therefore have no remote CI evidence yet.
+- Cross-platform build/check and authority evidence is deliberately external to
+  the source package. The RECERT package must identify exact workflow runs,
+  jobs, raw logs, and artifact hashes; this source file makes no platform PASS
+  claim.
 - The 302-mammal and 2,275-gene authorities are external. Environments without
   their documented environment variables explicitly skip only the unavailable
   regression.
@@ -54,12 +56,14 @@ between a 7-decimal expected value and the retained 10-decimal input value.
 - Final literal `NA` is summarized as `residual_NA`; empirical FREE-tree
   conflict and adjacent-side-clade loss are not classification predicates.
 - Large-production performance and memory profiling have not yet been certified.
-- Release citation/version metadata, archive hashes, commit, tag, and changed
-  file manifest must be frozen together after joint review.
-- No independent Opus/Kimi review or Pro RECERT has been performed on this
-  implementation snapshot.
+- Package/core/schema metadata is frozen at 0.1.0/0.1.0/1.0.0, with paired
+  schema 1.0.0. Commit, annotated RC tag, archive hashes, and changed-file
+  manifest must still close as one provenance chain.
+- Independent Pro RECERT remains pending. The V1 release-candidate tag, when
+  created after platform gates pass, must not be interpreted as final release
+  approval.
 
-## Joint-audit sequence
+## RECERT sequence
 
 1. Review `V1_SCIENTIFIC_CONTRACT.md` and `conventions-v1.json` against the
    frozen Perl program and manuscripts.
@@ -69,5 +73,5 @@ between a 7-decimal expected value and the retained 10-decimal input value.
    residual-NA authority.
 4. Re-run self-contained tests plus both opt-in mammal regressions from a clean
    source archive.
-5. Resolve issues before creating a new frozen review package. Do not modify a
-   frozen review input in place.
+5. Resolve blockers before creating an annotated RC tag. Do not move a frozen
+   tag or modify a frozen review input in place.

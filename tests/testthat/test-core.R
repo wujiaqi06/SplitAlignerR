@@ -1,8 +1,8 @@
 test_that("compiled core reports versioned implementation metadata", {
   info <- splitaligner_core_info()
   expect_type(info, "list")
-  expect_identical(info$core_version, "0.1.0-dev.2")
-  expect_identical(info$schema_version, "1.0.0-draft.2")
+  expect_identical(info$core_version, "0.1.0")
+  expect_identical(info$schema_version, "1.0.0")
   expect_identical(info$production_language, "C++17")
   expect_identical(info$numeric_policy, "finite-double-v1")
   expect_false(info$oracle_calls_production_core)

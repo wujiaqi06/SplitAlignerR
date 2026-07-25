@@ -7,8 +7,8 @@
 // [[Rcpp::export]]
 Rcpp::List cpp_splitaligner_core_info() {
   return Rcpp::List::create(
-    Rcpp::Named("core_version") = "0.1.0-dev.2",
-    Rcpp::Named("schema_version") = "1.0.0-draft.2",
+    Rcpp::Named("core_version") = "0.1.0",
+    Rcpp::Named("schema_version") = "1.0.0",
     Rcpp::Named("production_language") = "C++17",
     Rcpp::Named("numeric_policy") = "finite-double-v1",
     Rcpp::Named("oracle_language") = "pure R node-edge graph surgery",

@@ -2,17 +2,16 @@
 % Please edit documentation in R/scaffold.R
 \name{splitalignerR_scaffold}
 \alias{splitalignerR_scaffold}
-\title{SplitAlignerR seed-release status}
+\title{SplitAlignerR release-candidate status}
 \usage{
 splitalignerR_scaffold()
 }
 \value{
-A length-one character string describing the seed-release status.
+A length-one character string describing the release-candidate
+status.
 }
 \description{
-Report the current development status of the package. This helper is kept
-for early users of the public seed while the C++ mapper proceeds through the
-V1 audit and certification gates.
+Report the current V1 release-candidate status of the package.
 }
 \examples{
 splitalignerR_scaffold()

@@ -1234,8 +1234,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
         "length-prefixed-UTF8-bytes-RT1"
     ),
     Rcpp::Named("metadata") = Rcpp::List::create(
-      Rcpp::Named("core_version") = "0.1.0-dev.2",
-      Rcpp::Named("schema_version") = "1.0.0-draft.2",
+      Rcpp::Named("core_version") = "0.1.0",
+      Rcpp::Named("schema_version") = "1.0.0",
       Rcpp::Named("mode") = mode,
       Rcpp::Named("gene_count") = static_cast<int>(genes.size()),
       Rcpp::Named("primitive_coordinate_count") =

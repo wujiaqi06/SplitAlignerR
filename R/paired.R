@@ -477,7 +477,7 @@ pair_alignment_results <- function(fixed, free) {
     metadata = list(
       core_version = free$metadata$core_version,
       schema_version = free$metadata$schema_version,
-      paired_schema = "1.0.0-draft.3",
+      paired_schema = "1.0.0",
       gene_count = gene_count,
       primitive_coordinate_count = coordinate_count,
       residual_NA_count = nrow(residual_rows),
