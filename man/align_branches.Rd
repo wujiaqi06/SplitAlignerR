@@ -26,7 +26,10 @@ plain Newick tree.}
 topology-constrained trees. Both modes use the same state semantics;
 fixed-mode topology mismatches are additionally diagnosed.}
 
-\item{gene_ids}{Optional character vector overriding inferred/file IDs.}
+\item{gene_ids}{Optional character vector overriding inferred/file IDs.
+Explicit IDs must be non-missing, nonempty, unique, free of control
+characters, and have no leading or trailing whitespace. Unicode IDs are
+supported.}
 
 \item{...}{Reserved; additional arguments currently signal an error.}
 }

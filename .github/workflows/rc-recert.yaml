@@ -3,6 +3,9 @@ name: SplitAlignerR V1 RC RECERT
 on:
   push:
     branches:
+      - probe/SAR-V1-FIX005-RC002
+      - fix/SAR-V1-FIX005-RC002
+      - rc/v0.1.0-rc2
       - rc/v0.1.0-rc1
   workflow_dispatch:
 

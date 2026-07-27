@@ -102,7 +102,7 @@
     ))
   }
 
-  endpoints <- sort(endpoints)
+  endpoints <- sort(endpoints, method = "radix")
   list(parent_label = endpoints[1L], child_label = endpoints[2L])
 }
 
@@ -125,7 +125,7 @@
   members <- sort(unique(c(
     state$edges$member_ids[[row_a]],
     state$edges$member_ids[[row_b]]
-  )))
+  )), method = "radix")
   branch_type <- if (
     state$edges$branch_type[row_a] == "internal" ||
       state$edges$branch_type[row_b] == "internal"
@@ -163,7 +163,9 @@
     }
 
     root_edges <- state$edges[root_rows, , drop = FALSE]
-    root_rows <- root_rows[order(root_edges$child_label, root_edges$edge_uid)]
+    root_rows <- root_rows[order(
+      root_edges$child_label, root_edges$edge_uid, method = "radix"
+    )]
     endpoint_a <- state$edges$child_label[root_rows[1L]]
     endpoint_b <- state$edges$child_label[root_rows[2L]]
 
@@ -182,7 +184,7 @@
     nodes <- sort(unique(c(
       state$edges$parent_label,
       state$edges$child_label
-    )))
+    )), method = "radix")
     nodes <- setdiff(
       nodes,
       c(.oracle_root_sentinel, state$tip_labels)
@@ -244,7 +246,7 @@
   for (row_index in seq_len(nrow(state$edges))) {
     members <- sort(unique(as.character(
       state$edges$member_ids[[row_index]]
-    )))
+    )), method = "radix")
     if (length(members) == 1L) {
       values[members] <- .oracle_format_length(
         state$edges$branch_length[row_index]
@@ -263,7 +265,7 @@
   for (row_index in seq_len(nrow(state$edges))) {
     members <- sort(unique(as.character(
       state$edges$member_ids[[row_index]]
-    )))
+    )), method = "radix")
     if (length(members) < 2L) {
       next
     }

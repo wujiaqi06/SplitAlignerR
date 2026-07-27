@@ -130,6 +130,10 @@ Literal finalized tokens such as `NA` must be read with
 `na.strings = character(0)` when using base R tabular readers.
 Actual R `NA` inside a finalized token matrix is a data-quality error.
 
+The contract name `finalized_perl_matrices_are_authoritative` is intentional,
+not a typo for “paired.” Perl refers to the frozen SplitAligner reference
+implementation. SplitAlignerR does not require Perl at runtime.
+
 Topology recovery and numeric availability are orthogonal. In particular, a
 recognized IQ-TREE/PAML/RAxML-style failure marker on an otherwise recovered
 gene-tree edge does not create `NA_topo`; the state remains `mapped`, the

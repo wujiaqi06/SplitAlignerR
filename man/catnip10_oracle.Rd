@@ -19,7 +19,8 @@ coordinates), and \code{deletion_order} (character vector).}
 }
 }
 \source{
-Wu J. (2026) SplitAligner preprint,
+Wu J. (2026) \emph{SplitAligner: A Gene-Species Tree Reconciliation
+Framework Using Split-Based Branch Mapping},
 \doi{10.64898/2026.02.24.707838}; Catnip10 10-tip coordinate-audit
 benchmark, unrooted oracle outputs
 (\code{oracle_gene_by_original_branch_matrix.tsv}, \code{oracle_cell_status_long.tsv},
