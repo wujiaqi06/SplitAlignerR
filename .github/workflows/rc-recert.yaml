@@ -117,12 +117,23 @@ jobs:
           - label: macOS R release
             os: macos-latest
             r: release
+            operations: validate_species_tree,align_branches
+            artifact_suffix: combined
           - label: Linux R release
             os: ubuntu-latest
             r: release
-          - label: Windows R release
+            operations: validate_species_tree,align_branches
+            artifact_suffix: combined
+          - label: Windows R release validation-only
             os: windows-latest
             r: release
+            operations: validate_species_tree
+            artifact_suffix: validation
+          - label: Windows R release alignment-only
+            os: windows-latest
+            r: release
+            operations: align_branches
+            artifact_suffix: alignment
 
     permissions:
       contents: read
@@ -154,6 +165,8 @@ jobs:
       - name: Run isolated deep-tree probe
         id: deep
         shell: bash
+        env:
+          SPLITALIGNERR_DEEP_TREE_OPERATIONS: ${{ matrix.config.operations }}
         run: |
           bash "$GITHUB_WORKSPACE/source/.github/recert/run_deep_tree_job.sh" \
             "$GITHUB_WORKSPACE/source" \
@@ -164,7 +177,7 @@ jobs:
         if: always() && steps.deep.outputs.artifact_zip != ''
         uses: actions/upload-artifact@v4
         with:
-          name: splitalignerr-deep-tree-evidence-${{ runner.os }}-${{ runner.arch }}
+          name: splitalignerr-deep-tree-evidence-${{ runner.os }}-${{ runner.arch }}-${{ matrix.config.artifact_suffix }}
           path: |
             ${{ steps.deep.outputs.artifact_zip }}
             ${{ steps.deep.outputs.artifact_sidecar }}

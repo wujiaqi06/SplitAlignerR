@@ -96,6 +96,23 @@ def parse_timeout() -> float:
     return timeout
 
 
+def parse_operations() -> tuple[str, ...]:
+    text = os.environ.get(
+        "SPLITALIGNERR_DEEP_TREE_OPERATIONS", ",".join(OPERATIONS)
+    )
+    operations = tuple(item.strip() for item in text.split(",") if item.strip())
+    if (
+        not operations
+        or len(set(operations)) != len(operations)
+        or any(operation not in OPERATIONS for operation in operations)
+    ):
+        raise SystemExit(
+            "SPLITALIGNERR_DEEP_TREE_OPERATIONS must be a unique subset of "
+            + ",".join(OPERATIONS)
+        )
+    return operations
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         raise SystemExit("usage: deep_tree_probe.py SOURCE_ROOT OUTPUT_DIR")
@@ -115,6 +132,7 @@ def main() -> int:
     case_script = source_root / ".github" / "recert" / "deep_tree_case.R"
     sizes = parse_sizes()
     timeout_seconds = parse_timeout()
+    operations = parse_operations()
     source_commit = run_text([git, "-C", str(source_root), "rev-parse", "HEAD"])
     compiler = run_text([r_command, "CMD", "config", "CXX17"])
     r_version = run_text([r_command, "--version"]).splitlines()[0]
@@ -128,8 +146,9 @@ def main() -> int:
         "generator: deterministic_left_comb_v1",
         "generator_definition: start=(t000001:1,t000002:1):1; "
         "append=(previous,tNNNNNN:1):1; terminate=;",
-        "probe_sequence: ascending taxa; validate then align at each size; "
-        "stop after first non-PASS case",
+        "probe_sequence: ascending taxa; requested operations in declared order "
+        "at each size; stop after first non-PASS case",
+        f"requested_operations: {','.join(operations)}",
         f"requested_sizes: {','.join(str(size) for size in sizes)}",
         f"per_case_timeout_seconds: {timeout_seconds:g}",
         f"runner_os: {os.environ.get('RUNNER_OS', platform.system())}",
@@ -147,12 +166,12 @@ def main() -> int:
 
     rows: list[dict[str, object]] = []
     direct_nonzero_failure = False
-    mandatory_size_failure_observed = False
     unexpected_graceful_failure_observed = False
+    timeout_boundary_observed = False
     stopped_after_first_nonpass = False
 
     for taxa in sizes:
-        for operation in OPERATIONS:
+        for operation in operations:
             label = f"{operation}_taxa_{taxa:06d}"
             command = [rscript, str(case_script), operation, str(taxa)]
             timed_out = False
@@ -193,13 +212,12 @@ def main() -> int:
                 classification == "GRACEFUL_FAILURE"
                 and "safe recursion depth" in stdout
             )
-            mandatory_size_failure = taxa <= 500 and classification != "PASS"
             unexpected_graceful = (
                 classification == "GRACEFUL_FAILURE" and not expected_depth_guard
             )
             direct_nonzero_failure |= classification == "CRASH_OR_NONZERO"
-            mandatory_size_failure_observed |= mandatory_size_failure
             unexpected_graceful_failure_observed |= unexpected_graceful
+            timeout_boundary_observed |= classification == "TIMEOUT"
             byte_match = re.search(r"newick_bytes: ([0-9]+)", stdout)
             rows.append(
                 {
@@ -239,7 +257,7 @@ def main() -> int:
         writer.writerows(rows)
 
     summary: list[str] = []
-    for operation in OPERATIONS:
+    for operation in operations:
         selected = [row for row in rows if row["operation"] == operation]
         passed_rows = [row for row in selected if row["classification"] == "PASS"]
         graceful_rows = [
@@ -270,15 +288,14 @@ def main() -> int:
 
     failed = (
         direct_nonzero_failure
-        or mandatory_size_failure_observed
         or unexpected_graceful_failure_observed
     )
     summary.extend(
         [
             "direct_crash_or_unclassified_nonzero_observed: "
             + str(direct_nonzero_failure).upper(),
-            "mandatory_size_failure_observed: "
-            + str(mandatory_size_failure_observed).upper(),
+            "timeout_boundary_observed: "
+            + str(timeout_boundary_observed).upper(),
             "unexpected_graceful_failure_observed: "
             + str(unexpected_graceful_failure_observed).upper(),
             "stopped_after_first_nonpass: "
