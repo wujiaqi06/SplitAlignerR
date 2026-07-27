@@ -149,7 +149,6 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: source
-          extra-packages: any::processx
           needs: check
 
       - name: Run isolated deep-tree probe
