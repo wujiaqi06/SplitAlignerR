@@ -29,7 +29,9 @@ fixed-mode topology mismatches are additionally diagnosed.}
 \item{gene_ids}{Optional character vector overriding inferred/file IDs.
 Explicit IDs must be non-missing, nonempty, unique, free of control
 characters, and have no leading or trailing whitespace. Unicode IDs are
-supported.}
+supported. Existing names on character vectors, \code{multiPhylo} objects,
+and lists follow the same content rules; only missing or empty object names
+receive deterministic automatic IDs.}
 
 \item{...}{Reserved; additional arguments currently signal an error.}
 }

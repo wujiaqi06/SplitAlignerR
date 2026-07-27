@@ -150,7 +150,10 @@ run_logged "03_recursive_depth_probe" "$runner_temp" \
   env "R_LIBS=${probe_libraries}" python3 -B \
   "${script_dir}/deep_tree_probe.py" "$source_root" \
   "${evidence_dir}/DEEP_TREE_PROBE"
-run_logged "04_clean_source_after_probe" "$source_root" git status --porcelain
+run_logged "04_verify_deep_tree_evidence" "$source_root" \
+  python3 -B "${script_dir}/verify_deep_tree_evidence.py" \
+  "${evidence_dir}/DEEP_TREE_PROBE"
+run_logged "05_clean_source_after_probe" "$source_root" git status --porcelain
 if [[ -n "$(git -C "$source_root" status --porcelain)" ]]; then
   echo "source working tree is dirty after deep-tree probe" >&2
   exit 65

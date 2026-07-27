@@ -16,31 +16,25 @@
 
 ## Recursive depth boundary
 
-The C++ Newick parser and descendant-tip traversals are recursive. Fix005 tests
-them in independent R subprocesses generated as deterministic left-comb trees.
+The C++ Newick parser and descendant-tip traversals are recursive. Fix005A tests
+them in independent R subprocess trees generated as deterministic left-comb trees.
 The generator starts with `(t000001:1,t000002:1):1`, repeatedly appends
 `(previous,tNNNNNN:1):1`, and terminates with `;`. Dedicated clean-runner jobs
-used R 4.6.1 and a 60-second classification limit per case. Windows validation
-and alignment ran in separate jobs so that each operation began on a clean
-runner.
+use a 60-second operational limit per case. On Unix, every case starts in a new
+session and timeout termination kills its process group. On Windows, an
+anchored new process group is terminated with `taskkill /PID /T /F`. Evidence
+is accepted only when process-tree termination is confirmed, output pipes are
+closed, and timeout stdout contains no late `case_status`.
 
-| Platform | Operation | Maximum passing tips | First observed boundary |
-| --- | --- | ---: | --- |
-| macOS ARM64 | validation | 3,000 | not reached before alignment stopped the combined probe |
-| macOS ARM64 | alignment | 2,000 | timeout at 3,000 |
-| Linux X64 | validation | 1,500 | not reached before alignment stopped the combined probe |
-| Linux X64 | alignment | 1,000 | timeout at 1,500 |
-| Windows X64 | validation | 1,500 | timeout at 2,000 |
-| Windows X64 | alignment | none | timeout at the first requested case, 50 tips |
-
-No direct crash, segfault, unclassified nonzero exit, or graceful parser
-failure was observed. The Windows alignment result is specific to the deeply
-imbalanced comb topology: the same platform passed the ordinary package tests,
-302-mammal and 2,275-gene authorities, and the balanced 50/200/302/500-tip
-benchmark. Fix005 therefore adds no speculative recursion guard. Very deep or
-highly imbalanced trees, especially on Windows, remain a documented V1
-limitation; raw stdout, stderr, exit status, runner metadata, and timeout rows
-belong to the external Fix005 evidence.
+The earlier Fix005 Windows timeout classifications are rejected because the
+outer process timed out while a descendant R process continued and eventually
+printed `case_status: PASS`. They are not recursion or performance boundaries.
+Fix005A reruns all four dedicated platform jobs with the corrected harness;
+exact tested maxima and 60-second operational-limit cases belong to the
+external review evidence. A timeout means only that the case did not complete
+within that operational limit, not that the input crashes or can never finish.
+No speculative recursion guard is added unless the corrected probe observes a
+direct crash or segmentation fault.
 
 ## Performance boundary
 

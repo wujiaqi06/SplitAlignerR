@@ -45,6 +45,29 @@ unicode_whitespace_codepoint <- function(codepoint) {
   )
 }
 
+validate_present_gene_ids <- function(ids) {
+  codepoints <- lapply(enc2utf8(ids), utf8ToInt)
+  has_boundary_whitespace <- vapply(codepoints, function(x) {
+    unicode_whitespace_codepoint(x[[1L]]) ||
+      unicode_whitespace_codepoint(x[[length(x)]])
+  }, logical(1))
+  if (any(has_boundary_whitespace)) {
+    stop(
+      "User-provided gene identifiers must not have leading or trailing whitespace.",
+      call. = FALSE
+    )
+  }
+
+  has_control <- vapply(codepoints, function(x) {
+    any(x <= 0x001F | (x >= 0x007F & x <= 0x009F))
+  }, logical(1))
+  if (any(has_control)) {
+    stop("User-provided gene identifiers must not contain control characters.",
+         call. = FALSE)
+  }
+  ids
+}
+
 validate_explicit_gene_ids <- function(ids, count) {
   if (!is.character(ids) || length(ids) != count) {
     stop("`gene_ids` must be a character vector with one ID per tree.",
@@ -58,26 +81,7 @@ validate_explicit_gene_ids <- function(ids, count) {
     stop("User-supplied `gene_ids` must not contain empty strings.",
          call. = FALSE)
   }
-
-  codepoints <- lapply(enc2utf8(ids), utf8ToInt)
-  has_boundary_whitespace <- vapply(codepoints, function(x) {
-    unicode_whitespace_codepoint(x[[1L]]) ||
-      unicode_whitespace_codepoint(x[[length(x)]])
-  }, logical(1))
-  if (any(has_boundary_whitespace)) {
-    stop(
-      "User-supplied `gene_ids` must not have leading or trailing whitespace.",
-      call. = FALSE
-    )
-  }
-
-  has_control <- vapply(codepoints, function(x) {
-    any(x <= 0x001F | (x >= 0x007F & x <= 0x009F))
-  }, logical(1))
-  if (any(has_control)) {
-    stop("User-supplied `gene_ids` must not contain control characters.",
-         call. = FALSE)
-  }
+  ids <- validate_present_gene_ids(ids)
   if (anyDuplicated(ids)) {
     duplicate <- ids[duplicated(ids)][[1L]]
     stop(sprintf("Duplicate gene identifier `%s`.", duplicate), call. = FALSE)
@@ -93,6 +97,23 @@ gene_id_byte_key <- function(ids) {
 
 restore_gene_id_encodings <- function(result, ids) {
   ids <- enc2utf8(ids)
+  expected_keys <- gene_id_byte_key(ids)
+  state_ids <- rownames(result$state_matrix)
+  numeric_ids <- rownames(result$numeric_matrix)
+  axis_matches <- function(values) {
+    is.character(values) &&
+      length(values) == length(ids) &&
+      !anyNA(values) &&
+      identical(gene_id_byte_key(values), expected_keys)
+  }
+  axes_match <- axis_matches(state_ids) && axis_matches(numeric_ids)
+  if (!axes_match) {
+    stop(
+      "Internal error: C++ result gene axis differs from requested gene order.",
+      call. = FALSE
+    )
+  }
+
   key_to_id <- stats::setNames(ids, gene_id_byte_key(ids))
   restore <- function(values) {
     restored <- unname(key_to_id[gene_id_byte_key(values)])
@@ -128,9 +149,16 @@ complete_gene_ids <- function(ids, count, user_supplied = FALSE) {
     stop("`gene_ids` must be a character vector with one ID per tree.",
          call. = FALSE)
   }
-  ids <- trimws(ids)
-  used <- ids[!is.na(ids) & nzchar(ids)]
-  for (i in which(is.na(ids) | !nzchar(ids))) {
+  missing <- is.na(ids) | !nzchar(ids)
+  if (any(!missing)) {
+    ids[!missing] <- validate_present_gene_ids(ids[!missing])
+  }
+  used <- ids[!missing]
+  if (anyDuplicated(used)) {
+    duplicate <- used[duplicated(used)][[1L]]
+    stop(sprintf("Duplicate gene identifier `%s`.", duplicate), call. = FALSE)
+  }
+  for (i in which(missing)) {
     candidate_number <- i
     repeat {
       candidate <- sprintf("gene_%06d", candidate_number)
@@ -232,7 +260,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #' @param gene_ids Optional character vector overriding inferred/file IDs.
 #'   Explicit IDs must be non-missing, nonempty, unique, free of control
 #'   characters, and have no leading or trailing whitespace. Unicode IDs are
-#'   supported.
+#'   supported. Existing names on character vectors, `multiPhylo` objects, and
+#'   lists follow the same content rules; only missing or empty object names
+#'   receive deterministic automatic IDs.
 #' @param ... Reserved; additional arguments currently signal an error.
 #' @return A `splitaligner_result` list containing the primitive `state_matrix`,
 #'   primitive-plus-composite `numeric_matrix`, long state and composite

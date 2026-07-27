@@ -1,5 +1,13 @@
 # SplitAlignerR 0.1.0
 
+* Closed Fix005A gene-ID routes by validating existing object names under the
+  same Unicode-preserving whitespace/control/duplicate rules as `gene_ids=`,
+  while retaining deterministic auto-fill only for truly missing names.
+* Added a byte-key order assertion before restoring gene-ID encodings so the R
+  wrapper cannot mask a reordered C++ result axis.
+* Replaced single-process deep-tree timeouts with process-tree termination and
+  an independent evidence verifier that rejects timeout rows containing late
+  R completion output.
 * Opened the controlled Fix005/RC002 candidate without moving the frozen,
   abandoned `v0.1.0-rc1` tag.
 * Corrected the SplitAligner paper title associated with DOI

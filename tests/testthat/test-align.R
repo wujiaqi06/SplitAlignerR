@@ -201,6 +201,75 @@ test_that("explicit Unicode gene IDs and deterministic automatic IDs remain vali
   )
 })
 
+test_that("object-name gene IDs use the same hardening rules", {
+  species <- "((A,B),(C,D));"
+  tree <- "((A:1,B:1):1,(C:1,D:1):1);"
+  phy <- ape::read.tree(text = tree)
+
+  expect_error(
+    align_branches(species, stats::setNames(tree, "gene\tid")),
+    "control characters"
+  )
+  for (trees in list(
+    stats::setNames(list(phy), " padded"),
+    structure(stats::setNames(list(phy), "padded "), class = "multiPhylo")
+  )) {
+    expect_error(
+      align_branches(species, trees),
+      "leading or trailing whitespace"
+    )
+  }
+
+  partly_named <- stats::setNames(c(tree, tree), c("present", ""))
+  from_character <- align_branches(species, partly_named)
+  expect_identical(
+    rownames(from_character$state_matrix),
+    c("present", "gene_000002")
+  )
+  partly_named_list <- stats::setNames(list(phy, phy), c("present", ""))
+  from_list <- align_branches(species, partly_named_list)
+  expect_identical(
+    rownames(from_list$state_matrix),
+    c("present", "gene_000002")
+  )
+  missing_named <- stats::setNames(c(tree, tree), c("present", NA_character_))
+  from_missing_name <- align_branches(species, missing_named)
+  expect_identical(
+    rownames(from_missing_name$state_matrix),
+    c("present", "gene_000002")
+  )
+
+  unicode_id <- paste0("基因", intToUtf8(0x1F9EC))
+  unicode_named <- align_branches(
+    species, stats::setNames(list(phy), unicode_id)
+  )
+  expect_identical(enc2utf8(rownames(unicode_named$state_matrix)), unicode_id)
+  expect_identical(
+    enc2utf8(unicode_named$input$gene_ids), unicode_id
+  )
+})
+
+test_that("encoding restoration rejects a reordered C++ gene axis", {
+  species <- "((A,B),(C,D));"
+  tree <- "((A:1,B:1):1,(C:1,D:1):1);"
+  ids <- c("first", "second")
+  aligned <- align_branches(species, c(tree, tree), gene_ids = ids)
+
+  state_reordered <- aligned
+  rownames(state_reordered$state_matrix) <- rev(ids)
+  expect_error(
+    restore_gene_id_encodings(state_reordered, ids),
+    "Internal error: C\\+\\+ result gene axis differs from requested gene order\\."
+  )
+
+  numeric_reordered <- aligned
+  rownames(numeric_reordered$numeric_matrix) <- rev(ids)
+  expect_error(
+    restore_gene_id_encodings(numeric_reordered, ids),
+    "Internal error: C\\+\\+ result gene axis differs from requested gene order\\."
+  )
+})
+
 test_that("C++ graph-first states reproduce all 272 Catnip10 cells", {
   for (regime in c("global", "local")) {
     aligned <- align_branches(
