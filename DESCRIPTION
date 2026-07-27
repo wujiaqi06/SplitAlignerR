@@ -10,7 +10,9 @@ Description: R interface and independent benchmark track for the SplitAligner
     parsing, explicit structural/topological states, and composite-coordinate
     provenance. A separate R paired-finalization layer retains the frozen
     structured output-token rules and literal-NA provenance. See the
-    SplitAligner preprint (Wu 2026, <doi:10.64898/2026.02.24.707838>).
+    SplitAligner preprint, "SplitAligner: A Gene-Species Tree Reconciliation
+    Framework Using Split-Based Branch Mapping" (Wu 2026,
+    <doi:10.64898/2026.02.24.707838>).
 License: GPL-3
 Encoding: UTF-8
 Depends:

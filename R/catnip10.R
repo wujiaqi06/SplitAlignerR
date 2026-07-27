@@ -93,7 +93,7 @@ validate_catnip10_oracle <- function() {
     all(counts$total > 0L)
   add(
     "status_counts_available",
-    if (counts_ok) "PASS" else "DEFERRED",
+    if (counts_ok) "PASS" else if (data_loaded) "FAIL" else "DEFERRED",
     if (counts_ok) {
       paste(
         sprintf(
@@ -107,8 +107,10 @@ validate_catnip10_oracle <- function() {
         ),
         collapse = "; "
       )
+    } else if (inherits(counts, "error")) {
+      conditionMessage(counts)
     } else {
-      "Exact count checks are deferred because summary counts could not be computed"
+      "Summary counts did not return a nonempty data frame with the required columns"
     }
   )
 

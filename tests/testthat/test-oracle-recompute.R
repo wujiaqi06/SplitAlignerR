@@ -125,3 +125,61 @@ test_that("oracle classifications are invariant to consistent tip relabeling", {
     unname(renamed_trace[, renamed_axis_for_original, drop = FALSE])
   )
 })
+
+unicode_oracle_trace <- function() {
+  set.seed(5405)
+  tree <- ape::rtree(8L)
+  tree$tip.label <- c(
+    "é", "E", "β", "Ω", "中", "あ", intToUtf8(0x1F9EC), "Å"
+  )
+  frozen <- SplitAlignerR:::.oracle_freeze_tree_identity(tree)
+  state <- SplitAlignerR:::.oracle_init_state(
+    frozen$identity, frozen$root_label
+  )
+  deletion <- c("中", "E", "Å")
+  states <- list()
+  ledgers <- list()
+  for (step in 0:length(deletion)) {
+    if (step > 0L) {
+      state <- SplitAlignerR:::.oracle_delete_tip(state, deletion[[step]])
+    }
+    states[[step + 1L]] <- SplitAlignerR:::.oracle_classify_state(
+      state, frozen$identity
+    )
+    ledgers[[step + 1L]] <- SplitAlignerR:::.oracle_fusion_rows(
+      state, paste0("unicode_step", step), step
+    )
+  }
+  list(states = states, ledgers = ledgers)
+}
+
+test_that("oracle UTF-8 member and ledger ordering is locale-independent", {
+  original_locale <- Sys.getlocale("LC_COLLATE")
+  on.exit(Sys.setlocale("LC_COLLATE", original_locale), add = TRUE)
+  baseline <- unicode_oracle_trace()
+  expect_true(nzchar(Sys.setlocale("LC_COLLATE", "C")))
+  under_c <- unicode_oracle_trace()
+  expect_identical(under_c, baseline)
+})
+
+test_that("oracle character ordering sites explicitly use radix ordering", {
+  oracle_file <- test_path("../../R/oracle.R")
+  if (!file.exists(oracle_file)) {
+    skip("Oracle source is not available in installed-package tests")
+  }
+  source_text <- paste(readLines(oracle_file, warn = FALSE), collapse = "\n")
+  required <- c(
+    'sort(endpoints, method = "radix")',
+    'root_edges$child_label, root_edges$edge_uid, method = "radix"',
+    ')), method = "radix")'
+  )
+  expect_true(all(vapply(
+    required, grepl, logical(1), x = source_text, fixed = TRUE
+  )))
+  expect_identical(
+    length(regmatches(source_text, gregexpr(
+      'method = "radix"', source_text, fixed = TRUE
+    ))[[1L]]),
+    6L
+  )
+})

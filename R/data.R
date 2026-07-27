@@ -24,7 +24,8 @@
 #'     coordinates), and `deletion_order` (character vector).}
 #'   \item{local}{list for the local regime, same structure as `global`.}
 #' }
-#' @source Wu J. (2026) SplitAligner preprint,
+#' @source Wu J. (2026) *SplitAligner: A Gene-Species Tree Reconciliation
+#'   Framework Using Split-Based Branch Mapping*,
 #'   \doi{10.64898/2026.02.24.707838}; Catnip10 10-tip coordinate-audit
 #'   benchmark, unrooted oracle outputs
 #'   (`oracle_gene_by_original_branch_matrix.tsv`, `oracle_cell_status_long.tsv`,

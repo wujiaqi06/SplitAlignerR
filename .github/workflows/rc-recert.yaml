@@ -3,6 +3,9 @@ name: SplitAlignerR V1 RC RECERT
 on:
   push:
     branches:
+      - probe/SAR-V1-FIX005-RC002
+      - fix/SAR-V1-FIX005-RC002
+      - rc/v0.1.0-rc2
       - rc/v0.1.0-rc1
   workflow_dispatch:
 
@@ -101,3 +104,82 @@ jobs:
             echo "artifact_url: ${{ steps.upload.outputs.artifact-url }}"
             echo "artifact_digest: ${{ steps.upload.outputs.artifact-digest }}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  deep-tree-probe:
+    name: ${{ matrix.config.label }} dedicated deep-tree probe
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 90
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - label: macOS R release
+            os: macos-latest
+            r: release
+            operations: validate_species_tree,align_branches
+            artifact_suffix: combined
+          - label: Linux R release
+            os: ubuntu-latest
+            r: release
+            operations: validate_species_tree,align_branches
+            artifact_suffix: combined
+          - label: Windows R release validation-only
+            os: windows-latest
+            r: release
+            operations: validate_species_tree
+            artifact_suffix: validation
+          - label: Windows R release alignment-only
+            os: windows-latest
+            r: release
+            operations: align_branches
+            artifact_suffix: alignment
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Preserve repository bytes across platforms
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out RC source
+        uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 0
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+
+      - name: Install declared and probe dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: source
+          needs: check
+
+      - name: Run isolated deep-tree probe
+        id: deep
+        shell: bash
+        env:
+          SPLITALIGNERR_DEEP_TREE_OPERATIONS: ${{ matrix.config.operations }}
+        run: |
+          bash "$GITHUB_WORKSPACE/source/.github/recert/run_deep_tree_job.sh" \
+            "$GITHUB_WORKSPACE/source" \
+            "$GITHUB_SHA"
+
+      - name: Upload isolated deep-tree evidence
+        id: upload-deep
+        if: always() && steps.deep.outputs.artifact_zip != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: splitalignerr-deep-tree-evidence-${{ runner.os }}-${{ runner.arch }}-${{ matrix.config.artifact_suffix }}
+          path: |
+            ${{ steps.deep.outputs.artifact_zip }}
+            ${{ steps.deep.outputs.artifact_sidecar }}
+          if-no-files-found: error
+          retention-days: 30

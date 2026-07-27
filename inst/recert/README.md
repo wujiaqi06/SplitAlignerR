@@ -10,6 +10,7 @@ turn a release candidate into a final release.
   including the litedown/commonmark vignette chain.
 - KNOWN_LIMITATIONS.md records the V1 architecture and scope boundary.
 
-The authoritative RC source commit is the commit to which the annotated
-v0.1.0-rc1 tag peels. The commit cannot embed its own hash without creating
-a self-reference; tag-to-commit proof belongs in the external RECERT package.
+The Fix005 source is a pre-tag candidate for `v0.1.0-rc2`. The frozen
+`v0.1.0-rc1` tag remains immutable and is not submitted to Pro. An annotated
+RC2 tag may be created only after main-console acceptance; tag-to-commit proof
+belongs in the later external RECERT package.

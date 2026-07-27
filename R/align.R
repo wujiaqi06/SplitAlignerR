@@ -38,7 +38,89 @@ gene_records_from_lines <- function(lines) {
   list(newicks = newicks, ids = embedded_ids)
 }
 
-complete_gene_ids <- function(ids, count) {
+unicode_whitespace_codepoint <- function(codepoint) {
+  codepoint %in% c(
+    0x0009:0x000D, 0x0020, 0x0085, 0x00A0, 0x1680,
+    0x2000:0x200A, 0x2028, 0x2029, 0x202F, 0x205F, 0x3000
+  )
+}
+
+validate_explicit_gene_ids <- function(ids, count) {
+  if (!is.character(ids) || length(ids) != count) {
+    stop("`gene_ids` must be a character vector with one ID per tree.",
+         call. = FALSE)
+  }
+  if (anyNA(ids)) {
+    stop("User-supplied `gene_ids` must not contain missing values.",
+         call. = FALSE)
+  }
+  if (any(!nzchar(ids))) {
+    stop("User-supplied `gene_ids` must not contain empty strings.",
+         call. = FALSE)
+  }
+
+  codepoints <- lapply(enc2utf8(ids), utf8ToInt)
+  has_boundary_whitespace <- vapply(codepoints, function(x) {
+    unicode_whitespace_codepoint(x[[1L]]) ||
+      unicode_whitespace_codepoint(x[[length(x)]])
+  }, logical(1))
+  if (any(has_boundary_whitespace)) {
+    stop(
+      "User-supplied `gene_ids` must not have leading or trailing whitespace.",
+      call. = FALSE
+    )
+  }
+
+  has_control <- vapply(codepoints, function(x) {
+    any(x <= 0x001F | (x >= 0x007F & x <= 0x009F))
+  }, logical(1))
+  if (any(has_control)) {
+    stop("User-supplied `gene_ids` must not contain control characters.",
+         call. = FALSE)
+  }
+  if (anyDuplicated(ids)) {
+    duplicate <- ids[duplicated(ids)][[1L]]
+    stop(sprintf("Duplicate gene identifier `%s`.", duplicate), call. = FALSE)
+  }
+  ids
+}
+
+gene_id_byte_key <- function(ids) {
+  vapply(ids, function(id) {
+    paste(as.character(charToRaw(id)), collapse = "")
+  }, character(1), USE.NAMES = FALSE)
+}
+
+restore_gene_id_encodings <- function(result, ids) {
+  ids <- enc2utf8(ids)
+  key_to_id <- stats::setNames(ids, gene_id_byte_key(ids))
+  restore <- function(values) {
+    restored <- unname(key_to_id[gene_id_byte_key(values)])
+    if (anyNA(restored)) {
+      stop(
+        "Internal error: the production result returned an unknown gene ID.",
+        call. = FALSE
+      )
+    }
+    restored
+  }
+
+  rownames(result$state_matrix) <- ids
+  rownames(result$numeric_matrix) <- ids
+  for (component in c(
+    "state_ledger", "composite_ledger", "gene_provenance", "diagnostics"
+  )) {
+    if ("gene_id" %in% names(result[[component]])) {
+      result[[component]]$gene_id <- restore(result[[component]]$gene_id)
+    }
+  }
+  result
+}
+
+complete_gene_ids <- function(ids, count, user_supplied = FALSE) {
+  if (user_supplied) {
+    return(validate_explicit_gene_ids(ids, count))
+  }
   if (is.null(ids)) {
     ids <- rep(NA_character_, count)
   }
@@ -123,7 +205,8 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
   }
   ids <- complete_gene_ids(
     if (is.null(gene_ids)) inferred_ids else gene_ids,
-    length(newicks)
+    length(newicks),
+    user_supplied = !is.null(gene_ids)
   )
   list(newicks = unname(newicks), ids = ids, source = source)
 }
@@ -147,6 +230,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #'   topology-constrained trees. Both modes use the same state semantics;
 #'   fixed-mode topology mismatches are additionally diagnosed.
 #' @param gene_ids Optional character vector overriding inferred/file IDs.
+#'   Explicit IDs must be non-missing, nonempty, unique, free of control
+#'   characters, and have no leading or trailing whitespace. Unicode IDs are
+#'   supported.
 #' @param ... Reserved; additional arguments currently signal an error.
 #' @return A `splitaligner_result` list containing the primitive `state_matrix`,
 #'   primitive-plus-composite `numeric_matrix`, long state and composite
@@ -176,6 +262,7 @@ align_branches <- function(species_tree, gene_trees,
   result <- cpp_align_branches(
     species$text, genes$newicks, genes$ids, mode
   )
+  result <- restore_gene_id_encodings(result, genes$ids)
   result$coordinate_table <- build_coordinate_table(result)
   result$input <- list(
     species_source = species$source,

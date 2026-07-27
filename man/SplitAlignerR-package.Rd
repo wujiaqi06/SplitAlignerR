@@ -6,7 +6,7 @@
 \alias{SplitAlignerR-package}
 \title{SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner}
 \description{
-R interface and independent benchmark track for the SplitAligner branch-coordinate framework. The package ships deterministic Catnip10 graph-oracle data, a pure R node-edge oracle that recomputes the benchmark, and a C++17 graph-first mapper with strict finite-range branch-length parsing, explicit structural/topological states, and composite-coordinate provenance. A separate R paired-finalization layer retains the frozen output-token rules and literal-NA provenance. See the SplitAligner preprint (Wu 2026, \doi{10.64898/2026.02.24.707838}).
+R interface and independent benchmark track for the SplitAligner branch-coordinate framework. The package ships deterministic Catnip10 graph-oracle data, a pure R node-edge oracle that recomputes the benchmark, and a C++17 graph-first mapper with strict finite-range branch-length parsing, explicit structural/topological states, and composite-coordinate provenance. A separate R paired-finalization layer retains the frozen structured output-token rules and literal-NA provenance. See the SplitAligner preprint, "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping" (Wu 2026, \doi{10.64898/2026.02.24.707838}).
 }
 \seealso{
 Useful links:

@@ -6,7 +6,7 @@ if (length(args) != 1L || !nzchar(args[[1L]])) {
 required <- data.frame(
   package = c(
     "ape", "Rcpp", "testthat", "knitr", "markdown",
-    "xfun", "litedown", "commonmark", "pkgload", "rcmdcheck"
+    "xfun", "litedown", "commonmark", "pkgload", "rcmdcheck", "processx"
   ),
   reason = c(
     "DESCRIPTION Imports",
@@ -18,7 +18,8 @@ required <- data.frame(
     "markdown direct dependency",
     "litedown direct dependency",
     "source-root test runner",
-    "CI check runner"
+    "CI check runner",
+    "independent subprocess deep-tree probe"
   ),
   stringsAsFactors = FALSE
 )

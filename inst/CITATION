@@ -2,7 +2,7 @@ citHeader("To cite SplitAlignerR in publications, please cite the SplitAligner p
 
 bibentry(
   bibtype  = "Article",
-  title    = "SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance",
+  title    = "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping",
   author   = person("Jiaqi", "Wu"),
   year     = "2026",
   journal  = "bioRxiv",

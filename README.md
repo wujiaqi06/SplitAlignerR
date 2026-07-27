@@ -8,8 +8,10 @@
 <!-- badges: end -->
 
 SplitAlignerR is the R interface and independent benchmark track for the
-SplitAligner branch-coordinate framework. Package version 0.1.0 is the first
-V1 release candidate. It provides a
+SplitAligner branch-coordinate framework. Package version 0.1.0 is the V1
+release-candidate line. The frozen `v0.1.0-rc1` tag is retained as an abandoned
+first candidate; this Fix005 source is the controlled pre-tag candidate for
+`v0.1.0-rc2`. It provides a
 production C++17 graph-first mapper, strict finite-range branch-length
 validation, and a pure R node-edge implementation that independently recomputes
 the Catnip10 graph-oracle benchmark. The candidate is not a final release
@@ -23,8 +25,8 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 # install.packages("remotes")
 remotes::install_github("wujiaqi06/SplitAlignerR")
 
-# After the annotated release-candidate tag is published:
-remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0-rc1")
+# After the annotated RC2 tag is published:
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0-rc2")
 ```
 
 ## Minimal Example
@@ -99,6 +101,10 @@ The production mapper lives in the C++ core. R converts inputs and wraps the
 result; the Catnip10 Oracle remains a separate pure R node-edge implementation
 that never calls the core or uses projected splits for structural states.
 
+The contract field `finalized_perl_matrices_are_authoritative` is intentionally
+named. Here, Perl refers to the frozen SplitAligner reference implementation;
+SplitAlignerR does not require Perl at runtime.
+
 The release-candidate tests reproduce all 272 frozen Catnip10 primitive
 cells and all 19 fusion events, and include explicit discordance and unavailable
 numeric-evidence toys. This is implementation evidence, not final V1 release
@@ -113,8 +119,8 @@ model, batch input forms, diagnostics, provenance lookup, and save/reload flow.
 If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI
 will be added only after final release approval.
 
-> Wu J. (2026). *SplitAligner: Branch-Identity Coordinate System for
-> Phylogenomics under Missing Taxa and Gene-Tree Discordance.* bioRxiv.
+> Wu J. (2026). *SplitAligner: A Gene-Species Tree Reconciliation Framework
+> Using Split-Based Branch Mapping.* bioRxiv.
 > <https://doi.org/10.64898/2026.02.24.707838>
 
 See [`CITATION.cff`](CITATION.cff) and `citation("SplitAlignerR")`.

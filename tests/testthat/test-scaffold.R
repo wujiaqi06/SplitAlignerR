@@ -46,8 +46,7 @@ test_that("validate_catnip10_oracle reruns both pure R oracle scenarios", {
   checks <- validate_catnip10_oracle()
   expect_s3_class(checks, "data.frame")
   expect_true(all(c("check", "status", "details") %in% names(checks)))
-  expect_true(all(checks$status %in% c("PASS", "DEFERRED")))
-  expect_false(any(checks$status == "FAIL"))
+  expect_true(all(checks$status == "PASS"))
   oracle_checks <- checks[grepl("^pure_R_graph_oracle_exact_", checks$check), ]
   expect_identical(oracle_checks$check, c(
     "pure_R_graph_oracle_exact_global",
@@ -55,6 +54,20 @@ test_that("validate_catnip10_oracle reruns both pure R oracle scenarios", {
   ))
   expect_true(all(oracle_checks$status == "PASS"))
   expect_true(all(grepl("136/136", oracle_checks$details, fixed = TRUE)))
+})
+
+test_that("Catnip10 summary failures after data load are FAIL with original details", {
+  local_mocked_bindings(
+    catnip10_summary_counts = function(...) {
+      stop("forced Catnip10 count failure", call. = FALSE)
+    },
+    .package = "SplitAlignerR"
+  )
+
+  checks <- validate_catnip10_oracle()
+  row <- checks[checks$check == "status_counts_available", , drop = FALSE]
+  expect_identical(row$status, "FAIL")
+  expect_identical(row$details, "forced Catnip10 count failure")
 })
 
 test_that("bundled oracle has both regimes and no NA_topo", {

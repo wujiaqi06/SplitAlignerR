@@ -142,6 +142,65 @@ test_that("gene tree input conversion is deterministic and bounded", {
                "reserved")
 })
 
+test_that("explicit gene IDs reject missing, empty, padded, control, and duplicate values", {
+  species <- "((A,B),(C,D));"
+  tree <- "((A:1,B:1):1,(C:1,D:1):1);"
+
+  expect_error(
+    align_branches(species, tree, gene_ids = NA_character_),
+    "must not contain missing"
+  )
+  expect_error(
+    align_branches(species, tree, gene_ids = ""),
+    "must not contain empty"
+  )
+  for (id in c(" padded", "padded ", "\u00a0padded", "padded\u3000")) {
+    expect_error(
+      align_branches(species, tree, gene_ids = id),
+      "leading or trailing whitespace"
+    )
+  }
+  for (id in c("gene\tid", "gene\nid", "gene\rid", paste0("gene", intToUtf8(0x80)))) {
+    expect_error(
+      align_branches(species, tree, gene_ids = id),
+      "control characters"
+    )
+  }
+  expect_error(
+    align_branches(
+      species, c(tree, tree), gene_ids = c("duplicate", "duplicate")
+    ),
+    "Duplicate gene identifier"
+  )
+})
+
+test_that("explicit Unicode gene IDs and deterministic automatic IDs remain valid", {
+  species <- "((A,B),(C,D));"
+  tree <- "((A:1,B:1):1,(C:1,D:1):1);"
+  unicode_ids <- c("基因α", paste0("δένδρο", intToUtf8(0x1F9EC)))
+  explicit <- align_branches(
+    species, c(tree, tree), gene_ids = unicode_ids
+  )
+  expect_identical(
+    enc2utf8(rownames(explicit$state_matrix)),
+    enc2utf8(unicode_ids)
+  )
+  expect_identical(
+    enc2utf8(unique(explicit$state_ledger$gene_id)),
+    enc2utf8(unicode_ids)
+  )
+  expect_identical(
+    enc2utf8(explicit$gene_provenance$gene_id),
+    enc2utf8(unicode_ids)
+  )
+
+  automatic <- align_branches(species, c(tree, tree))
+  expect_identical(
+    rownames(automatic$state_matrix),
+    c("gene_000001", "gene_000002")
+  )
+})
+
 test_that("C++ graph-first states reproduce all 272 Catnip10 cells", {
   for (regime in c("global", "local")) {
     aligned <- align_branches(

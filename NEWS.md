@@ -1,5 +1,13 @@
 # SplitAlignerR 0.1.0
 
+* Opened the controlled Fix005/RC002 candidate without moving the frozen,
+  abandoned `v0.1.0-rc1` tag.
+* Corrected the SplitAligner paper title associated with DOI
+  10.64898/2026.02.24.707838 while keeping the top-level CFF title specific to
+  SplitAlignerR software.
+* Hardened explicit gene identifiers, Catnip10 validator failure reporting,
+  Oracle character ordering, and release metadata consistency gates.
+
 * Froze the first V1 release-candidate identity: package 0.1.0, C++ core
   0.1.0, general schema 1.0.0, and paired schema 1.0.0.
 * Added release-candidate provenance, dependency, replay, and multi-platform

@@ -352,7 +352,17 @@ run_logged "09_repeat_install_identity" "$runner_temp" \
   env "R_LIBS=${install_lib_two}" Rscript -e \
   'library(SplitAlignerR); stopifnot(as.character(packageVersion("SplitAlignerR")) == "0.1.0"); print(splitaligner_core_info())'
 
-run_logged "10_full_residual_authority_chunked" "$runner_temp" \
+run_logged "10_release_metadata_consistency" "$runner_temp" \
+  env "R_LIBS=${install_lib_one}" Rscript \
+  "${script_dir}/release_metadata_gate.R" "$source_root" \
+  "${evidence_dir}/RELEASE_METADATA_GATE.tsv"
+
+run_logged "11_performance_benchmark" "$runner_temp" \
+  env "R_LIBS=${install_lib_one}" Rscript \
+  "${script_dir}/performance_benchmark.R" "$source_root" \
+  "${evidence_dir}/PERFORMANCE_BENCHMARK"
+
+run_logged "12_full_residual_authority_chunked" "$runner_temp" \
   env "R_LIBS=${install_lib_one}" Rscript \
   "${script_dir}/full_residual_authority.R" \
   "${authority_2275}/speciesTree302.nwk" \
@@ -363,12 +373,12 @@ run_logged "10_full_residual_authority_chunked" "$runner_temp" \
   "${evidence_dir}/RESIDUAL_407_SUMMARY.txt" \
   "$authority_chunk_size"
 
-run_logged "11_determinism_three_runs_and_input_order" "$runner_temp" \
+run_logged "13_determinism_three_runs_and_input_order" "$runner_temp" \
   env "R_LIBS=${install_lib_one}" Rscript \
   "${script_dir}/determinism.R" "$authority_302" \
   "${evidence_dir}/DETERMINISM.txt"
 
-run_logged "12_clean_source_after_all_gates" "$source_root" \
+run_logged "14_clean_source_after_all_gates" "$source_root" \
   git status --porcelain
 if [[ -n "$(git -C "$source_root" status --porcelain)" ]]; then
   echo "source working tree is dirty after gates" >&2
@@ -384,6 +394,13 @@ fi
   printf 'source_root_tests_bundled_and_302: PASS\n'
   printf 'documentation_examples_and_vignette: PASS via R CMD check\n'
   printf 'repeat_clean_install: PASS\n'
+  printf 'release_metadata_consistency_gate: PASS\n'
+  printf 'citation_metadata_gate: PASS via release metadata gate\n'
+  printf 'gene_id_hardening_tests: PASS via bundled tests\n'
+  printf 'catnip10_failure_classification_tests: PASS via bundled tests\n'
+  printf 'oracle_locale_independence_tests: PASS via bundled tests\n'
+  printf 'recursive_depth_probe: ISOLATED IN DEDICATED PLATFORM JOB\n'
+  printf 'performance_benchmark: PASS; see PERFORMANCE_BENCHMARK\n'
   printf 'full_2275_residual_authority_chunked: PASS\n'
   printf 'determinism_three_runs: PASS\n'
   printf 'input_order_canonicalization: PASS\n'
