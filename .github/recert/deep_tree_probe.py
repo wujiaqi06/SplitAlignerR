@@ -28,7 +28,7 @@ def run_text(command: list[str]) -> str:
     )
     stdout = result.stdout.decode("utf-8", errors="replace").strip()
     stderr = result.stderr.decode("utf-8", errors="replace").strip()
-    return stdout if result.returncode == 0 or stdout else stderr
+    return stdout if stdout else stderr
 
 
 def write_text(path: pathlib.Path, text: str) -> None:
