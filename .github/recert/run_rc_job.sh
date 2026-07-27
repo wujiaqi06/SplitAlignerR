@@ -357,17 +357,12 @@ run_logged "10_release_metadata_consistency" "$runner_temp" \
   "${script_dir}/release_metadata_gate.R" "$source_root" \
   "${evidence_dir}/RELEASE_METADATA_GATE.tsv"
 
-run_logged "11_recursive_depth_probe" "$runner_temp" \
-  env "R_LIBS=${install_lib_one}" Rscript \
-  "${script_dir}/deep_tree_probe.R" "$source_root" \
-  "${evidence_dir}/DEEP_TREE_PROBE"
-
-run_logged "12_performance_benchmark" "$runner_temp" \
+run_logged "11_performance_benchmark" "$runner_temp" \
   env "R_LIBS=${install_lib_one}" Rscript \
   "${script_dir}/performance_benchmark.R" "$source_root" \
   "${evidence_dir}/PERFORMANCE_BENCHMARK"
 
-run_logged "13_full_residual_authority_chunked" "$runner_temp" \
+run_logged "12_full_residual_authority_chunked" "$runner_temp" \
   env "R_LIBS=${install_lib_one}" Rscript \
   "${script_dir}/full_residual_authority.R" \
   "${authority_2275}/speciesTree302.nwk" \
@@ -378,10 +373,19 @@ run_logged "13_full_residual_authority_chunked" "$runner_temp" \
   "${evidence_dir}/RESIDUAL_407_SUMMARY.txt" \
   "$authority_chunk_size"
 
-run_logged "14_determinism_three_runs_and_input_order" "$runner_temp" \
+run_logged "13_determinism_three_runs_and_input_order" "$runner_temp" \
   env "R_LIBS=${install_lib_one}" Rscript \
   "${script_dir}/determinism.R" "$authority_302" \
   "${evidence_dir}/DETERMINISM.txt"
+
+# Run the destructive-timeout probe after all scientific and performance
+# gates.  A Windows investigation showed that a case immediately after a
+# timeout can be contaminated; keeping this probe last prevents a timeout
+# boundary from affecting a later R case or a scientific regression.
+run_logged "14_recursive_depth_probe" "$runner_temp" \
+  env "R_LIBS=${install_lib_one}" Rscript \
+  "${script_dir}/deep_tree_probe.R" "$source_root" \
+  "${evidence_dir}/DEEP_TREE_PROBE"
 
 run_logged "15_clean_source_after_all_gates" "$source_root" \
   git status --porcelain

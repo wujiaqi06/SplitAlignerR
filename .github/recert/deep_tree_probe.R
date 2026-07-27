@@ -63,6 +63,7 @@ metadata <- c(
   sprintf("source_commit: %s", paste(source_commit, collapse = " ")),
   "generator: deterministic_left_comb_v1",
   "generator_definition: start=(t000001:1,t000002:1):1; append=(previous,tNNNNNN:1):1; terminate=;",
+  "probe_sequence: ascending taxa; validate then align at each size; stop after first non-PASS case",
   sprintf("requested_sizes: %s", paste(sizes, collapse = ",")),
   sprintf("per_case_timeout_seconds: %s", timeout_seconds),
   sprintf("runner_os: %s", Sys.getenv("RUNNER_OS", Sys.info()[["sysname"]])),
@@ -79,9 +80,12 @@ writeLines(metadata, file.path(output_dir, "METADATA.txt"), useBytes = TRUE)
 
 operations <- c("validate_species_tree", "align_branches")
 rows <- list()
-hard_failure <- FALSE
-for (operation in operations) {
-  for (taxa in sizes) {
+direct_nonzero_failure <- FALSE
+mandatory_size_failure_observed <- FALSE
+unexpected_graceful_failure_observed <- FALSE
+stop_probe <- FALSE
+for (taxa in sizes) {
+  for (operation in operations) {
     label <- sprintf("%s_taxa_%06d", operation, taxa)
     result <- processx::run(
       command = file.path(R.home("bin"), "Rscript"),
@@ -115,10 +119,12 @@ for (operation in operations) {
       !identical(classification, "PASS")
     unexpected_graceful <- identical(classification, "GRACEFUL_FAILURE") &&
       !expected_depth_guard
-    if (identical(classification, "CRASH_OR_NONZERO") ||
-        mandatory_size_failure || unexpected_graceful) {
-      hard_failure <- TRUE
-    }
+    direct_nonzero_failure <- direct_nonzero_failure ||
+      identical(classification, "CRASH_OR_NONZERO")
+    mandatory_size_failure_observed <- mandatory_size_failure_observed ||
+      mandatory_size_failure
+    unexpected_graceful_failure_observed <-
+      unexpected_graceful_failure_observed || unexpected_graceful
     bytes_hit <- regmatches(
       result$stdout,
       regexpr("newick_bytes: [0-9]+", result$stdout)
@@ -141,8 +147,12 @@ for (operation in operations) {
       stringsAsFactors = FALSE
     )
     if (!identical(classification, "PASS")) {
+      stop_probe <- TRUE
       break
     }
+  }
+  if (stop_probe) {
+    break
   }
 }
 
@@ -182,12 +192,29 @@ for (operation in operations) {
 }
 summary_lines <- c(
   summary_lines,
-  sprintf("direct_crash_or_unclassified_nonzero_observed: %s", hard_failure),
-  sprintf("overall_probe_status: %s", if (hard_failure) "FAIL" else "PASS"),
+  sprintf(
+    "direct_crash_or_unclassified_nonzero_observed: %s",
+    direct_nonzero_failure
+  ),
+  sprintf(
+    "mandatory_size_failure_observed: %s",
+    mandatory_size_failure_observed
+  ),
+  sprintf(
+    "unexpected_graceful_failure_observed: %s",
+    unexpected_graceful_failure_observed
+  ),
+  sprintf("stopped_after_first_nonpass: %s", stop_probe),
+  sprintf(
+    "overall_probe_status: %s",
+    if (direct_nonzero_failure || mandatory_size_failure_observed ||
+        unexpected_graceful_failure_observed) "FAIL" else "PASS"
+  ),
   sprintf("finished_utc: %s", format(Sys.time(), tz = "UTC", usetz = TRUE))
 )
 writeLines(summary_lines, file.path(output_dir, "SUMMARY.txt"), useBytes = TRUE)
-if (hard_failure) {
-  stop("deep-tree probe observed a crash or unclassified nonzero exit")
+if (direct_nonzero_failure || mandatory_size_failure_observed ||
+    unexpected_graceful_failure_observed) {
+  stop("deep-tree probe observed a mandatory gate failure")
 }
 cat("deep_tree_probe: PASS\n")
