@@ -36,6 +36,30 @@ within that operational limit, not that the input crashes or can never finish.
 No speculative recursion guard is added unless the corrected probe observes a
 direct crash or segmentation fault.
 
+### RC2 Windows comb-tree alignment observation
+
+GitHub Actions run `30267368278`, on the Windows X64 runner
+`Windows-2025Server-10.0.26100-SP0` with R 4.6.1, used a 60-second operational
+limit per isolated case. Its alignment-only deterministic left-comb probe began
+at 50 tips, and that first case exceeded the limit. The harness confirmed
+process-tree termination, closed output streams, and no late `case_status`, but
+the run therefore contains no passing Windows comb-tree `align_branches()` data
+point.
+
+The same run's ordinary Windows package and authority jobs passed Catnip10, the
+302-mammal regression, the 407-cell residual-NA authority, and the package test
+suite. Its balanced-tree performance benchmark also completed the 50-tip case,
+whereas the 50-tip comb-tree alignment case timed out. Existing evidence does
+not reconcile those observations and cannot distinguish a Windows-specific
+hang from a pathological tree-shape slowdown.
+
+FIX006 changes the Windows comb-tree alignment sampling to 10, 20, 30, 40, and
+50 tips so that RC3 evidence can establish a passing data point before any
+larger operational-limit observation. A clean timeout demonstrates harness
+integrity only; operation coverage is reported separately and is
+`INCONCLUSIVE_NO_PASSING_CASE` when no case passes. Deep-tree maxima and timeout
+boundaries are runner-load-sensitive observations, not stable capability limits.
+
 ## Performance boundary
 
 The reproducible `balanced-projection-v1` benchmark uses a deterministic

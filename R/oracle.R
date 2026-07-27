@@ -235,7 +235,13 @@
   if (is.na(value)) {
     return("")
   }
-  format(value, digits = 10L, scientific = FALSE, trim = TRUE)
+  format(
+    value,
+    digits = 10L,
+    scientific = FALSE,
+    trim = TRUE,
+    decimal.mark = "."
+  )
 }
 
 .oracle_classify_state <- function(state, identity) {

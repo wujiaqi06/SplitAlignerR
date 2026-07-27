@@ -1,10 +1,14 @@
+canonical_ape_write_tree <- function(tree) {
+  enc2utf8(ape::write.tree(tree, digits = 10L))
+}
+
 as_species_newick <- function(species_tree) {
   if (inherits(species_tree, "multiPhylo")) {
     stop("`species_tree` must contain exactly one tree.", call. = FALSE)
   }
   if (inherits(species_tree, "phylo")) {
     return(list(
-      text = enc2utf8(ape::write.tree(species_tree)),
+      text = canonical_ape_write_tree(species_tree),
       source = "ape::phylo"
     ))
   }

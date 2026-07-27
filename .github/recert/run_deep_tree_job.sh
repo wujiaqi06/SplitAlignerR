@@ -36,6 +36,8 @@ finalize() {
     {
       printf 'source_commit: %s\n' "$expected_commit"
       printf 'recursive_depth_probe: FAILED; see DEEP_TREE_PROBE and logs\n'
+      printf 'harness_integrity_status: UNKNOWN_OR_FAILED\n'
+      printf 'operation_coverage_status: NOT_ACCEPTED\n'
       printf 'overall_status: FAILED\n'
       printf 'exit_status: %s\n' "$status"
     } > "${evidence_dir}/RUN_SUMMARY.txt"
@@ -146,23 +148,52 @@ run_logged "02_install_clean_source_tar" "$runner_temp" \
 library_path_separator="$(Rscript -e 'cat(.Platform$path.sep)')"
 existing_libraries="$(Rscript -e 'cat(paste(.libPaths(), collapse = .Platform$path.sep))')"
 probe_libraries="${install_lib}${library_path_separator}${existing_libraries}"
+probe_status=0
 run_logged "03_recursive_depth_probe" "$runner_temp" \
   env "R_LIBS=${probe_libraries}" python3 -B \
   "${script_dir}/deep_tree_probe.py" "$source_root" \
-  "${evidence_dir}/DEEP_TREE_PROBE"
+  "${evidence_dir}/DEEP_TREE_PROBE" || probe_status=$?
+if [[ $probe_status -ne 0 && $probe_status -ne 2 ]]; then
+  exit "$probe_status"
+fi
+
+verifier_status=0
 run_logged "04_verify_deep_tree_evidence" "$source_root" \
   python3 -B "${script_dir}/verify_deep_tree_evidence.py" \
-  "${evidence_dir}/DEEP_TREE_PROBE"
+  "${evidence_dir}/DEEP_TREE_PROBE" || verifier_status=$?
+if [[ $verifier_status -ne $probe_status ]]; then
+  echo "probe and independent verifier status disagree" >&2
+  exit 65
+fi
+
 run_logged "05_clean_source_after_probe" "$source_root" git status --porcelain
 if [[ -n "$(git -C "$source_root" status --porcelain)" ]]; then
   echo "source working tree is dirty after deep-tree probe" >&2
   exit 65
 fi
 
+if [[ $probe_status -eq 2 ]]; then
+  {
+    printf 'source_commit: %s\n' "$actual_commit"
+    printf 'clean_source_build_and_install: PASS\n'
+    printf 'recursive_depth_probe: INCONCLUSIVE_NO_PASSING_CASE; see DEEP_TREE_PROBE\n'
+    printf 'harness_integrity_status: PASS\n'
+    printf 'operation_coverage_status: INCONCLUSIVE_NO_PASSING_CASE\n'
+    printf 'source_checkout_immutable_after_probe: PASS\n'
+    printf 'overall_status: INCONCLUSIVE_NO_PASSING_CASE\n'
+    printf 'exit_status: 2\n'
+    printf 'finished_utc: '
+    date -u '+%Y-%m-%dT%H:%M:%SZ'
+  } > "${evidence_dir}/RUN_SUMMARY.txt"
+  exit 2
+fi
+
 {
   printf 'source_commit: %s\n' "$actual_commit"
   printf 'clean_source_build_and_install: PASS\n'
   printf 'recursive_depth_probe: PASS; see DEEP_TREE_PROBE\n'
+  printf 'harness_integrity_status: PASS\n'
+  printf 'operation_coverage_status: PASSING_CASE_OBSERVED\n'
   printf 'source_checkout_immutable_after_probe: PASS\n'
   printf 'overall_status: PASS\n'
   printf 'finished_utc: '

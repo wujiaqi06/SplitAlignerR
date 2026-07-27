@@ -3,8 +3,10 @@ name: SplitAlignerR V1 RC RECERT
 on:
   push:
     branches:
+      - fix/SAR-V1-FIX006
       - probe/SAR-V1-FIX005-RC002
       - fix/SAR-V1-FIX005-RC002
+      - rc/v0.1.0-rc3
       - rc/v0.1.0-rc2
       - rc/v0.1.0-rc1
   workflow_dispatch:
@@ -118,21 +120,29 @@ jobs:
             os: macos-latest
             r: release
             operations: validate_species_tree,align_branches
+            sizes: 50,200,302,500,750,1000,1500,2000,3000,5000
+            continue_after_nonpass: "false"
             artifact_suffix: combined
           - label: Linux R release
             os: ubuntu-latest
             r: release
             operations: validate_species_tree,align_branches
+            sizes: 50,200,302,500,750,1000,1500,2000,3000,5000
+            continue_after_nonpass: "false"
             artifact_suffix: combined
           - label: Windows R release validation-only
             os: windows-latest
             r: release
             operations: validate_species_tree
+            sizes: 50,200,302,500,750,1000,1500,2000,3000,5000
+            continue_after_nonpass: "false"
             artifact_suffix: validation
           - label: Windows R release alignment-only
             os: windows-latest
             r: release
             operations: align_branches
+            sizes: 10,20,30,40,50
+            continue_after_nonpass: "true"
             artifact_suffix: alignment
 
     permissions:
@@ -167,6 +177,8 @@ jobs:
         shell: bash
         env:
           SPLITALIGNERR_DEEP_TREE_OPERATIONS: ${{ matrix.config.operations }}
+          SPLITALIGNERR_DEEP_TREE_SIZES: ${{ matrix.config.sizes }}
+          SPLITALIGNERR_DEEP_TREE_CONTINUE_AFTER_NONPASS: ${{ matrix.config.continue_after_nonpass }}
         run: |
           bash "$GITHUB_WORKSPACE/source/.github/recert/run_deep_tree_job.sh" \
             "$GITHUB_WORKSPACE/source" \

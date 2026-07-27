@@ -182,11 +182,11 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
   inferred_ids <- NULL
 
   if (inherits(gene_trees, "multiPhylo")) {
-    newicks <- enc2utf8(ape::write.tree(gene_trees))
+    newicks <- canonical_ape_write_tree(gene_trees)
     inferred_ids <- names(gene_trees)
     source <- "ape::multiPhylo"
   } else if (inherits(gene_trees, "phylo")) {
-    newicks <- enc2utf8(ape::write.tree(gene_trees))
+    newicks <- canonical_ape_write_tree(gene_trees)
     inferred_ids <- NULL
     source <- "ape::phylo"
   } else if (is.list(gene_trees)) {
@@ -195,9 +195,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
       stop("A gene-tree list must contain only `ape::phylo` objects.",
            call. = FALSE)
     }
-    newicks <- enc2utf8(vapply(
-      gene_trees, ape::write.tree, character(1)
-    ))
+    newicks <- vapply(
+      gene_trees, canonical_ape_write_tree, character(1)
+    )
     inferred_ids <- names(gene_trees)
     source <- "list of ape::phylo"
   } else if (is.character(gene_trees)) {

@@ -197,11 +197,17 @@ def parse_sizes() -> list[int]:
         sizes = [int(item) for item in text.split(",")]
     except ValueError as error:
         raise SystemExit(
-            "SPLITALIGNERR_DEEP_TREE_SIZES must be increasing integers >= 2"
+            "SPLITALIGNERR_DEEP_TREE_SIZES must be strictly increasing unique "
+            "integers >= 2"
         ) from error
-    if not sizes or any(size < 2 for size in sizes) or sizes != sorted(sizes):
+    if (
+        not sizes
+        or any(size < 2 for size in sizes)
+        or any(left >= right for left, right in zip(sizes, sizes[1:]))
+    ):
         raise SystemExit(
-            "SPLITALIGNERR_DEEP_TREE_SIZES must be increasing integers >= 2"
+            "SPLITALIGNERR_DEEP_TREE_SIZES must be strictly increasing unique "
+            "integers >= 2"
         )
     return sizes
 
@@ -219,6 +225,17 @@ def parse_timeout() -> float:
             "SPLITALIGNERR_DEEP_TREE_TIMEOUT_SECONDS must be positive"
         )
     return timeout
+
+
+def parse_continue_after_nonpass() -> bool:
+    text = os.environ.get(
+        "SPLITALIGNERR_DEEP_TREE_CONTINUE_AFTER_NONPASS", "false"
+    ).strip().lower()
+    if text not in ("true", "false"):
+        raise SystemExit(
+            "SPLITALIGNERR_DEEP_TREE_CONTINUE_AFTER_NONPASS must be true or false"
+        )
+    return text == "true"
 
 
 def parse_operations() -> tuple[str, ...]:
@@ -257,6 +274,7 @@ def main() -> int:
     case_script = source_root / ".github" / "recert" / "deep_tree_case.R"
     sizes = parse_sizes()
     timeout_seconds = parse_timeout()
+    continue_after_nonpass = parse_continue_after_nonpass()
     operations = parse_operations()
     source_commit = run_text([git, "-C", str(source_root), "rev-parse", "HEAD"])
     compiler = run_text([r_command, "CMD", "config", "CXX17"])
@@ -272,12 +290,24 @@ def main() -> int:
         "generator_definition: start=(t000001:1,t000002:1):1; "
         "append=(previous,tNNNNNN:1):1; terminate=;",
         "probe_sequence: ascending taxa; requested operations in declared order "
-        "at each size; stop after first non-PASS case",
+        "at each size",
+        "sampling_policy: "
+        + (
+            "continue requested sizes after a passing case even if a later case "
+            "is non-PASS; stop immediately if no passing case has been observed"
+            if continue_after_nonpass
+            else "stop after first non-PASS case"
+        ),
+        "continue_after_nonpass: " + str(continue_after_nonpass).upper(),
         f"requested_operations: {','.join(operations)}",
         f"requested_sizes: {','.join(str(size) for size in sizes)}",
         f"per_case_timeout_seconds: {timeout_seconds:g}",
         f"runner_os: {os.environ.get('RUNNER_OS', platform.system())}",
         f"runner_arch: {os.environ.get('RUNNER_ARCH', platform.machine())}",
+        f"workflow: {os.environ.get('GITHUB_WORKFLOW', 'local')}",
+        f"run_id: {os.environ.get('GITHUB_RUN_ID', 'NOT_AVAILABLE')}",
+        f"run_attempt: {os.environ.get('GITHUB_RUN_ATTEMPT', 'NOT_AVAILABLE')}",
+        f"runner_name: {os.environ.get('RUNNER_NAME', 'NOT_AVAILABLE')}",
         f"hardware_logical_cores: {os.cpu_count() or 'UNKNOWN'}",
         f"cpu_model: {cpu_model()}",
         f"os: {platform.platform()}",
@@ -298,7 +328,8 @@ def main() -> int:
     timeout_boundary_observed = False
     timeout_termination_failure_observed = False
     late_completion_observed = False
-    stopped_after_first_nonpass = False
+    stopped_after_nonpass = False
+    stop_probe = False
 
     for taxa in sizes:
         for operation in operations:
@@ -384,9 +415,16 @@ def main() -> int:
                 }
             )
             if classification != "PASS":
-                stopped_after_first_nonpass = True
-                break
-        if stopped_after_first_nonpass:
+                passing_case_observed = any(
+                    row["operation"] == operation
+                    and row["classification"] == "PASS"
+                    for row in rows
+                )
+                if not continue_after_nonpass or not passing_case_observed:
+                    stopped_after_nonpass = True
+                    stop_probe = True
+                    break
+        if stop_probe:
             break
 
     fieldnames = [
@@ -417,6 +455,7 @@ def main() -> int:
         writer.writerows(rows)
 
     summary: list[str] = []
+    operation_coverage_statuses: list[str] = []
     for operation in operations:
         selected = [row for row in rows if row["operation"] == operation]
         passed_rows = [row for row in selected if row["classification"] == "PASS"]
@@ -430,9 +469,16 @@ def main() -> int:
                 "CRASH_OR_NONZERO", "TIMEOUT", "HARNESS_FAILURE"
             )
         ]
+        operation_coverage_status = (
+            "PASSING_CASE_OBSERVED"
+            if passed_rows
+            else "INCONCLUSIVE_NO_PASSING_CASE"
+        )
+        operation_coverage_statuses.append(operation_coverage_status)
         summary.extend(
             [
                 f"operation: {operation}",
+                f"operation_coverage_status: {operation_coverage_status}",
                 "maximum_passing_taxa: "
                 + (str(max(row["taxa"] for row in passed_rows)) if passed_rows else "NONE"),
                 "first_graceful_failure_taxa: "
@@ -448,11 +494,31 @@ def main() -> int:
             ]
         )
 
-    failed = (
-        direct_nonzero_failure
-        or unexpected_graceful_failure_observed
-        or timeout_termination_failure_observed
-        or late_completion_observed
+    harness_failed = (
+        timeout_termination_failure_observed or late_completion_observed
+    )
+    operation_failed = (
+        direct_nonzero_failure or unexpected_graceful_failure_observed
+    )
+    coverage_inconclusive = any(
+        status == "INCONCLUSIVE_NO_PASSING_CASE"
+        for status in operation_coverage_statuses
+    )
+    failed = harness_failed or operation_failed
+    harness_integrity_status = "FAIL" if harness_failed else "PASS"
+    operation_coverage_status = (
+        "INCONCLUSIVE_NO_PASSING_CASE"
+        if coverage_inconclusive
+        else "PASSING_CASE_OBSERVED"
+    )
+    overall_probe_status = (
+        "FAIL"
+        if failed
+        else (
+            "INCONCLUSIVE_NO_PASSING_CASE"
+            if coverage_inconclusive
+            else "PASS"
+        )
     )
     summary.extend(
         [
@@ -466,9 +532,10 @@ def main() -> int:
             + str(late_completion_observed).upper(),
             "unexpected_graceful_failure_observed: "
             + str(unexpected_graceful_failure_observed).upper(),
-            "stopped_after_first_nonpass: "
-            + str(stopped_after_first_nonpass).upper(),
-            "overall_probe_status: " + ("FAIL" if failed else "PASS"),
+            "stopped_after_nonpass: " + str(stopped_after_nonpass).upper(),
+            "harness_integrity_status: " + harness_integrity_status,
+            "operation_coverage_status: " + operation_coverage_status,
+            "overall_probe_status: " + overall_probe_status,
             f"finished_utc: {utc_now()}",
         ]
     )
@@ -476,6 +543,11 @@ def main() -> int:
     if failed:
         print("deep_tree_probe: FAIL", file=sys.stderr)
         return 1
+    if coverage_inconclusive:
+        print(
+            "deep_tree_probe: INCONCLUSIVE_NO_PASSING_CASE", file=sys.stderr
+        )
+        return 2
     print("deep_tree_probe: PASS")
     return 0
 

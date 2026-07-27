@@ -9,8 +9,12 @@ turn a release candidate into a final release.
 - DEPENDENCY_CONTRACT.md records the package and replay dependency closure,
   including the litedown/commonmark vignette chain.
 - KNOWN_LIMITATIONS.md records the V1 architecture and scope boundary.
+- UNRESOLVED_ISSUES.md records operational observations that remain open.
+- NUMERIC_SERIALIZATION_INVENTORY.tsv records the FIX006 numeric-to-text audit.
 
-The Fix005 source is a pre-tag candidate for `v0.1.0-rc2`. The frozen
-`v0.1.0-rc1` tag remains immutable and is not submitted to Pro. An annotated
-RC2 tag may be created only after main-console acceptance; tag-to-commit proof
-belongs in the later external RECERT package.
+The frozen `v0.1.0-rc1` and `v0.1.0-rc2` tags remain immutable historical
+candidates. This source is the untagged Fix006 implementation child of the
+failed RC2 commit; it is not RC3 and does not authorize a release. Only after
+main-console acceptance may a separate release-identity child and annotated
+`v0.1.0-rc3` tag be created. Tag-to-commit proof belongs in that later external
+RECERT package.

@@ -3,7 +3,7 @@ legacy_numeric_text <- function(value) {
   finite <- is.finite(value)
   if (any(finite)) {
     output[finite] <- trimws(formatC(
-      value[finite], digits = 17L, format = "g"
+      value[finite], digits = 17L, format = "g", decimal.mark = "."
     ))
   }
   output
