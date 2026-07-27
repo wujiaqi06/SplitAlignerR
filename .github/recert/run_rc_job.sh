@@ -378,16 +378,7 @@ run_logged "13_determinism_three_runs_and_input_order" "$runner_temp" \
   "${script_dir}/determinism.R" "$authority_302" \
   "${evidence_dir}/DETERMINISM.txt"
 
-# Run the destructive-timeout probe after all scientific and performance
-# gates.  A Windows investigation showed that a case immediately after a
-# timeout can be contaminated; keeping this probe last prevents a timeout
-# boundary from affecting a later R case or a scientific regression.
-run_logged "14_recursive_depth_probe" "$runner_temp" \
-  env "R_LIBS=${install_lib_one}" Rscript \
-  "${script_dir}/deep_tree_probe.R" "$source_root" \
-  "${evidence_dir}/DEEP_TREE_PROBE"
-
-run_logged "15_clean_source_after_all_gates" "$source_root" \
+run_logged "14_clean_source_after_all_gates" "$source_root" \
   git status --porcelain
 if [[ -n "$(git -C "$source_root" status --porcelain)" ]]; then
   echo "source working tree is dirty after gates" >&2
@@ -408,7 +399,7 @@ fi
   printf 'gene_id_hardening_tests: PASS via bundled tests\n'
   printf 'catnip10_failure_classification_tests: PASS via bundled tests\n'
   printf 'oracle_locale_independence_tests: PASS via bundled tests\n'
-  printf 'recursive_depth_probe: PASS; see DEEP_TREE_PROBE\n'
+  printf 'recursive_depth_probe: ISOLATED IN DEDICATED PLATFORM JOB\n'
   printf 'performance_benchmark: PASS; see PERFORMANCE_BENCHMARK\n'
   printf 'full_2275_residual_authority_chunked: PASS\n'
   printf 'determinism_three_runs: PASS\n'
