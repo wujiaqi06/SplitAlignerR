@@ -53,12 +53,33 @@ whereas the 50-tip comb-tree alignment case timed out. Existing evidence does
 not reconcile those observations and cannot distinguish a Windows-specific
 hang from a pathological tree-shape slowdown.
 
-FIX006 changes the Windows comb-tree alignment sampling to 10, 20, 30, 40, and
-50 tips so that RC3 evidence can establish a passing data point before any
-larger operational-limit observation. A clean timeout demonstrates harness
-integrity only; operation coverage is reported separately and is
-`INCONCLUSIVE_NO_PASSING_CASE` when no case passes. Deep-tree maxima and timeout
-boundaries are runner-load-sensitive observations, not stable capability limits.
+FIX006 changed the Windows comb-tree alignment sampling to 10, 20, 30, 40, and
+50 tips. In GitHub Actions run `30314598409`, the first 10-tip case still did
+not complete within 60 seconds. Process-tree termination was confirmed, but no
+passing Windows comb-tree alignment point was established. A clean timeout
+demonstrates harness integrity only; operation coverage is reported separately
+and remains `INCONCLUSIVE_NO_PASSING_CASE` when no case passes. Deep-tree maxima
+and timeout boundaries are runner-load-sensitive observations, not stable
+capability limits.
+
+FIX006A adds a bounded 10-tip cold-start diagnosis rather than another deep-tree
+scan. Each numeric validation, fixed/free alignment, no-length control,
+wrapper/core boundary, and standalone C++ microprobe case runs in a fresh
+process tree with a 900-second operational limit. The diagnostic evidence is
+external to this source document and must not be converted into a capability
+claim without its run ID, raw stage markers, and timing records.
+
+## Session-option portability boundary
+
+R versions may constrain the range accepted by `options(scipen=...)`. Hosted R
+4.6.1 in run `30314598409` replaced requested `-999` with effective `-9` and
+emitted a warning. Consequently, exact `scipen=-999` execution is not a portable
+three-platform requirement. FIX006A requires the portable matrix `-9`, `0`, and
+`999`, records requested and effective values separately, and treats `-999` as
+an optional extreme probe. A clamped extreme is reported as
+`NOT_AVAILABLE_CLAMPED_TO_<effective>` rather than PASS for the requested value.
+Clamp warnings remain visible in raw RECERT logs and are also copied into the
+tabular evidence.
 
 ## Performance boundary
 

@@ -4,9 +4,37 @@ with_test_session_options <- function(values, code) {
   force(code)
 }
 
-session_option_settings <- expand.grid(
+with_test_session_option_evidence <- function(values, code) {
+  old <- options("OutDec", "scipen")
+  on.exit(options(old), add = TRUE)
+  option_warnings <- character()
+  withCallingHandlers(
+    options(values),
+    warning = function(warning) {
+      option_warnings <<- c(
+        option_warnings,
+        gsub("[\t\r\n]+", " ", conditionMessage(warning))
+      )
+    }
+  )
+  effective <- options("OutDec", "scipen")
+  payload <- force(code)
+  list(
+    requested_outdec = values$OutDec,
+    effective_outdec = effective$OutDec,
+    requested_scipen = values$scipen,
+    effective_scipen = effective$scipen,
+    option_warning = paste(unique(option_warnings), collapse = " | "),
+    option_exactly_applied =
+      identical(effective$OutDec, values$OutDec) &&
+      identical(as.numeric(effective$scipen), as.numeric(values$scipen)),
+    payload = payload
+  )
+}
+
+session_option_mandatory_settings <- expand.grid(
   outdec = c(".", ","),
-  scipen = c(-999L, 0L, 999L),
+  scipen = c(-9L, 0L, 999L),
   stringsAsFactors = FALSE
 )
 
@@ -33,48 +61,52 @@ expect_canonical_numeric_tokens <- function(tokens) {
   )
 }
 
-session_option_public_snapshot <- function(outdec, scipen) {
-  with_test_session_options(
-    list(OutDec = outdec, scipen = scipen),
-    {
-      species <- ape::read.tree(text = "((A,B),(C,D));")
-      gene <- ape::read.tree(
-        text = "((A:1.5,B:2):3,(C:4,D:5):6);"
-      )
-      multi <- structure(
-        list(g1 = gene, g2 = gene),
-        class = "multiPhylo"
-      )
-      gene_list <- unclass(multi)
+session_option_public_payload <- function() {
+  species <- ape::read.tree(text = "((A,B),(C,D));")
+  gene <- ape::read.tree(
+    text = "((A:1.5,B:2):3,(C:4,D:5):6);"
+  )
+  multi <- structure(
+    list(g1 = gene, g2 = gene),
+    class = "multiPhylo"
+  )
+  gene_list <- unclass(multi)
 
-      fixed <- align_branches(
-        species, gene, mode = "fixed", gene_ids = "g"
-      )
-      free <- align_branches(
-        species, gene, mode = "free", gene_ids = "g"
-      )
-      paired <- pair_alignment_results(fixed, free)
+  fixed <- align_branches(
+    species, gene, mode = "fixed", gene_ids = "g"
+  )
+  free <- align_branches(
+    species, gene, mode = "free", gene_ids = "g"
+  )
+  paired <- pair_alignment_results(fixed, free)
 
-      list(
-        fixed = fixed,
-        free = free,
-        paired = paired,
-        multi = align_branches(species, multi, mode = "free"),
-        phylo_list = align_branches(species, gene_list, mode = "free"),
-        oracle_global = recompute_catnip10_oracle("global"),
-        oracle_local = recompute_catnip10_oracle("local")
-      )
-    }
+  list(
+    fixed = fixed,
+    free = free,
+    paired = paired,
+    multi = align_branches(species, multi, mode = "free"),
+    phylo_list = align_branches(species, gene_list, mode = "free"),
+    oracle_global = recompute_catnip10_oracle("global"),
+    oracle_local = recompute_catnip10_oracle("local")
   )
 }
 
-test_that("paired numeric serialization is canonical under session options", {
-  original <- options(c("OutDec", "scipen"))
-  serialized <- vector("list", nrow(session_option_settings))
+session_option_public_snapshot <- function(outdec, scipen) {
+  with_test_session_option_evidence(
+    list(OutDec = outdec, scipen = scipen),
+    session_option_public_payload()
+  )
+}
 
-  for (i in seq_len(nrow(session_option_settings))) {
-    setting <- session_option_settings[i, , drop = FALSE]
-    finalized <- with_test_session_options(
+test_that("paired numeric serialization is canonical under portable options", {
+  original <- options("OutDec", "scipen")
+  serialized <- vector(
+    "list", nrow(session_option_mandatory_settings)
+  )
+
+  for (i in seq_len(nrow(session_option_mandatory_settings))) {
+    setting <- session_option_mandatory_settings[i, , drop = FALSE]
+    evidence <- with_test_session_option_evidence(
       list(OutDec = setting$outdec, scipen = setting$scipen),
       finalize_paired_cells(
         fixed_state = rep("mapped", length(session_option_numeric_values)),
@@ -89,7 +121,14 @@ test_that("paired numeric serialization is canonical under session options", {
         )
       )
     )
+    expect_true(evidence$option_exactly_applied)
+    expect_identical(evidence$requested_outdec, evidence$effective_outdec)
+    expect_identical(
+      as.numeric(evidence$requested_scipen),
+      as.numeric(evidence$effective_scipen)
+    )
 
+    finalized <- evidence$payload
     serialized[[i]] <- finalized[c(
       "fixed_output_token", "free_pre_promotion_token",
       "final_matrix_token"
@@ -113,25 +152,32 @@ test_that("paired numeric serialization is canonical under session options", {
   }
 
   reference_index <- which(
-    session_option_settings$outdec == "." &
-      session_option_settings$scipen == 0L
+    session_option_mandatory_settings$outdec == "." &
+      session_option_mandatory_settings$scipen == 0L
   )
   for (value in serialized) {
     expect_identical(value, serialized[[reference_index]])
   }
 
-  expect_identical(options(c("OutDec", "scipen")), original)
+  expect_identical(options("OutDec", "scipen"), original)
 })
 
-test_that("public paired and phylo paths are session-option invariant", {
-  original <- options(c("OutDec", "scipen"))
-  snapshots <- lapply(seq_len(nrow(session_option_settings)), function(i) {
-    setting <- session_option_settings[i, , drop = FALSE]
-    session_option_public_snapshot(setting$outdec, setting$scipen)
-  })
+test_that("public paired and phylo paths are portable-option invariant", {
+  original <- options("OutDec", "scipen")
+  evidence <- lapply(
+    seq_len(nrow(session_option_mandatory_settings)),
+    function(i) {
+      setting <- session_option_mandatory_settings[i, , drop = FALSE]
+      session_option_public_snapshot(setting$outdec, setting$scipen)
+    }
+  )
+  expect_true(all(vapply(
+    evidence, function(value) value$option_exactly_applied, logical(1)
+  )))
+  snapshots <- lapply(evidence, `[[`, "payload")
   reference_index <- which(
-    session_option_settings$outdec == "." &
-      session_option_settings$scipen == 0L
+    session_option_mandatory_settings$outdec == "." &
+      session_option_mandatory_settings$scipen == 0L
   )
   reference <- snapshots[[reference_index]]
 
@@ -146,18 +192,20 @@ test_that("public paired and phylo paths are session-option invariant", {
     ))
   }
 
-  expect_identical(options(c("OutDec", "scipen")), original)
+  expect_identical(options("OutDec", "scipen"), original)
 })
 
-test_that("Catnip10 Oracle matches frozen truth under session options", {
-  original <- options(c("OutDec", "scipen"))
+test_that("Catnip10 Oracle matches frozen truth under portable options", {
+  original <- options("OutDec", "scipen")
 
-  for (i in seq_len(nrow(session_option_settings))) {
-    setting <- session_option_settings[i, , drop = FALSE]
-    rebuilt <- with_test_session_options(
+  for (i in seq_len(nrow(session_option_mandatory_settings))) {
+    setting <- session_option_mandatory_settings[i, , drop = FALSE]
+    evidence <- with_test_session_option_evidence(
       list(OutDec = setting$outdec, scipen = setting$scipen),
       lapply(c("global", "local"), recompute_catnip10_oracle)
     )
+    expect_true(evidence$option_exactly_applied)
+    rebuilt <- evidence$payload
     names(rebuilt) <- c("global", "local")
     for (regime in names(rebuilt)) {
       expect_identical(rebuilt[[regime]]$matrix,
@@ -171,17 +219,37 @@ test_that("Catnip10 Oracle matches frozen truth under session options", {
     }
   }
 
-  expect_identical(options(c("OutDec", "scipen")), original)
+  expect_identical(options("OutDec", "scipen"), original)
+})
+
+test_that("optional scipen extreme records the effective boundary truthfully", {
+  original <- options("OutDec", "scipen")
+  reference <- session_option_public_snapshot(".", 0L)$payload
+
+  for (outdec in c(".", ",")) {
+    evidence <- session_option_public_snapshot(outdec, -999L)
+    expect_identical(evidence$requested_outdec, outdec)
+    expect_identical(as.numeric(evidence$requested_scipen), -999)
+    expect_identical(evidence$payload, reference)
+    if (evidence$option_exactly_applied) {
+      expect_identical(as.numeric(evidence$effective_scipen), -999)
+    } else {
+      expect_false(identical(as.numeric(evidence$effective_scipen), -999))
+      expect_true(nzchar(evidence$option_warning))
+    }
+  }
+
+  expect_identical(options("OutDec", "scipen"), original)
 })
 
 test_that("session options are restored when an invariant case errors", {
-  original <- options(c("OutDec", "scipen"))
+  original <- options("OutDec", "scipen")
   expect_error(
     with_test_session_options(
-      list(OutDec = ",", scipen = -999L),
+      list(OutDec = ",", scipen = -9L),
       stop("sentinel session-option failure", call. = FALSE)
     ),
     "sentinel session-option failure"
   )
-  expect_identical(options(c("OutDec", "scipen")), original)
+  expect_identical(options("OutDec", "scipen"), original)
 })

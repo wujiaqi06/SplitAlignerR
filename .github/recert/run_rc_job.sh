@@ -399,7 +399,7 @@ fi
   printf 'source_root_tests_bundled_and_302: PASS\n'
   printf 'documentation_examples_and_vignette: PASS via R CMD check\n'
   printf 'repeat_clean_install: PASS\n'
-  printf 'session_option_invariance: PASS; see SESSION_OPTION_INVARIANCE.tsv\n'
+  printf 'session_option_invariance: PORTABLE 6/6 PASS; optional extreme records requested/effective boundary; see SESSION_OPTION_INVARIANCE.tsv\n'
   printf 'release_metadata_consistency_gate: PASS\n'
   printf 'citation_metadata_gate: PASS via release metadata gate\n'
   printf 'gene_id_hardening_tests: PASS via bundled tests\n'

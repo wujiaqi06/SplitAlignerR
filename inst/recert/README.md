@@ -11,6 +11,10 @@ turn a release candidate into a final release.
 - KNOWN_LIMITATIONS.md records the V1 architecture and scope boundary.
 - UNRESOLVED_ISSUES.md records operational observations that remain open.
 - NUMERIC_SERIALIZATION_INVENTORY.tsv records the FIX006 numeric-to-text audit.
+- The FIX006A session-option gate records requested and effective values
+  separately; its optional `scipen=-999` row is not a portable PASS claim.
+- The FIX006A Windows cold-start scripts provide bounded, fresh-process
+  diagnostic evidence and do not modify or replace the numeric parser.
 
 The frozen `v0.1.0-rc1` and `v0.1.0-rc2` tags remain immutable historical
 candidates. This source is the untagged Fix006 implementation child of the

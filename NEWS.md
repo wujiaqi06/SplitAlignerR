@@ -1,5 +1,11 @@
 # SplitAlignerR 0.1.0
 
+* Corrected RECERT session-option evidence to distinguish requested from
+  effective values, require the portable `scipen=-9/0/999` matrix, and report
+  clamped `-999` probes as unavailable rather than exact PASS.
+* Added a bounded Windows 10-tip fresh-process cold-start diagnostic with
+  numeric pre-warm, no-length, fixed/free, wrapper/core, and standalone C++
+  regex timing controls; the diagnostic does not change scientific semantics.
 * Closed Fix005A gene-ID routes by validating existing object names under the
   same Unicode-preserving whitespace/control/duplicate rules as `gene_ids=`,
   while retaining deterministic auto-fill only for truly missing names.
