@@ -20,26 +20,41 @@ comb observation is a Windows-specific hang or a pathological tree-shape
 slowdown, and it does not define an unsupported input size or a maximum
 capability.
 
-Required FIX006A diagnosis before any RC3 decision:
+FIX006A run `30331386645` rejected only the standalone-executable regex
+cold-start hypothesis: direct `validate_numeric_token("1")` and explicit
+`std::regex` construction completed in milliseconds. It did not resolve the
+R-hosted package/DLL numeric path. The fresh public R validator stopped after
+`NUMERIC_FIRST_CALL_STARTED` for 900 seconds, and branch-length alignment cases
+also reached that bound, while the identical no-length comb control passed.
 
-- run only the 10-tip comb topology with a 900-second operational limit;
-- compare first and second numeric validation calls in one fresh process;
-- compare fixed alignment without and after numeric-policy pre-warm;
-- run no-length and free-mode controls in their own fresh processes;
-- time wrapper conversion and direct `cpp_align_branches()` boundaries;
-- compile, without modifying package C++ source, a standalone microprobe for
-  `validate_numeric_token("1")` and explicit `std::regex` construction;
-- retain all raw stage markers, timings, process-tree termination evidence,
-  compiler command/output, runner identity, and run ID.
+The FIX006A evidence producer additionally parsed Windows CRLF without first
+normalizing line endings. Raw stdout remained available, but derived last-stage
+and timing tables were wrong and the independent verifier correctly failed.
+The precise accepted conclusion boundary is therefore:
 
-If the numeric-regex cold-start pattern is independently reproduced, source
-construction stops with `ROOT CAUSE CONFIRMED`; replacing the parser requires a
-separate Fix007 authority. If it is not reproduced, the handoff reports only
-the last completed stages and timings without guessing another cause.
+```text
+Standalone-executable regex cold-start hypothesis rejected.
+R-hosted package/DLL numeric path remains unresolved.
+```
+
+FIX007 first repairs that evidence path, then builds a diagnostic DLL using
+`R CMD SHLIB` and runs fresh-process `.Call()` probes for noop, `strtod`, the
+frozen marker path, automatic/static regex, frozen numeric policy, and package
+Rcpp boundaries. Package C++ source may change only if those hosted results
+satisfy the separately authorized A/B trigger. Otherwise construction stops
+without guessing a core cause.
+
+Status update: Windows run `30346950266` satisfied trigger A. Noop, `strtod`,
+marker, and package core-info controls passed; both hosted regex controls, the
+frozen validator, and the public package validator timed out after their first
+call started. The task therefore authorized the narrow manual decimal-parser
+replacement. Post-fix remediation, 60-second release-gate, and three-platform
+authority evidence remain external review-package evidence rather than claims
+established by this historical pre-fix observation.
 
 ## SAR-OPTION-EFFECTIVE-001 — requested versus effective session options
 
-Status: evidence policy corrected in FIX006A; hosted replay pending.
+Status: evidence policy corrected in FIX006A; three-platform replay accepted.
 
 FIX006 recorded requested `scipen` values but did not record the value returned
 by `getOption("scipen")`. Hosted R 4.6.1 clamped `-999` to `-9`, so the former

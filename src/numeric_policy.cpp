@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <cctype>
-#include <regex>
 #include <unordered_set>
 
 namespace splitaligner {
@@ -29,15 +28,63 @@ bool is_software_failure_marker(const std::string& token) {
   return markers.find(ascii_lower(token)) != markers.end();
 }
 
-bool has_decimal_numeric_grammar(const std::string& token) {
-  static const std::regex decimal_pattern(
-    R"(^[+-]?(?:(?:[0-9]+(?:\.[0-9]*)?)|(?:\.[0-9]+))(?:[eE][+-]?[0-9]+)?$)",
-    std::regex::ECMAScript
-  );
-  return std::regex_match(token, decimal_pattern);
+bool is_ascii_digit(char ch) {
+  return ch >= '0' && ch <= '9';
+}
+
+bool consume_ascii_digits(const std::string& token, std::size_t& cursor) {
+  const std::size_t first = cursor;
+  while (cursor < token.size() && is_ascii_digit(token[cursor])) {
+    ++cursor;
+  }
+  return cursor > first;
+}
+
+bool has_decimal_numeric_grammar_impl(const std::string& token) {
+  std::size_t cursor = 0;
+  if (cursor < token.size() &&
+      (token[cursor] == '+' || token[cursor] == '-')) {
+    ++cursor;
+  }
+
+  if (cursor < token.size() && is_ascii_digit(token[cursor])) {
+    consume_ascii_digits(token, cursor);
+    if (cursor < token.size() && token[cursor] == '.') {
+      ++cursor;
+      consume_ascii_digits(token, cursor);
+    }
+  } else if (cursor < token.size() && token[cursor] == '.') {
+    ++cursor;
+    if (!consume_ascii_digits(token, cursor)) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+
+  if (cursor < token.size() &&
+      (token[cursor] == 'e' || token[cursor] == 'E')) {
+    ++cursor;
+    if (cursor < token.size() &&
+        (token[cursor] == '+' || token[cursor] == '-')) {
+      ++cursor;
+    }
+    if (!consume_ascii_digits(token, cursor)) {
+      return false;
+    }
+  }
+  return cursor == token.size();
 }
 
 }  // namespace
+
+namespace detail {
+
+bool has_decimal_numeric_grammar(const std::string& token) {
+  return has_decimal_numeric_grammar_impl(token);
+}
+
+}  // namespace detail
 
 std::string trim_ascii_whitespace(const std::string& input) {
   std::size_t first = 0;
@@ -69,7 +116,7 @@ NumericResult validate_numeric_token(const std::string& input) {
       "recognized unavailable marker; never converted to zero";
     return result;
   }
-  if (!has_decimal_numeric_grammar(token)) {
+  if (!detail::has_decimal_numeric_grammar(token)) {
     result.classification = "invalid_numeric";
     result.diagnostic =
       "token does not match the complete decimal numeric grammar";

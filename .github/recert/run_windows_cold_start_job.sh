@@ -124,10 +124,12 @@ cxx17std="$(R CMD config CXX17STD)"
   printf 'per_case_timeout_seconds: %s\n' "$timeout_seconds"
   printf 'R: '
   R --version 2>&1 | sed -n '1p'
-  printf 'R_platform: '
-  Rscript -e 'cat(R.version$platform, "\n", sep = "")'
+  printf 'R_locale_capture: bare C runtime in fresh dll_locale process\n'
   printf 'CXX17: %s\n' "$cxx17"
   printf 'CXX17STD: %s\n' "$cxx17std"
+  printf 'CXX17_VERSION: '
+  read -r -a environment_cxx_command <<< "$cxx17"
+  "${environment_cxx_command[@]}" --version 2>&1 | sed -n '1p'
 } > "${evidence_dir}/ENVIRONMENT.txt"
 
 source_tar="${runner_temp}/SplitAlignerR-cold-start-${expected_commit}.tar"
@@ -207,41 +209,157 @@ python3 -c \
   'import hashlib,pathlib,sys; p=pathlib.Path(sys.argv[1]); print(hashlib.sha256(p.read_bytes()).hexdigest(), p.name)' \
   "$microprobe_exe" > "${evidence_dir}/MICROPROBE_BINARY_SHA256.txt"
 
-probe_status=0
+dll_build_dir="$(mktemp -d "${runner_temp}/splitalignerr-r-hosted-dll.XXXXXX")"
+dll_source_dir="${evidence_dir}/R_HOSTED_DLL_SOURCE"
+mkdir -p "$dll_source_dir"
+cp "${snapshot}/.github/recert/windows_r_hosted_microprobe.cpp" \
+  "${dll_build_dir}/windows_r_hosted_microprobe.cpp"
+cp "${snapshot}/src/numeric_policy.cpp" \
+  "${dll_build_dir}/numeric_policy.cpp"
+cp "${snapshot}/src/numeric_policy.h" \
+  "${dll_build_dir}/numeric_policy.h"
+cp "${dll_build_dir}/windows_r_hosted_microprobe.cpp" \
+  "${dll_build_dir}/numeric_policy.cpp" \
+  "${dll_build_dir}/numeric_policy.h" "$dll_source_dir/"
+
+dll_name="fix007_r_hosted_microprobe.so"
+if [[ "$runner_os" == "Windows" ]]; then
+  dll_name="fix007_r_hosted_microprobe.dll"
+fi
+dll_build_path="${dll_build_dir}/${dll_name}"
+dll_evidence_path="${evidence_dir}/${dll_name}"
+dll_compile_command=(
+  R CMD SHLIB --preclean -o "$dll_name"
+  windows_r_hosted_microprobe.cpp
+  numeric_policy.cpp
+)
+{
+  printf 'working_directory: %s\n' "$dll_build_dir"
+  printf 'command:'
+  printf ' %q' "${dll_compile_command[@]}"
+  printf '\n'
+} > "${evidence_dir}/06_compile_r_hosted_dll.log"
+set +e
+(cd "$dll_build_dir" && "${dll_compile_command[@]}") \
+  >> "${evidence_dir}/06_compile_r_hosted_dll.log" 2>&1
+dll_compile_status=$?
+set -e
+printf 'exit_status: %s\n' "$dll_compile_status" \
+  >> "${evidence_dir}/06_compile_r_hosted_dll.log"
+if [[ $dll_compile_status -ne 0 || ! -f "$dll_build_path" ]]; then
+  exit 65
+fi
+cp "$dll_build_path" "$dll_evidence_path"
+python3 - "$dll_evidence_path" "$dll_source_dir" \
+  > "${evidence_dir}/R_HOSTED_DLL_SHA256.txt" <<'PY'
+import hashlib
+import pathlib
+import sys
+
+for raw in sys.argv[1:]:
+    path = pathlib.Path(raw)
+    members = [path] if path.is_file() else sorted(p for p in path.iterdir() if p.is_file())
+    for member in members:
+        print(hashlib.sha256(member.read_bytes()).hexdigest(), member.name)
+PY
+
+cold_probe_status=0
 env \
   "R_LIBS=${install_lib}" \
   "SPLITALIGNERR_COLD_START_MICROPROBE=${microprobe_exe}" \
   "SPLITALIGNERR_COLD_START_TIMEOUT_SECONDS=${timeout_seconds}" \
   python3 -B "${snapshot}/.github/recert/windows_cold_start_probe.py" \
-  "$snapshot" "${evidence_dir}/COLD_START_PROBE" \
-  > "${evidence_dir}/06_windows_cold_start_probe.log" 2>&1 || probe_status=$?
-printf 'exit_status: %s\n' "$probe_status" \
-  >> "${evidence_dir}/06_windows_cold_start_probe.log"
-if [[ $probe_status -ne 0 ]]; then
-  exit "$probe_status"
-fi
+  "$snapshot" "${evidence_dir}/COLD_START_PROBE" "$expected_commit" \
+  > "${evidence_dir}/07_windows_cold_start_probe.log" 2>&1 || \
+  cold_probe_status=$?
+printf 'exit_status: %s\n' "$cold_probe_status" \
+  >> "${evidence_dir}/07_windows_cold_start_probe.log"
 
-run_logged "07_verify_windows_cold_start_evidence" "$snapshot" \
+r_hosted_probe_status=0
+env \
+  "R_LIBS=${install_lib}" \
+  "SPLITALIGNERR_COLD_START_TIMEOUT_SECONDS=${timeout_seconds}" \
+  python3 -B "${snapshot}/.github/recert/windows_r_hosted_probe.py" \
+  "$snapshot" "${evidence_dir}/R_HOSTED_PROBE" "$expected_commit" \
+  "$dll_evidence_path" \
+  > "${evidence_dir}/08_windows_r_hosted_probe.log" 2>&1 || \
+  r_hosted_probe_status=$?
+printf 'exit_status: %s\n' "$r_hosted_probe_status" \
+  >> "${evidence_dir}/08_windows_r_hosted_probe.log"
+
+cold_verify_status=0
+run_logged "09_verify_windows_cold_start_evidence" "$snapshot" \
   python3 -B \
   "${snapshot}/.github/recert/verify_windows_cold_start_evidence.py" \
-  "${evidence_dir}/COLD_START_PROBE"
+  "${evidence_dir}/COLD_START_PROBE" "$expected_commit" || \
+  cold_verify_status=$?
 
-run_logged "08_clean_source_after_diagnosis" "$source_root" \
-  git status --porcelain
-if [[ -n "$(git -C "$source_root" status --porcelain)" ]]; then
-  echo "source working tree is dirty after cold-start diagnosis" >&2
-  exit 65
+r_hosted_verify_status=0
+run_logged "10_verify_windows_r_hosted_evidence" "$snapshot" \
+  python3 -B \
+  "${snapshot}/.github/recert/verify_windows_r_hosted_evidence.py" \
+  "${evidence_dir}/R_HOSTED_PROBE" "$expected_commit" || \
+  r_hosted_verify_status=$?
+
+trigger_classifier_status=0
+if [[ $r_hosted_verify_status -eq 0 ]]; then
+  run_logged "11_classify_fix007_trigger" "$snapshot" \
+    python3 -B \
+    "${snapshot}/.github/recert/classify_fix007_trigger.py" \
+    "${evidence_dir}/R_HOSTED_PROBE/RESULTS.tsv" || \
+    trigger_classifier_status=$?
+else
+  trigger_classifier_status=65
+  {
+    printf 'working_directory: %s\n' "$snapshot"
+    printf 'command: NOT RUN — R-hosted verifier failed\n'
+    printf 'exit_status: %s\n' "$trigger_classifier_status"
+  } > "${evidence_dir}/11_classify_fix007_trigger.log"
+fi
+
+source_clean_command_status=0
+run_logged "12_clean_source_after_diagnosis" "$source_root" \
+  git status --porcelain || source_clean_command_status=$?
+source_status_after="$(git -C "$source_root" status --porcelain)"
+source_clean_status=0
+if [[ $source_clean_command_status -ne 0 || -n "$source_status_after" ]]; then
+  source_clean_status=65
 fi
 
 {
   printf 'source_commit: %s\n' "$actual_commit"
   printf 'exact_source_build_and_install: PASS\n'
   printf 'standalone_microprobe_build: PASS\n'
-  printf 'fresh_process_case_schedule: 8/8 CAPTURED\n'
-  printf 'cold_start_evidence_integrity: PASS\n'
-  printf 'source_checkout_immutable_after_diagnosis: PASS\n'
-  printf 'root_cause_interpretation: DEFERRED_TO_MAIN_CONSOLE_REVIEW\n'
-  printf 'overall_status: EVIDENCE_CAPTURED\n'
+  printf 'r_hosted_diagnostic_dll_build: PASS\n'
+  printf 'cold_start_probe_exit_status: %s\n' "$cold_probe_status"
+  printf 'r_hosted_probe_exit_status: %s\n' "$r_hosted_probe_status"
+  printf 'cold_start_verifier_exit_status: %s\n' "$cold_verify_status"
+  printf 'r_hosted_verifier_exit_status: %s\n' "$r_hosted_verify_status"
+  printf 'trigger_classifier_exit_status: %s\n' \
+    "$trigger_classifier_status"
+  printf 'source_clean_command_exit_status: %s\n' \
+    "$source_clean_command_status"
+  printf 'source_status_after_diagnosis: %s\n' \
+    "${source_status_after:-<empty>}"
+  if [[ $source_clean_status -eq 0 ]]; then
+    printf 'source_checkout_immutable_after_diagnosis: PASS\n'
+  else
+    printf 'source_checkout_immutable_after_diagnosis: FAIL\n'
+  fi
+  printf 'root_cause_interpretation: DEFERRED_TO_TRIGGER_CLASSIFIER\n'
+  if [[ $cold_probe_status -eq 0 && $r_hosted_probe_status -eq 0 &&
+        $cold_verify_status -eq 0 && $r_hosted_verify_status -eq 0 &&
+        $trigger_classifier_status -eq 0 && $source_clean_status -eq 0 ]]; then
+    printf 'overall_status: EVIDENCE_CAPTURED\n'
+  else
+    printf 'overall_status: FAILED\n'
+  fi
   printf 'finished_utc: '
   date -u '+%Y-%m-%dT%H:%M:%SZ'
 } > "${evidence_dir}/RUN_SUMMARY.txt"
+
+if [[ $cold_probe_status -ne 0 || $r_hosted_probe_status -ne 0 ||
+      $cold_verify_status -ne 0 || $r_hosted_verify_status -ne 0 ||
+      $trigger_classifier_status -ne 0 || $source_clean_status -ne 0 ]]; then
+  exit 1
+fi

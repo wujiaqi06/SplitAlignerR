@@ -69,6 +69,26 @@ process tree with a 900-second operational limit. The diagnostic evidence is
 external to this source document and must not be converted into a capability
 claim without its run ID, raw stage markers, and timing records.
 
+That run established only that standalone-executable numeric/regex operations
+were fast. The R-hosted package numeric path remained unresolved. FIX007 uses a
+separate `R CMD SHLIB` diagnostic DLL and fresh `Rscript` processes to isolate
+the R-to-DLL baseline, `strtod`, marker initialization, automatic/static regex,
+the frozen numeric function, and package Rcpp boundaries. The diagnostic DLL
+is not installed with the package and is not a supported runtime component.
+Windows R 4.6.1 hosted attempts showed that both category-specific and combined
+R-level locale queries could terminate the process before D1. FIX007 therefore
+records effective locale categories through an additional fresh-process bare-C
+control; this control is not part of the A/B/C numeric trigger and cannot warm
+the separately launched D1-D7 processes.
+
+Windows run `30346950266` then satisfied the authorized A trigger: noop,
+`strtod`, and the frozen marker path passed; automatic and function-local
+static regex plus the frozen numeric function timed out after their first-call
+markers; package core-info passed while the public numeric validator timed out.
+The conditional FIX007 change replaces only the decimal grammar regex with an
+ASCII cursor parser. The runtime-size/performance observations remain specific
+to the recorded runner and do not alter any scientific capability boundary.
+
 ## Session-option portability boundary
 
 R versions may constrain the range accepted by `options(scipen=...)`. Hosted R

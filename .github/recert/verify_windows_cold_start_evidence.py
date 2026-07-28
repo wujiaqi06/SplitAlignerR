@@ -106,8 +106,20 @@ def read_tsv(path: pathlib.Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
+def normalize_text(text: str) -> str:
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def read_raw_text(path: pathlib.Path) -> str:
+    return path.read_bytes().decode("utf-8", errors="replace")
+
+
 def stage_markers(stdout: str) -> list[str]:
-    return re.findall(r"^stage_marker: ([A-Z0-9_]+)$", stdout, re.MULTILINE)
+    return re.findall(
+        r"^stage_marker: ([A-Z0-9_]+)$",
+        normalize_text(stdout),
+        re.MULTILINE,
+    )
 
 
 def raw_timings(case_id: str, stdout: str) -> list[dict[str, str]]:
@@ -121,11 +133,11 @@ def raw_timings(case_id: str, stdout: str) -> list[dict[str, str]]:
             "timing_name": match.group(1),
             "wall_seconds": match.group(2),
         }
-        for match in pattern.finditer(stdout)
+        for match in pattern.finditer(normalize_text(stdout))
     ]
 
 
-def verify(root: pathlib.Path) -> None:
+def verify(root: pathlib.Path, expected_commit: str) -> None:
     metadata = parse_key_values(root / "METADATA.txt")
     if metadata.get("probe_id") != "windows-cold-start-v1":
         fail("unexpected probe_id")
@@ -133,6 +145,8 @@ def verify(root: pathlib.Path) -> None:
         "one new process tree per declared case"
     ):
         fail("fresh-process policy is missing")
+    if metadata.get("source_commit") != expected_commit:
+        fail("source commit metadata does not equal the frozen task commit")
     requested = tuple(metadata.get("requested_cases", "").split(","))
     if requested != CASES:
         fail(f"requested case schedule mismatch: {requested}")
@@ -168,7 +182,8 @@ def verify(root: pathlib.Path) -> None:
             fail(f"{case_id}: invalid stdout path")
         if stderr_path.name != f"{case_id}.stderr.txt" or not stderr_path.is_file():
             fail(f"{case_id}: invalid stderr path")
-        stdout = stdout_path.read_text(encoding="utf-8", errors="replace")
+        stdout = read_raw_text(stdout_path)
+        normalized_stdout = normalize_text(stdout)
         markers = stage_markers(stdout)
         expected_last = markers[-1] if markers else "NONE"
         if row.get("last_stage_marker") != expected_last:
@@ -189,7 +204,7 @@ def verify(root: pathlib.Path) -> None:
         if classification == "PASS":
             if exit_status != 0 or row.get("timed_out") != "FALSE":
                 fail(f"{case_id}: PASS exit/timeout invariant failed")
-            if "case_status: PASS" not in stdout:
+            if "case_status: PASS" not in normalized_stdout:
                 fail(f"{case_id}: PASS marker missing")
             missing = [
                 marker for marker in PASS_MARKERS[case_id] if marker not in markers
@@ -209,7 +224,10 @@ def verify(root: pathlib.Path) -> None:
             for key, value in required.items():
                 if row.get(key) != value:
                     fail(f"{case_id}: TIMEOUT invariant failed for {key}")
-            if "case_status:" in stdout or "OPERATION_FINISHED" in markers:
+            if (
+                "case_status:" in normalized_stdout
+                or "OPERATION_FINISHED" in markers
+            ):
                 fail(f"{case_id}: timeout contains late completion output")
             if runner_os == "Windows":
                 if row.get("process_tree_kill_strategy") != (
@@ -221,12 +239,12 @@ def verify(root: pathlib.Path) -> None:
         elif classification == "REPORTED_FAILURE":
             if exit_status == 0 or row.get("timed_out") != "FALSE":
                 fail(f"{case_id}: reported failure exit invariant failed")
-            if "case_status:" not in stdout:
+            if "case_status:" not in normalized_stdout:
                 fail(f"{case_id}: reported failure marker missing")
         elif classification == "CRASH_OR_NONZERO":
             if exit_status == 0 or row.get("timed_out") != "FALSE":
                 fail(f"{case_id}: crash/nonzero exit invariant failed")
-            if "case_status:" in stdout:
+            if "case_status:" in normalized_stdout:
                 fail(f"{case_id}: crash/nonzero has a reported case status")
         elif classification == "HARNESS_FAILURE":
             fail(f"{case_id}: evidence declares HARNESS_FAILURE")
@@ -253,9 +271,7 @@ def verify(root: pathlib.Path) -> None:
         except (KeyError, ValueError):
             fail("invalid TIMINGS.tsv wall_seconds")
 
-    summary_text = (root / "SUMMARY.txt").read_text(
-        encoding="utf-8", errors="replace"
-    )
+    summary_text = normalize_text(read_raw_text(root / "SUMMARY.txt"))
     counts = {
         name: sum(value == name for value in classifications)
         for name in (
@@ -291,13 +307,17 @@ def verify(root: pathlib.Path) -> None:
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         raise SystemExit(
-            "usage: verify_windows_cold_start_evidence.py EVIDENCE_DIR"
+            "usage: verify_windows_cold_start_evidence.py "
+            "EVIDENCE_DIR EXPECTED_COMMIT"
         )
     root = pathlib.Path(sys.argv[1]).resolve()
+    expected_commit = sys.argv[2]
+    if re.fullmatch(r"[0-9a-f]{40}", expected_commit) is None:
+        raise SystemExit("EXPECTED_COMMIT must be a lowercase 40-hex commit")
     try:
-        verify(root)
+        verify(root, expected_commit)
     except (OSError, VerificationError) as error:
         print("cold_start_evidence_integrity: FAIL", file=sys.stderr)
         print(f"verification_error: {error}", file=sys.stderr)

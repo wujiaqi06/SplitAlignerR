@@ -317,6 +317,25 @@ run_logged "03_compare_repeat_payloads" "$runner_temp" python3 \
   --second "${evidence_dir}/SOURCE_PAYLOAD_MANIFEST_REPEAT.tsv" \
   --report "${evidence_dir}/REPEAT_BUILD_PAYLOAD_COMPARISON.txt"
 
+grammar_probe_dir="$(mktemp -d "${runner_temp}/splitalignerr-grammar-differential.XXXXXX")"
+cp "${build_source}/.github/recert/numeric_grammar_differential.cpp" \
+  "${build_source}/src/numeric_policy.cpp" \
+  "${build_source}/src/numeric_policy.h" "$grammar_probe_dir/"
+grammar_executable="numeric_grammar_differential"
+if [[ "$runner_os" == "Windows" ]]; then
+  grammar_executable="${grammar_executable}.exe"
+fi
+read -r -a grammar_cxx_command <<< "$cxx17"
+read -r -a grammar_cxxstd_flags <<< "$(R CMD config CXX17STD)"
+run_logged "03_compile_numeric_grammar_differential" "$grammar_probe_dir" \
+  "${grammar_cxx_command[@]}" "${grammar_cxxstd_flags[@]}" -O2 -I. \
+  numeric_grammar_differential.cpp numeric_policy.cpp \
+  -o "$grammar_executable"
+run_logged "03_run_numeric_grammar_differential_100000" \
+  "$grammar_probe_dir" "./${grammar_executable}"
+cp "${grammar_probe_dir}/numeric_grammar_differential.cpp" \
+  "${grammar_probe_dir}/${grammar_executable}" "$evidence_dir/"
+
 check_dir="$(mktemp -d "${runner_temp}/splitalignerr-rc-check.XXXXXX")"
 authority_302="${authority_root}/examples/302mammal"
 authority_2275="${authority_root}/examples/preprint_302mammal/input"
@@ -394,6 +413,7 @@ fi
   printf 'source_materialized_from_expected_commit_archive: PASS\n'
   printf 'build_exact_source_tar: PASS\n'
   printf 'repeat_build_payload_identity: PASS\n'
+  printf 'numeric_grammar_differential_100000: PASS\n'
   printf 'check_exact_source_tar_bundled_and_302: PASS\n'
   printf 'installed_package_tests_bundled_and_302: PASS\n'
   printf 'source_root_tests_bundled_and_302: PASS\n'

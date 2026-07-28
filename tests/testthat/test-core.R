@@ -38,3 +38,37 @@ test_that("numeric tokens are consumed completely and finite-range checked", {
 test_that("numeric validator rejects non-character inputs", {
   expect_error(validate_branch_length_tokens(1:3), "character vector")
 })
+
+test_that("manual decimal grammar preserves the frozen acceptance corpus", {
+  valid <- c(
+    "0", "-0", "+0", "1", "1.", ".5", "-.5", "1.5",
+    "1e8", "1E+8", "-1.2e-8", "2.2250738585072014e-308",
+    "4.9406564584124654e-324"
+  )
+  valid_checked <- validate_branch_length_tokens(valid)
+  expect_true(all(valid_checked$accepted))
+  expect_true(all(valid_checked$classification == "finite_numeric"))
+
+  invalid <- c(
+    "", "   ", "+", "-", ".", "e1", "1e", "1e+", "1..2",
+    "1,5", "1_000", "0x10", "1 2", "1e2x"
+  )
+  invalid_checked <- validate_branch_length_tokens(invalid)
+  expect_false(any(invalid_checked$accepted))
+  expect_identical(invalid_checked$classification[1:2], c("missing", "missing"))
+  expect_identical(invalid_checked$classification[5], "software_failure_marker")
+  expect_true(all(
+    invalid_checked$classification[-c(1, 2, 5)] == "invalid_numeric"
+  ))
+
+  markers <- c(
+    "NA", "na", "N/A", "n/a", ".", "?", "NULL", "null", "NONE",
+    "none", "NaN", "nAn", "Inf", "iNF", "Infinity", "INFINITY",
+    "+Inf", "-Infinity"
+  )
+  marker_checked <- validate_branch_length_tokens(markers)
+  expect_false(any(marker_checked$accepted))
+  expect_true(all(
+    marker_checked$classification == "software_failure_marker"
+  ))
+})

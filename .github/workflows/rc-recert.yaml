@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/SAR-V1-FIX006A
+      - fix/SAR-V1-FIX007
       - fix/SAR-V1-FIX006
       - probe/SAR-V1-FIX005-RC002
       - fix/SAR-V1-FIX005-RC002
@@ -199,8 +200,8 @@ jobs:
           retention-days: 30
 
   windows-cold-start-diagnosis:
-    name: Windows R release 10-tip cold-start diagnosis
-    if: github.ref_name == 'fix/SAR-V1-FIX006A'
+    name: Windows R release numeric-path isolation
+    if: github.ref_name == 'fix/SAR-V1-FIX007'
     runs-on: windows-latest
     timeout-minutes: 180
 
@@ -210,7 +211,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-      SPLITALIGNERR_COLD_START_TIMEOUT_SECONDS: "900"
+      SPLITALIGNERR_COLD_START_TIMEOUT_SECONDS: "60"
 
     steps:
       - name: Preserve repository bytes on Windows
@@ -219,7 +220,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
 
-      - name: Check out Fix006A source
+      - name: Check out Fix007 source
         uses: actions/checkout@v4
         with:
           path: source
@@ -236,7 +237,7 @@ jobs:
           working-directory: source
           needs: check
 
-      - name: Run bounded fresh-process cold-start diagnosis
+      - name: Run bounded R-hosted numeric-path isolation
         id: cold
         shell: bash
         run: |

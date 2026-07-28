@@ -57,10 +57,25 @@ def decode_output(value: bytes | str | None) -> str:
     return value
 
 
+def raw_output(value: bytes | str | None) -> bytes:
+    if value is None:
+        return b""
+    if isinstance(value, bytes):
+        return value
+    return value.encode("utf-8")
+
+
+def normalize_text(text: str) -> str:
+    """Build the parser view without changing the preserved raw stream."""
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def has_case_completion(text: str) -> bool:
+    return "case_status:" in normalize_text(text)
+
+
 def one_line(value: str) -> str:
-    return " | ".join(
-        value.replace("\r\n", "\n").replace("\r", "\n").splitlines()
-    )
+    return " | ".join(normalize_text(value).splitlines())
 
 
 def run_text(command: list[str]) -> str:
@@ -170,10 +185,12 @@ def run_case(command: list[str], timeout_seconds: float) -> dict[str, object]:
 
     stdout = decode_output(stdout_bytes)
     stderr = decode_output(stderr_bytes)
-    late_completion = timeout_triggered and "case_status:" in stdout
+    late_completion = timeout_triggered and has_case_completion(stdout)
     return {
         "stdout": stdout,
         "stderr": stderr,
+        "stdout_bytes": stdout_bytes,
+        "stderr_bytes": stderr_bytes,
         "exit_status": exit_status,
         "timeout_triggered": timeout_triggered,
         "termination_attempted": termination_attempted,
@@ -204,7 +221,11 @@ def parse_timeout() -> float:
 
 
 def last_stage(stdout: str) -> str:
-    markers = re.findall(r"^stage_marker: ([A-Z0-9_]+)$", stdout, re.MULTILINE)
+    markers = re.findall(
+        r"^stage_marker: ([A-Z0-9_]+)$",
+        normalize_text(stdout),
+        re.MULTILINE,
+    )
     return markers[-1] if markers else "NONE"
 
 
@@ -214,7 +235,7 @@ def parse_timings(case_id: str, stdout: str) -> list[dict[str, str]]:
         r"^timing_([a-z0-9_]+)_wall_seconds: ([0-9]+(?:\.[0-9]+)?)$",
         re.MULTILINE,
     )
-    for match in pattern.finditer(stdout):
+    for match in pattern.finditer(normalize_text(stdout)):
         rows.append(
             {
                 "case_id": case_id,
@@ -226,26 +247,28 @@ def parse_timings(case_id: str, stdout: str) -> list[dict[str, str]]:
 
 
 def main() -> int:
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         raise SystemExit(
-            "usage: windows_cold_start_probe.py SOURCE_ROOT OUTPUT_DIR"
+            "usage: windows_cold_start_probe.py "
+            "SOURCE_ROOT OUTPUT_DIR EXPECTED_COMMIT"
         )
     source_root = pathlib.Path(sys.argv[1]).resolve(strict=True)
     output_dir = pathlib.Path(sys.argv[2])
+    source_commit = sys.argv[3]
+    if re.fullmatch(r"[0-9a-f]{40}", source_commit) is None:
+        raise SystemExit("EXPECTED_COMMIT must be a lowercase 40-hex commit")
     if output_dir.exists():
         raise SystemExit("refusing to overwrite existing cold-start output")
     output_dir.mkdir(parents=True)
 
     rscript = shutil.which("Rscript")
-    git = shutil.which("git")
     microprobe_raw = os.environ.get("SPLITALIGNERR_COLD_START_MICROPROBE", "")
     microprobe = pathlib.Path(microprobe_raw).resolve()
-    if not rscript or not git or not microprobe.is_file():
-        raise SystemExit("Rscript, git, and the standalone microprobe are required")
+    if not rscript or not microprobe.is_file():
+        raise SystemExit("Rscript and the standalone microprobe are required")
 
     timeout_seconds = parse_timeout()
     case_script = source_root / ".github/recert/windows_cold_start_case.R"
-    source_commit = run_text([git, "-C", str(source_root), "rev-parse", "HEAD"])
     metadata = [
         "probe_id: windows-cold-start-v1",
         f"source_commit: {source_commit}",
@@ -283,6 +306,7 @@ def main() -> int:
         execution = run_case(command, timeout_seconds)
         stdout = str(execution["stdout"])
         stderr = str(execution["stderr"])
+        normalized_stdout = normalize_text(stdout)
         exit_status = int(execution["exit_status"])
         timed_out = bool(execution["timeout_triggered"])
         termination_confirmed = bool(execution["termination_confirmed"])
@@ -292,17 +316,17 @@ def main() -> int:
             harness_failure = True
         elif timed_out:
             classification = "TIMEOUT"
-        elif exit_status == 0 and "case_status: PASS" in stdout:
+        elif exit_status == 0 and "case_status: PASS" in normalized_stdout:
             classification = "PASS"
-        elif "case_status:" in stdout:
+        elif "case_status:" in normalized_stdout:
             classification = "REPORTED_FAILURE"
         else:
             classification = "CRASH_OR_NONZERO"
 
         stdout_file = output_dir / f"{case_id}.stdout.txt"
         stderr_file = output_dir / f"{case_id}.stderr.txt"
-        write_text(stdout_file, stdout)
-        write_text(stderr_file, stderr)
+        stdout_file.write_bytes(raw_output(execution["stdout_bytes"]))
+        stderr_file.write_bytes(raw_output(execution["stderr_bytes"]))
         timing_rows.extend(parse_timings(case_id, stdout))
         result_rows.append(
             {

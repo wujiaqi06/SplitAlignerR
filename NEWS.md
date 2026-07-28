@@ -1,5 +1,21 @@
 # SplitAlignerR 0.1.0
 
+* Added the conditional FIX007 Windows R-hosted numeric-path isolation: CRLF-
+  safe evidence parsing with raw-byte preservation, explicit snapshot commit
+  metadata, an independent source-clean gate, and fresh-process bare-R DLL and
+  package-Rcpp microprobes. Windows run `30346950266` objectively triggered
+  authorized case A: hosted automatic/static regex, frozen numeric policy, and
+  the public validator timed out while noop, `strtod`, marker, and core-info
+  controls passed.
+* Replaced only the decimal-token `std::regex` predicate with an allocation-free
+  ASCII full-token parser for the identical frozen grammar. Marker handling,
+  `strtod`, ERANGE, finite/subnormal/negative policy, diagnostics, and all
+  scientific mapping semantics are unchanged. A fixed-seed 100,000-token
+  old-regex/manual-parser differential is part of every platform RECERT.
+* The Windows harness obtains effective `LC_CTYPE`, `LC_COLLATE`, and
+  `LC_NUMERIC` values through a separate fresh-process bare-C-runtime DLL
+  operation. This avoids a Windows R 4.6.1 crash observed in both individual
+  and combined R-level locale queries without pre-warming D1-D7.
 * Corrected RECERT session-option evidence to distinguish requested from
   effective values, require the portable `scipen=-9/0/999` matrix, and report
   clamped `-999` probes as unavailable rather than exact PASS.
