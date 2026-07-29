@@ -13,7 +13,7 @@ expected <- list(
   core = "0.1.0",
   general_schema = "1.0.0",
   paired_schema = "1.0.0",
-  candidate = "v0.1.0-rc2",
+  candidate = "v0.1.0-rc3",
   doi = "10.64898/2026.02.24.707838",
   software_title = paste(
     "SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner"

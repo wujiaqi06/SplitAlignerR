@@ -9,9 +9,9 @@
 
 SplitAlignerR is the R interface and independent benchmark track for the
 SplitAligner branch-coordinate framework. Package version 0.1.0 is the V1
-release-candidate line. The frozen `v0.1.0-rc1` tag is retained as an abandoned
-first candidate; this Fix005 source is the controlled pre-tag candidate for
-`v0.1.0-rc2`. It provides a
+release-candidate line. The frozen `v0.1.0-rc1` and `v0.1.0-rc2` tags are
+retained as historical candidates; this source carries the controlled
+`v0.1.0-rc3` identity on the accepted Fix007 implementation. It provides a
 production C++17 graph-first mapper, strict finite-range branch-length
 validation, and a pure R node-edge implementation that independently recomputes
 the Catnip10 graph-oracle benchmark. The candidate is not a final release
@@ -25,8 +25,8 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 # install.packages("remotes")
 remotes::install_github("wujiaqi06/SplitAlignerR")
 
-# After the annotated RC2 tag is published:
-remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0-rc2")
+# Install the annotated RC3 candidate:
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0-rc3")
 ```
 
 ## Minimal Example

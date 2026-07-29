@@ -23,8 +23,7 @@ turn a release candidate into a final release.
   conditional on hosted A/B evidence.
 
 The frozen `v0.1.0-rc1` and `v0.1.0-rc2` tags remain immutable historical
-candidates. This source is the untagged Fix007 child of the accepted Fix006A
-implementation; it is not RC3 and does not authorize a release. Only
-after main-console acceptance may a separate release-identity child and
-annotated `v0.1.0-rc3` tag be created. Tag-to-commit proof belongs in that later
-external RECERT package.
+candidates. This source carries the `v0.1.0-rc3` release-candidate identity on
+the accepted Fix007 implementation. Annotated-tag existence and peeled-commit
+identity are established by external tag proof to avoid source self-reference.
+RC3 is not final release approval and does not authorize a GitHub Release.
