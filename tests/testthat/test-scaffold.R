@@ -1,9 +1,10 @@
-test_that("package release-candidate status helper returns a single string", {
+test_that("package release and development status helper is current", {
   s <- splitalignerR_scaffold()
   expect_type(s, "character")
   expect_length(s, 1)
-  expect_match(s, "V1 release candidate")
-  expect_match(s, "not a final release certificate")
+  expect_match(s, "post-release development", fixed = TRUE)
+  expect_match(s, "v0.1.0 is the immutable Pro-RECERT-certified release", fixed = TRUE)
+  expect_match(s, "not covered by that RECERT decision", fixed = TRUE)
 })
 
 test_that("catnip10_expected returns the expected 8 x 18 matrices", {

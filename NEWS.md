@@ -1,3 +1,11 @@
+# SplitAlignerR 0.1.0.9000
+
+* Published the immutable, Pro-RECERT-certified `v0.1.0` release.
+* Started post-release development; this development line is not covered by
+  the `v0.1.0` RECERT decision.
+* Deferred subsequent user-usability APIs to separately scoped development
+  tasks.
+
 # SplitAlignerR 0.1.0
 
 * Added the conditional FIX007 Windows R-hosted numeric-path isolation: CRLF-

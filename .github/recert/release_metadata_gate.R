@@ -9,11 +9,15 @@ if (length(args) != 2L) {
 source_root <- normalizePath(args[[1L]], mustWork = TRUE)
 output_report <- args[[2L]]
 expected <- list(
-  package = "0.1.0",
+  package = "0.1.0.9000",
   core = "0.1.0",
   general_schema = "1.0.0",
   paired_schema = "1.0.0",
   candidate = "v0.1.0-rc3",
+  certified_release = "v0.1.0",
+  certified_commit = "17a0927095c7a067817bf598a2556cbe7348a6d0",
+  development_status = "post-release development",
+  recert_status = "not covered by v0.1.0 Pro PASS",
   doi = "10.64898/2026.02.24.707838",
   software_title = paste(
     "SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner"
@@ -125,6 +129,17 @@ identity_core <- json_string(release_identity, "core_version")
 identity_general <- json_string(release_identity, "general_schema")
 identity_paired <- json_string(release_identity, "paired_schema")
 identity_candidate <- json_string(release_identity, "rc_identifier")
+identity_certified_release <- json_string(
+  release_identity, "certified_release_tag"
+)
+identity_certified_commit <- json_string(
+  release_identity, "certified_release_commit"
+)
+identity_development <- json_string(release_identity, "development_version")
+identity_development_status <- json_string(
+  release_identity, "development_status"
+)
+identity_recert_status <- json_string(release_identity, "recert_status")
 identity_values <- c(
   identity_package, identity_core, identity_general, identity_paired
 )
@@ -143,6 +158,31 @@ add_check(
   "release_identity_candidate",
   identical(identity_candidate, expected$candidate),
   identity_candidate
+)
+add_check(
+  "release_identity_certified_release",
+  identical(identity_certified_release, expected$certified_release),
+  identity_certified_release
+)
+add_check(
+  "release_identity_certified_commit",
+  identical(identity_certified_commit, expected$certified_commit),
+  identity_certified_commit
+)
+add_check(
+  "release_identity_development_version",
+  identical(identity_development, expected$package),
+  identity_development
+)
+add_check(
+  "release_identity_development_status",
+  identical(identity_development_status, expected$development_status),
+  identity_development_status
+)
+add_check(
+  "release_identity_recert_status",
+  identical(identity_recert_status, expected$recert_status),
+  identity_recert_status
 )
 
 cff_lines <- readLines(file.path(source_root, "CITATION.cff"), warn = FALSE)
@@ -193,15 +233,60 @@ documentation_text <- c(
 )
 add_check(
   "documentation_package_version",
-  grepl("Package version 0.1.0", documentation_text[[1L]], fixed = TRUE) &&
-    grepl("package version 0.1.0", documentation_text[[2L]], fixed = TRUE),
-  "README.md and inst/CITATION declare package version 0.1.0"
+  grepl("0.1.0.9000", documentation_text[[1L]], fixed = TRUE) &&
+    grepl("package version 0.1.0.9000", documentation_text[[2L]], fixed = TRUE),
+  "README.md and inst/CITATION declare development version 0.1.0.9000"
 )
 add_check(
-  "documentation_candidate_identity",
-  grepl(expected$candidate, documentation_text[[1L]], fixed = TRUE) &&
-    grepl(expected$candidate, documentation_text[[3L]], fixed = TRUE),
-  expected$candidate
+  "documentation_certified_release_boundary",
+  grepl(expected$certified_release, documentation_text[[1L]], fixed = TRUE) &&
+    grepl(expected$certified_release, documentation_text[[2L]], fixed = TRUE) &&
+    grepl(expected$certified_release, documentation_text[[3L]], fixed = TRUE) &&
+    grepl(
+      "not covered by the `v0.1.0` RECERT decision",
+      documentation_text[[1L]],
+      fixed = TRUE
+    ),
+  paste(
+    expected$certified_release,
+    "development not covered by the v0.1.0 RECERT decision",
+    sep = "; "
+  )
+)
+
+readme <- read_text("README.md")
+add_check(
+  "readme_stable_install_targets_certified_tag",
+  grepl(
+    'remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0")',
+    readme,
+    fixed = TRUE
+  ),
+  "stable install uses @v0.1.0"
+)
+add_check(
+  "readme_development_install_targets_default_branch",
+  grepl(
+    'remotes::install_github("wujiaqi06/SplitAlignerR")',
+    readme,
+    fixed = TRUE
+  ),
+  "development install uses the default branch"
+)
+stale_readme_phrases <- c(
+  "release-candidate line",
+  "candidate is not a final release certificate",
+  "independent RECERT remains pending",
+  "Install the annotated RC3 candidate"
+)
+stale_readme_hits <- stale_readme_phrases[
+  vapply(stale_readme_phrases, grepl, logical(1), x = readme, fixed = TRUE)
+]
+add_check(
+  "readme_has_no_stale_candidate_wording",
+  !length(stale_readme_hits),
+  if (length(stale_readme_hits)) paste(stale_readme_hits, collapse = "; ") else
+    "no stale candidate wording"
 )
 
 forbidden <- c(
