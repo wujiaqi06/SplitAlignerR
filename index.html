@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Catnip10 Graph-Oracle Benchmark Accessors for SplitAligner • SplitAlignerR</title>
+<title>R Interface and Independent Graph Oracle for SplitAligner • SplitAlignerR</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Catnip10 Graph-Oracle Benchmark Accessors for SplitAligner">
-<meta name="description" content='Initial R reference implementation track for the SplitAligner branch-coordinate framework. This public seed release ships deterministic Catnip10 10-tip graph-oracle benchmark data, audit-ready accessors, and validation helpers for the primitive branch-coordinate ledger. The current manuscript title is "SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance". The split-based empirical gene-tree mapping engine is under active development. See the SplitAligner preprint (Wu 2026, &lt;doi:10.64898/2026.02.24.707838&gt;).'>
-<meta property="og:description" content='Initial R reference implementation track for the SplitAligner branch-coordinate framework. This public seed release ships deterministic Catnip10 10-tip graph-oracle benchmark data, audit-ready accessors, and validation helpers for the primitive branch-coordinate ledger. The current manuscript title is "SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance". The split-based empirical gene-tree mapping engine is under active development. See the SplitAligner preprint (Wu 2026, &lt;doi:10.64898/2026.02.24.707838&gt;).'>
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R Interface and Independent Graph Oracle for SplitAligner">
+<meta name="description" content='R interface and independent benchmark track for the SplitAligner branch-coordinate framework. The package ships deterministic Catnip10 graph-oracle data, a pure R node-edge oracle that recomputes the benchmark, and a C++17 graph-first mapper with strict finite-range branch-length parsing, explicit structural/topological states, and composite-coordinate provenance. A separate R paired-finalization layer retains the frozen structured output-token rules and literal-NA provenance. See the SplitAligner preprint, "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping" (Wu 2026, &lt;doi:10.64898/2026.02.24.707838&gt;).'>
+<meta property="og:description" content='R interface and independent benchmark track for the SplitAligner branch-coordinate framework. The package ships deterministic Catnip10 graph-oracle data, a pure R node-edge oracle that recomputes the benchmark, and a C++17 graph-first mapper with strict finite-range branch-length parsing, explicit structural/topological states, and composite-coordinate provenance. A separate R paired-finalization layer retains the frozen structured output-token rules and literal-NA provenance. See the SplitAligner preprint, "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping" (Wu 2026, &lt;doi:10.64898/2026.02.24.707838&gt;).'>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">SplitAlignerR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/quick-start.html">SplitAlignerR Quick Start</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -51,15 +57,17 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>SplitAlignerR is the R reference implementation track for the SplitAligner branch-coordinate framework. The current release provides the Catnip10 graph-oracle benchmark as an executable, audit-ready R package: users can load the frozen primitive branch axis, inspect oracle cell states, recover fused-coordinate membership, and validate the benchmark accounting identities.</p>
-<p>The split-based empirical gene-tree mapping engine is under active development.</p>
+<p>SplitAlignerR is the R interface and independent benchmark track for the SplitAligner branch-coordinate framework. Package version 0.1.0 is the V1 release-candidate line. The frozen <code>v0.1.0-rc1</code> and <code>v0.1.0-rc2</code> tags are retained as historical candidates; this source carries the controlled <code>v0.1.0-rc3</code> identity on the accepted Fix007 implementation. It provides a production C++17 graph-first mapper, strict finite-range branch-length validation, and a pure R node-edge implementation that independently recomputes the Catnip10 graph-oracle benchmark. The candidate is not a final release certificate; independent RECERT remains pending.</p>
 <p>Documentation site: <a href="https://wujiaqi06.github.io/SplitAlignerR/" class="uri">https://wujiaqi06.github.io/SplitAlignerR/</a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Install the annotated RC3 candidate:</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR@v0.1.0-rc3"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="minimal-example">Minimal Example<a class="anchor" aria-label="anchor" href="#minimal-example"></a>
@@ -69,12 +77,34 @@
 <span></span>
 <span><span class="fu"><a href="reference/catnip10_expected.html">catnip10_expected</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/catnip10_summary_counts.html">catnip10_summary_counts</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/validate_catnip10_oracle.html">validate_catnip10_oracle</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/validate_catnip10_oracle.html">validate_catnip10_oracle</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Independently rebuild all Catnip10 graph states in pure R.</span></span>
+<span><span class="va">rebuilt</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/recompute_catnip10_oracle.html">recompute_catnip10_oracle</a></span><span class="op">(</span><span class="st">"global"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">rebuilt</span><span class="op">$</span><span class="va">matrix</span>, <span class="fu"><a href="reference/catnip10_matrix.html">catnip10_matrix</a></span><span class="op">(</span><span class="st">"global"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Inspect the compiled core and its numeric input policy.</span></span>
+<span><span class="fu"><a href="reference/splitaligner_core_info.html">splitaligner_core_info</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/validate_branch_length_tokens.html">validate_branch_length_tokens</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"1e-8"</span>, <span class="st">"NaN"</span>, <span class="st">"1e9999"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Parse and canonicalize a reference tree in the C++ core.</span></span>
+<span><span class="fu"><a href="reference/validate_species_tree.html">validate_species_tree</a></span><span class="op">(</span><span class="st">"((A:1,B:1),(C:1,D:1));"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Align empirical trees. State and finite numeric evidence stay separate.</span></span>
+<span><span class="va">species</span> <span class="op">&lt;-</span> <span class="st">"((A:1,B:1):1,(C:1,D:1):1);"</span></span>
+<span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  concordant <span class="op">=</span> <span class="st">"((A:1,B:1):1,(C:1,D:1):1);"</span>,</span>
+<span>  discordant <span class="op">=</span> <span class="st">"((A:1,C:1):1,(B:1,D:1):1);"</span>,</span>
+<span>  marker <span class="op">=</span> <span class="st">"((A:NaN,B:1):1,(C:1,D:1):1);"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">aligned</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/align_branches.html">align_branches</a></span><span class="op">(</span><span class="va">species</span>, <span class="va">genes</span>, mode <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span></span>
+<span><span class="va">aligned</span><span class="op">$</span><span class="va">state_matrix</span></span>
+<span><span class="va">aligned</span><span class="op">$</span><span class="va">numeric_matrix</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="current-scope">Current Scope<a class="anchor" aria-label="anchor" href="#current-scope"></a>
+<h2 id="v1-release-candidate-scope">V1 Release-Candidate Scope<a class="anchor" aria-label="anchor" href="#v1-release-candidate-scope"></a>
 </h2>
-<p>This seed release focuses on the bundled Catnip10 graph-oracle benchmark and branch-coordinate ledger accessors. It includes:</p>
+<p>This V1 release candidate combines the production mapper with the independent Catnip10 benchmark track. It includes:</p>
 <ul>
 <li>
 <code><a href="reference/catnip10_expected.html">catnip10_expected()</a></code> / <code><a href="reference/catnip10_matrix.html">catnip10_matrix()</a></code> for the wide primitive-coordinate oracle matrix;</li>
@@ -83,24 +113,42 @@
 <li>
 <code><a href="reference/catnip10_fusion_groups.html">catnip10_fusion_groups()</a></code> for graph-oracle fused-coordinate membership;</li>
 <li>
-<code><a href="reference/validate_catnip10_oracle.html">validate_catnip10_oracle()</a></code> for deterministic seed-release sanity checks;</li>
+<code><a href="reference/validate_catnip10_oracle.html">validate_catnip10_oracle()</a></code> for deterministic benchmark sanity checks;</li>
+<li>
+<code><a href="reference/recompute_catnip10_oracle.html">recompute_catnip10_oracle()</a></code> for an independent pure R reconstruction of every Catnip10 primitive state and fusion group;</li>
+<li>
+<code><a href="reference/validate_branch_length_tokens.html">validate_branch_length_tokens()</a></code> for C++ whole-token and finite-range numeric validation;</li>
+<li>
+<code><a href="reference/validate_species_tree.html">validate_species_tree()</a></code> for C++ Newick parsing, diagnostics, and canonical unrooted primitive coordinates;</li>
+<li>
+<code><a href="reference/align_branches.html">align_branches()</a></code> for C++ graph-first primitive classification, empirical split recovery, composite provenance, and finite numeric evidence;</li>
+<li>
+<code><a href="reference/coordinate_provenance.html">coordinate_provenance()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> for member-set and run-level inspection;</li>
+<li>
+<code><a href="reference/save_splitaligner_result.html">save_splitaligner_result()</a></code> / <code><a href="reference/read_splitaligner_result.html">read_splitaligner_result()</a></code> for checked, lossless result persistence;</li>
+<li>
+<code><a href="reference/pair_alignment_results.html">pair_alignment_results()</a></code> for a separate fixed/free finalized-output layer that preserves literal <code>NA</code>, summarizes it as <code>residual_NA</code>, and never changes the single-tree graph ledger;</li>
+<li>
+<code><a href="reference/splitaligner_core_info.html">splitaligner_core_info()</a></code> for core, schema, and numeric-policy metadata;</li>
 <li>
 <code>catnip10_oracle</code>, the bundled data object containing the frozen species tree, branch-label crosswalk, per-cell oracle states, and fusion groups.</li>
 </ul>
-<p>The Catnip10 benchmark is discordance-free by design. It is intended to exercise the graph-defined <code>observed</code>, <code>NA_fuse</code>, and <code>NA_struct</code> ledger states under taxon pruning. <code>NA_topo</code> is not expected in this benchmark because empirical gene-tree discordance is outside the Catnip10 oracle fixture.</p>
+<p>The Catnip10 benchmark is discordance-free by design. It exercises the graph-defined <code>observed</code>, <code>NA_fuse</code>, and <code>NA_struct</code> ledger states under taxon pruning. <code>NA_topo</code> is not expected in this benchmark because empirical gene-tree discordance is outside the Catnip10 oracle fixture.</p>
 </div>
 <div class="section level2">
-<h2 id="not-yet-implemented">Not Yet Implemented<a class="anchor" aria-label="anchor" href="#not-yet-implemented"></a>
+<h2 id="release-candidate-and-audit-boundary">Release-candidate and audit boundary<a class="anchor" aria-label="anchor" href="#release-candidate-and-audit-boundary"></a>
 </h2>
-<p>SplitAlignerR does not yet implement the full split-based empirical gene-tree mapping engine. The <code><a href="reference/align_branches.html">align_branches()</a></code> function is currently an interface preview that stops with a clear not-implemented message.</p>
-<p>This package should be cited and used as an initial benchmark/oracle-ledger release, not as a complete replacement for the Perl SplitAligner implementation.</p>
+<p>The production mapper lives in the C++ core. R converts inputs and wraps the result; the Catnip10 Oracle remains a separate pure R node-edge implementation that never calls the core or uses projected splits for structural states.</p>
+<p>The contract field <code>finalized_perl_matrices_are_authoritative</code> is intentionally named. Here, Perl refers to the frozen SplitAligner reference implementation; SplitAlignerR does not require Perl at runtime.</p>
+<p>The release-candidate tests reproduce all 272 frozen Catnip10 primitive cells and all 19 fusion events, and include explicit discordance and unavailable numeric-evidence toys. This is implementation evidence, not final V1 release certification. The scientific, numeric, provenance, and paired-bookkeeping boundaries are recorded in <code>inst/spec/V1_SCIENTIFIC_CONTRACT.md</code>.</p>
+<p>See <code><a href="articles/quick-start.html">vignette("quick-start", package = "SplitAlignerR")</a></code> for the layered result model, batch input forms, diagnostics, provenance lookup, and save/reload flow.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI will be added after a tagged release with clean metadata and tests.</p>
+<p>If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI will be added only after final release approval.</p>
 <blockquote>
-<p>Wu J. (2026). <em>SplitAligner: Branch-Identity Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree Discordance.</em> bioRxiv. <a href="https://doi.org/10.64898/2026.02.24.707838" class="external-link uri">https://doi.org/10.64898/2026.02.24.707838</a></p>
+<p>Wu J. (2026). <em>SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping.</em> bioRxiv. <a href="https://doi.org/10.64898/2026.02.24.707838" class="external-link uri">https://doi.org/10.64898/2026.02.24.707838</a></p>
 </blockquote>
 <p>See <a href="CITATION.cff"><code>CITATION.cff</code></a> and <code>citation("SplitAlignerR")</code>.</p>
 </div>
@@ -160,7 +208,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -42,7 +42,8 @@ A named list with components:
 
 ## Source
 
-Wu J. (2026) SplitAligner preprint,
+Wu J. (2026) *SplitAligner: A Gene-Species Tree Reconciliation Framework
+Using Split-Based Branch Mapping*,
 [doi:10.64898/2026.02.24.707838](https://doi.org/10.64898/2026.02.24.707838)
 ; Catnip10 10-tip coordinate-audit benchmark, unrooted oracle outputs
 (`oracle_gene_by_original_branch_matrix.tsv`,

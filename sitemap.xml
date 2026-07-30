@@ -1,6 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/404.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/LICENSE.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/articles/index.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/articles/quick-start.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/authors.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/index.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/news/index.html</loc></url>
@@ -11,8 +13,17 @@
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/catnip10_matrix.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/catnip10_oracle.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/catnip10_summary_counts.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/coordinate_provenance.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/index.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/pair_alignment_results.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/read_splitaligner_result.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/recompute_catnip10_oracle.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/save_splitaligner_result.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/splitalignerR_scaffold.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/splitaligner_core_info.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/summary.splitaligner_result.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/validate_branch_length_tokens.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/validate_catnip10_oracle.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/validate_species_tree.html</loc></url>
 </urlset>
 

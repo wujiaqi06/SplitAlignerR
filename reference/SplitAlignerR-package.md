@@ -1,13 +1,15 @@
-# SplitAlignerR: Catnip10 Graph-Oracle Benchmark Accessors for SplitAligner
+# SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner
 
-Initial R reference implementation track for the SplitAligner
-branch-coordinate framework. This public seed release ships
-deterministic Catnip10 10-tip graph-oracle benchmark data, audit-ready
-accessors, and validation helpers for the primitive branch-coordinate
-ledger. The current manuscript title is "SplitAligner: Branch-Identity
-Coordinate System for Phylogenomics under Missing Taxa and Gene-Tree
-Discordance". The split-based empirical gene-tree mapping engine is
-under active development. See the SplitAligner preprint (Wu 2026,
+R interface and independent benchmark track for the SplitAligner
+branch-coordinate framework. The package ships deterministic Catnip10
+graph-oracle data, a pure R node-edge oracle that recomputes the
+benchmark, and a C++17 graph-first mapper with strict finite-range
+branch-length parsing, explicit structural/topological states, and
+composite-coordinate provenance. A separate R paired-finalization layer
+retains the frozen structured output-token rules and literal-NA
+provenance. See the SplitAligner preprint, "SplitAligner: A Gene-Species
+Tree Reconciliation Framework Using Split-Based Branch Mapping" (Wu
+2026,
 [doi:10.64898/2026.02.24.707838](https://doi.org/10.64898/2026.02.24.707838)
 ).
 

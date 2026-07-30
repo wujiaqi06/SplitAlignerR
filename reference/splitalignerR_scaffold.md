@@ -1,8 +1,6 @@
-# SplitAlignerR seed-release status
+# SplitAlignerR release-candidate status
 
-Report the current seed-release status of the package. This helper is
-kept for early users who install the public seed before the split-based
-empirical gene-tree mapping engine is available.
+Report the current V1 release-candidate status of the package.
 
 ## Usage
 
@@ -12,11 +10,11 @@ splitalignerR_scaffold()
 
 ## Value
 
-A length-one character string describing the seed-release status.
+A length-one character string describing the release-candidate status.
 
 ## Examples
 
 ``` r
 splitalignerR_scaffold()
-#> [1] "SplitAlignerR 0.0.2 public seed release: Catnip10 graph-oracle benchmark data and accessors are available; the empirical split-mapping engine is under active development."
+#> [1] "SplitAlignerR 0.1.0 V1 release candidate: the C++ graph-first mapper and independent Catnip10 R Oracle are frozen for audit; independent RECERT is pending and this is not a final release certificate."
 ```

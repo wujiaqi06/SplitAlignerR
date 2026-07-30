@@ -2,7 +2,7 @@
 
 Summarize the bundled Catnip10 graph-oracle benchmark by deletion regime
 and primitive-cell status. The benchmark is discordance-free, so
-`NA_topo` is expected to be zero in this seed release.
+`NA_topo` is expected to be zero in this benchmark fixture.
 
 ## Usage
 
