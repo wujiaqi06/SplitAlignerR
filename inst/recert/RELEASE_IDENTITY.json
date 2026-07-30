@@ -26,6 +26,7 @@
     "accepted_fix004_static_manifest_sha256": "ebff214b95641e50d7ffd566d4eaae86ac489a72a1dad7a0c6360d99a7613e27",
     "point5_zip_sha256": "a2b26621413b17a5dcc6b245f3247e4647e508010bb1d5bb5b4d2572dd8cd22a"
   },
-  "final_release_tag_authorized": true,
-  "github_release_authorized": true
+  "certified_release_tag_created": true,
+  "certified_github_release_published": true,
+  "development_release_authorized": false
 }

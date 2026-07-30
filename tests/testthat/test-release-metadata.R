@@ -37,4 +37,31 @@ test_that("development identity preserves the certified v0.1.0 boundary", {
     '"recert_status": "not covered by v0.1.0 Pro PASS"',
     fixed = TRUE
   )
+  expect_match(
+    identity,
+    '"certified_release_tag_created": true',
+    fixed = TRUE
+  )
+  expect_match(
+    identity,
+    '"certified_github_release_published": true',
+    fixed = TRUE
+  )
+  expect_match(
+    identity,
+    '"development_release_authorized": false',
+    fixed = TRUE
+  )
+
+  legacy_authorization_fields <- c(
+    paste0("final_release_tag_", "authorized"),
+    paste0("github_release_", "authorized")
+  )
+  expect_false(any(vapply(
+    sprintf('"%s"', legacy_authorization_fields),
+    grepl,
+    logical(1),
+    x = identity,
+    fixed = TRUE
+  )))
 })

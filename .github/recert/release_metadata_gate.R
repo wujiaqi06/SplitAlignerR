@@ -18,6 +18,9 @@ expected <- list(
   certified_commit = "17a0927095c7a067817bf598a2556cbe7348a6d0",
   development_status = "post-release development",
   recert_status = "not covered by v0.1.0 Pro PASS",
+  certified_release_tag_created = TRUE,
+  certified_github_release_published = TRUE,
+  development_release_authorized = FALSE,
   doi = "10.64898/2026.02.24.707838",
   software_title = paste(
     "SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner"
@@ -65,6 +68,21 @@ json_string <- function(relative_path, key) {
     )
   }
   sub(pattern, "\\1", hits, perl = TRUE)
+}
+
+json_boolean <- function(relative_path, key) {
+  lines <- readLines(file.path(source_root, relative_path), warn = FALSE)
+  pattern <- sprintf(
+    '^\\s*"%s"\\s*:\\s*(true|false)\\s*,?\\s*$', key
+  )
+  hits <- grep(pattern, lines, perl = TRUE, value = TRUE)
+  if (length(hits) != 1L) {
+    stop(
+      sprintf("expected one `%s` boolean in %s", key, relative_path),
+      call. = FALSE
+    )
+  }
+  identical(sub(pattern, "\\1", hits, perl = TRUE), "true")
 }
 
 description <- read.dcf(file.path(source_root, "DESCRIPTION"))
@@ -140,6 +158,15 @@ identity_development_status <- json_string(
   release_identity, "development_status"
 )
 identity_recert_status <- json_string(release_identity, "recert_status")
+identity_certified_tag_created <- json_boolean(
+  release_identity, "certified_release_tag_created"
+)
+identity_certified_release_published <- json_boolean(
+  release_identity, "certified_github_release_published"
+)
+identity_development_release_authorized <- json_boolean(
+  release_identity, "development_release_authorized"
+)
 identity_values <- c(
   identity_package, identity_core, identity_general, identity_paired
 )
@@ -183,6 +210,54 @@ add_check(
   "release_identity_recert_status",
   identical(identity_recert_status, expected$recert_status),
   identity_recert_status
+)
+add_check(
+  "release_identity_certified_tag_created",
+  identical(
+    identity_certified_tag_created,
+    expected$certified_release_tag_created
+  ),
+  identity_certified_tag_created
+)
+add_check(
+  "release_identity_certified_github_release_published",
+  identical(
+    identity_certified_release_published,
+    expected$certified_github_release_published
+  ),
+  identity_certified_release_published
+)
+add_check(
+  "release_identity_development_release_not_authorized",
+  identical(
+    identity_development_release_authorized,
+    expected$development_release_authorized
+  ),
+  identity_development_release_authorized
+)
+
+legacy_authorization_fields <- c(
+  paste0("final_release_tag_", "authorized"),
+  paste0("github_release_", "authorized")
+)
+identity_text <- read_text(release_identity)
+legacy_authorization_hits <- legacy_authorization_fields[
+  vapply(
+    sprintf('"%s"', legacy_authorization_fields),
+    grepl,
+    logical(1),
+    x = identity_text,
+    fixed = TRUE
+  )
+]
+add_check(
+  "release_identity_has_no_ambiguous_legacy_authorization_fields",
+  !length(legacy_authorization_hits),
+  if (length(legacy_authorization_hits)) {
+    paste(legacy_authorization_hits, collapse = ",")
+  } else {
+    "no ambiguous legacy authorization fields"
+  }
 )
 
 cff_lines <- readLines(file.path(source_root, "CITATION.cff"), warn = FALSE)
