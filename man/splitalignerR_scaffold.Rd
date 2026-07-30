@@ -2,16 +2,17 @@
 % Please edit documentation in R/scaffold.R
 \name{splitalignerR_scaffold}
 \alias{splitalignerR_scaffold}
-\title{SplitAlignerR release-candidate status}
+\title{SplitAlignerR release and development status}
 \usage{
 splitalignerR_scaffold()
 }
 \value{
-A length-one character string describing the release-candidate
+A length-one character string describing the release and development
 status.
 }
 \description{
-Report the current V1 release-candidate status of the package.
+Report the relationship between the current development package and the
+immutable V1 release.
 }
 \examples{
 splitalignerR_scaffold()

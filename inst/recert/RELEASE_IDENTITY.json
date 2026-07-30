@@ -1,11 +1,18 @@
 {
-  "release_identity": "SplitAlignerR V1",
-  "package_version": "0.1.0",
+  "release_identity": "SplitAlignerR post-v0.1.0 development",
+  "package_version": "0.1.0.9000",
   "core_version": "0.1.0",
   "general_schema": "1.0.0",
   "paired_schema": "1.0.0",
+  "certified_release_tag": "v0.1.0",
+  "certified_release_tag_object": "085fabdc8a712730042c887ea8d8f0b549ed8f97",
+  "certified_release_commit": "17a0927095c7a067817bf598a2556cbe7348a6d0",
+  "certified_release_source_tree": "8df164a570ff7ee540381ab381535174044f7918",
+  "development_version": "0.1.0.9000",
+  "development_status": "post-release development",
+  "recert_status": "not covered by v0.1.0 Pro PASS",
   "rc_identifier": "v0.1.0-rc3",
-  "rc_status": "release candidate; independent RC3 RECERT pending; not final release approval",
+  "rc_status": "historical release candidate; superseded by immutable certified release v0.1.0",
   "implementation_baseline": "2fc1dd370843d54f3ca90942ce84228c5f08a0eb",
   "tag_status_rule": "annotated tag existence and peeled-commit identity are verified by external tag proof, not by source-embedded commit fields",
   "predecessor_rc": {
@@ -13,12 +20,13 @@
     "commit": "0f236ee935a73919d26faa8f46bb9f99e36a0026",
     "status": "frozen and superseded after independent Pro RECERT failure SAR-PRO-RC2-001; retained immutable"
   },
-  "source_commit_rule": "the annotated rc3 tag peeled commit is authoritative; tag-to-commit identity is recorded and verified externally to avoid self-reference",
+  "source_commit_rule": "the annotated v0.1.0 tag peeled commit is the immutable certified source; this development branch is outside that source identity",
   "scientific_authority": {
     "published_splitaligner_commit": "1aea990946e08d13349bc6a164dc7334d61cae08",
     "accepted_fix004_static_manifest_sha256": "ebff214b95641e50d7ffd566d4eaae86ac489a72a1dad7a0c6360d99a7613e27",
     "point5_zip_sha256": "a2b26621413b17a5dcc6b245f3247e4647e508010bb1d5bb5b4d2572dd8cd22a"
   },
-  "final_release_tag_authorized": false,
-  "github_release_authorized": false
+  "certified_release_tag_created": true,
+  "certified_github_release_published": true,
+  "development_release_authorized": false
 }

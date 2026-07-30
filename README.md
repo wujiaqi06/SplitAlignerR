@@ -8,14 +8,16 @@
 <!-- badges: end -->
 
 SplitAlignerR is the R interface and independent benchmark track for the
-SplitAligner branch-coordinate framework. Package version 0.1.0 is the V1
-release-candidate line. The frozen `v0.1.0-rc1` and `v0.1.0-rc2` tags are
-retained as historical candidates; this source carries the controlled
-`v0.1.0-rc3` identity on the accepted Fix007 implementation. It provides a
-production C++17 graph-first mapper, strict finite-range branch-length
-validation, and a pure R node-edge implementation that independently recomputes
-the Catnip10 graph-oracle benchmark. The candidate is not a final release
-certificate; independent RECERT remains pending.
+SplitAligner branch-coordinate framework. It provides a production C++17
+graph-first mapper, strict finite-range branch-length validation, and a pure R
+node-edge implementation that independently recomputes the Catnip10
+graph-oracle benchmark.
+
+`v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
+the post-release development line and is not covered by the `v0.1.0` RECERT
+decision; its current package version is `0.1.0.9000`. The frozen
+`v0.1.0-rc1`, `v0.1.0-rc2`, and `v0.1.0-rc3` tags are retained as historical
+release candidates.
 
 Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 
@@ -23,10 +25,12 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 
 ```r
 # install.packages("remotes")
-remotes::install_github("wujiaqi06/SplitAlignerR")
 
-# Install the annotated RC3 candidate:
-remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0-rc3")
+# Stable, Pro-RECERT-certified release:
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0")
+
+# Post-release development line (not covered by the v0.1.0 RECERT decision):
+remotes::install_github("wujiaqi06/SplitAlignerR")
 ```
 
 ## Minimal Example
@@ -61,9 +65,9 @@ aligned$state_matrix
 aligned$numeric_matrix
 ```
 
-## V1 Release-Candidate Scope
+## V1 Scope
 
-This V1 release candidate combines the production mapper with the independent
+The certified V1 release combines the production mapper with the independent
 Catnip10 benchmark track. It includes:
 
 - `catnip10_expected()` / `catnip10_matrix()` for the wide primitive-coordinate
@@ -95,7 +99,7 @@ the graph-defined `observed`, `NA_fuse`, and `NA_struct` ledger states under
 taxon pruning. `NA_topo` is not expected in this benchmark because empirical
 gene-tree discordance is outside the Catnip10 oracle fixture.
 
-## Release-candidate and audit boundary
+## Release and audit boundary
 
 The production mapper lives in the C++ core. R converts inputs and wraps the
 result; the Catnip10 Oracle remains a separate pure R node-edge implementation
@@ -105,9 +109,10 @@ The contract field `finalized_perl_matrices_are_authoritative` is intentionally
 named. Here, Perl refers to the frozen SplitAligner reference implementation;
 SplitAlignerR does not require Perl at runtime.
 
-The release-candidate tests reproduce all 272 frozen Catnip10 primitive
-cells and all 19 fusion events, and include explicit discordance and unavailable
-numeric-evidence toys. This is implementation evidence, not final V1 release
+The V1 tests reproduce all 272 frozen Catnip10 primitive cells and all 19
+fusion events, and include explicit discordance and unavailable
+numeric-evidence toys. The immutable `v0.1.0` source passed independent Pro
+RECERT; changes on the default development branch do not inherit that
 certification. The scientific, numeric, provenance, and paired-bookkeeping
 boundaries are recorded in `inst/spec/V1_SCIENTIFIC_CONTRACT.md`.
 
@@ -117,7 +122,7 @@ model, batch input forms, diagnostics, provenance lookup, and save/reload flow.
 ## Citation
 
 If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI
-will be added only after final release approval.
+has not yet been assigned.
 
 > Wu J. (2026). *SplitAligner: A Gene-Species Tree Reconciliation Framework
 > Using Split-Based Branch Mapping.* bioRxiv.

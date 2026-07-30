@@ -1,10 +1,9 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite the SplitAligner preprint below. This 0.1.0 package is a V1 release candidate; a software DOI will be added only after final release approval."
+message: "If you use this software, please cite the SplitAligner preprint below. The immutable v0.1.0 release passed independent Pro RECERT; this 0.1.0.9000 source is post-release development and is not covered by that decision."
 title: "SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner"
-abstract: "SplitAlignerR V1 release-candidate implementation of the SplitAligner branch-coordinate framework, with a C++17 production mapper, a separate pure R Catnip10 graph Oracle, strict finite-range numeric validation, and audit-ready paired-output provenance."
+abstract: "SplitAlignerR post-v0.1.0 development of the SplitAligner branch-coordinate framework, with a C++17 production mapper, a separate pure R Catnip10 graph Oracle, strict finite-range numeric validation, and audit-ready paired-output provenance."
 type: software
-version: 0.1.0
-date-released: "2026-07-26"
+version: 0.1.0.9000
 license: GPL-3.0-only
 repository-code: "https://github.com/wujiaqi06/SplitAlignerR"
 authors:
