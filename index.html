@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">SplitAlignerR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,17 +57,20 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>SplitAlignerR is the R interface and independent benchmark track for the SplitAligner branch-coordinate framework. Package version 0.1.0 is the V1 release-candidate line. The frozen <code>v0.1.0-rc1</code> and <code>v0.1.0-rc2</code> tags are retained as historical candidates; this source carries the controlled <code>v0.1.0-rc3</code> identity on the accepted Fix007 implementation. It provides a production C++17 graph-first mapper, strict finite-range branch-length validation, and a pure R node-edge implementation that independently recomputes the Catnip10 graph-oracle benchmark. The candidate is not a final release certificate; independent RECERT remains pending.</p>
+<p>SplitAlignerR is the R interface and independent benchmark track for the SplitAligner branch-coordinate framework. It provides a production C++17 graph-first mapper, strict finite-range branch-length validation, and a pure R node-edge implementation that independently recomputes the Catnip10 graph-oracle benchmark.</p>
+<p><code>v0.1.0</code> is the immutable Pro-RECERT-certified release. The default branch is the post-release development line and is not covered by the <code>v0.1.0</code> RECERT decision; its current package version is <code>0.1.0.9000</code>. The frozen <code>v0.1.0-rc1</code>, <code>v0.1.0-rc2</code>, and <code>v0.1.0-rc3</code> tags are retained as historical release candidates.</p>
 <p>Documentation site: <a href="https://wujiaqi06.github.io/SplitAlignerR/" class="uri">https://wujiaqi06.github.io/SplitAlignerR/</a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Install the annotated RC3 candidate:</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR@v0.1.0-rc3"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Stable, Pro-RECERT-certified release:</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR@v0.1.0"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Post-release development line (not covered by the v0.1.0 RECERT decision):</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"wujiaqi06/SplitAlignerR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="minimal-example">Minimal Example<a class="anchor" aria-label="anchor" href="#minimal-example"></a>
@@ -102,9 +105,9 @@
 <span><span class="va">aligned</span><span class="op">$</span><span class="va">numeric_matrix</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="v1-release-candidate-scope">V1 Release-Candidate Scope<a class="anchor" aria-label="anchor" href="#v1-release-candidate-scope"></a>
+<h2 id="v1-scope">V1 Scope<a class="anchor" aria-label="anchor" href="#v1-scope"></a>
 </h2>
-<p>This V1 release candidate combines the production mapper with the independent Catnip10 benchmark track. It includes:</p>
+<p>The certified V1 release combines the production mapper with the independent Catnip10 benchmark track. It includes:</p>
 <ul>
 <li>
 <code><a href="reference/catnip10_expected.html">catnip10_expected()</a></code> / <code><a href="reference/catnip10_matrix.html">catnip10_matrix()</a></code> for the wide primitive-coordinate oracle matrix;</li>
@@ -136,17 +139,17 @@
 <p>The Catnip10 benchmark is discordance-free by design. It exercises the graph-defined <code>observed</code>, <code>NA_fuse</code>, and <code>NA_struct</code> ledger states under taxon pruning. <code>NA_topo</code> is not expected in this benchmark because empirical gene-tree discordance is outside the Catnip10 oracle fixture.</p>
 </div>
 <div class="section level2">
-<h2 id="release-candidate-and-audit-boundary">Release-candidate and audit boundary<a class="anchor" aria-label="anchor" href="#release-candidate-and-audit-boundary"></a>
+<h2 id="release-and-audit-boundary">Release and audit boundary<a class="anchor" aria-label="anchor" href="#release-and-audit-boundary"></a>
 </h2>
 <p>The production mapper lives in the C++ core. R converts inputs and wraps the result; the Catnip10 Oracle remains a separate pure R node-edge implementation that never calls the core or uses projected splits for structural states.</p>
 <p>The contract field <code>finalized_perl_matrices_are_authoritative</code> is intentionally named. Here, Perl refers to the frozen SplitAligner reference implementation; SplitAlignerR does not require Perl at runtime.</p>
-<p>The release-candidate tests reproduce all 272 frozen Catnip10 primitive cells and all 19 fusion events, and include explicit discordance and unavailable numeric-evidence toys. This is implementation evidence, not final V1 release certification. The scientific, numeric, provenance, and paired-bookkeeping boundaries are recorded in <code>inst/spec/V1_SCIENTIFIC_CONTRACT.md</code>.</p>
+<p>The V1 tests reproduce all 272 frozen Catnip10 primitive cells and all 19 fusion events, and include explicit discordance and unavailable numeric-evidence toys. The immutable <code>v0.1.0</code> source passed independent Pro RECERT; changes on the default development branch do not inherit that certification. The scientific, numeric, provenance, and paired-bookkeeping boundaries are recorded in <code>inst/spec/V1_SCIENTIFIC_CONTRACT.md</code>.</p>
 <p>See <code><a href="articles/quick-start.html">vignette("quick-start", package = "SplitAlignerR")</a></code> for the layered result model, batch input forms, diagnostics, provenance lookup, and save/reload flow.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI will be added only after final release approval.</p>
+<p>If you use SplitAlignerR, please cite the SplitAligner preprint. A software DOI has not yet been assigned.</p>
 <blockquote>
 <p>Wu J. (2026). <em>SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping.</em> bioRxiv. <a href="https://doi.org/10.64898/2026.02.24.707838" class="external-link uri">https://doi.org/10.64898/2026.02.24.707838</a></p>
 </blockquote>

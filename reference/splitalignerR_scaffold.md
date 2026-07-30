@@ -1,6 +1,7 @@
-# SplitAlignerR release-candidate status
+# SplitAlignerR release and development status
 
-Report the current V1 release-candidate status of the package.
+Report the relationship between the current development package and the
+immutable V1 release.
 
 ## Usage
 
@@ -10,11 +11,12 @@ splitalignerR_scaffold()
 
 ## Value
 
-A length-one character string describing the release-candidate status.
+A length-one character string describing the release and development
+status.
 
 ## Examples
 
 ``` r
 splitalignerR_scaffold()
-#> [1] "SplitAlignerR 0.1.0 V1 release candidate: the C++ graph-first mapper and independent Catnip10 R Oracle are frozen for audit; independent RECERT is pending and this is not a final release certificate."
+#> [1] "SplitAlignerR 0.1.0.9000 post-release development: v0.1.0 is the immutable Pro-RECERT-certified release; this development source is not covered by that RECERT decision."
 ```

@@ -45,7 +45,7 @@ Catnip10 graph-oracle benchmark accessors and validation helpers.
 ## Package
 
 - [`splitalignerR_scaffold()`](https://wujiaqi06.github.io/SplitAlignerR/reference/splitalignerR_scaffold.md)
-  : SplitAlignerR release-candidate status
+  : SplitAlignerR release and development status
 - [`SplitAlignerR`](https://wujiaqi06.github.io/SplitAlignerR/reference/SplitAlignerR-package.md)
   [`SplitAlignerR-package`](https://wujiaqi06.github.io/SplitAlignerR/reference/SplitAlignerR-package.md)
   : SplitAlignerR: R Interface and Independent Graph Oracle for
