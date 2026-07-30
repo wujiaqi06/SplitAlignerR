@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/wujiaqi06/SplitAlignerR/blob/v0.1.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/wujiaqi06/SplitAlignerR/blob/main/inst/CITATION)
 
 Wu J (2026). “SplitAligner: A Gene-Species Tree Reconciliation Framework
 Using Split-Based Branch Mapping.” *bioRxiv*.

@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   quick-start: quick-start.html
-last_built: 2026-07-30T01:37Z
+last_built: 2026-07-30T02:19Z
 urls:
   reference: https://wujiaqi06.github.io/SplitAlignerR/reference
   article: https://wujiaqi06.github.io/SplitAlignerR/articles
