@@ -1,0 +1,15 @@
+gate	status	detail
+cross_strategy_toy_equality	PASS	not_applicable
+packed_roundtrip_all_test_patterns	PASS	not_applicable
+cross_strategy_302_5x601_fixed_free	PASS	not_applicable
+
+authority_store_isolation_normalized_checksum=550dbb4f
+strategies_with_same_normalized_checksum=retain_all,recompute,lru_recompute,disk,lru_disk_decoded,packed_disk_lru
+orderings_normalized_by_gene_id=original,reversed,grouped,interleaved,random_seed_20260731
+cache_budgets_bytes=33554432,67108864,134217728,268435456
+terminal_NA_topo=0
+
+The raw encounter-order diagnostics naturally differed before normalization.
+The recorded comparison sorts exact gene-ID/checksum pairs; all strategy and
+ordering rows then equal 550dbb4f. Cache statistics differ, scientific content
+does not.

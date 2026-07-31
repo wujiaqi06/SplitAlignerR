@@ -1,0 +1,25 @@
+status=PASS
+format_magic=SARATP01
+completion_footer=SARADONE
+taxa=302
+primitive_coordinates=601
+retained_key_bytes=38
+state_bytes=151
+query_bytes=22838
+packed_body_bytes=23027
+checksum_bytes_per_record=8
+packed_record_bytes=23035
+authority_patterns_roundtripped=1974/1974
+exact_S9_stress_patterns_roundtripped=10000/10000
+authority_file_bytes=45471146
+authority_footer_verified=yes
+per_record_checksums_verified=yes
+incomplete_prefix_store_rejected=yes
+single_byte_corruption_rejected=yes
+trailing_or_wrong_size_store_rejected=yes
+restart_policy=rebuild to new path, verify footer and all records, then publish
+successful_cleanup=authority full-conformance store removed after PASS
+
+Equality covers exact retained taxa, primitive truth states, projected queries,
+eligible coordinates, exact composite member sets, and composite queries. Hash
+equality is never accepted in place of exact bitset/member-byte equality.

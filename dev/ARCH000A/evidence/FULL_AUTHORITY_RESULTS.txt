@@ -1,0 +1,55 @@
+gate=full_2275_selected_packed_disk_lru
+status=PASS
+fixed_loci=2275
+free_loci=2275
+unique_patterns=1974
+unique_pattern_fraction=0.867692307692
+unique_Bstar=485
+packed_store_bytes=45471146
+packed_body_bytes_per_pattern=23027
+verbose_plan_bytes_total=191880880
+selected_cache_budget_bytes=67108864
+fixed_cache_hits=301
+fixed_cache_misses=1974
+fixed_cache_evictions=0
+fixed_cache_reloads=1974
+free_cache_hits=2275
+free_cache_misses=0
+free_cache_evictions=0
+free_cache_reloads=0
+fixed_terminal_NA_topo=0
+free_terminal_NA_topo=0
+residual_keys=407/407
+production_primitive_cells_fixed=1367275
+production_primitive_cells_free=1367275
+fixed_checksum=f75853e7
+free_checksum=dc46e3f9
+
+fixed_phase_seconds:
+  raw_read=0.282
+  full_newick_parse=1.583
+  empirical_split_index=147.865
+  truth_plan_load_and_R_decode=148.260
+  deterministic_split_queries=0.201
+  matrix_or_sink_write=0.367
+  branch_counter_update=0.029
+
+free_phase_seconds:
+  raw_read=0.341
+  full_newick_parse=2.058
+  empirical_split_index=154.314
+  truth_plan_load_and_R_decode=154.947
+  deterministic_split_queries=0.282
+  matrix_or_sink_write=0.368
+  branch_counter_update=0.039
+
+sampled_peak_RSS_bytes=1838825472
+RSS_samples=57190
+RSS_poll_interval_seconds=0.020
+RSS_interpretation=sampled OS RSS maximum; not kernel high-water mark
+
+Every fixed/free primitive state, primitive/composite numeric value, paired
+input, and residual literal-NA key comparison completed. The sampled process
+peak includes package loading, catalog construction, both compact results, and
+chunked production-reference outputs; it is not attributed to the 47,012,784-
+byte packed truth cache.

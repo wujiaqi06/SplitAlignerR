@@ -1,0 +1,11 @@
+gate	status	detail
+three_repeats_reversal_grouped_interleaved_seeded_random_budgets	PASS	not_applicable
+
+repeats=3
+orderings=original,reversed,grouped,interleaved,random_seed_20260731
+toy_cache_budgets_bytes=4096,32768
+authority_cache_budgets_bytes=33554432,67108864,134217728,268435456
+canonical_pattern_registry=identical
+canonical_Bstar_registry=identical
+normalized_scientific_output=identical
+verdict=PASS

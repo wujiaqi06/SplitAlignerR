@@ -1,0 +1,33 @@
+During startup - Warning messages:
+1: Setting LC_CTYPE failed, using "C"
+2: Setting LC_COLLATE failed, using "C"
+3: Setting LC_TIME failed, using "C"
+4: Setting LC_MESSAGES failed, using "C"
+5: Setting LC_MONETARY failed, using "C"
+compact_pattern_registry_exact_collision_reverse	PASS
+[1] TRUE
+degenerate_zero_one_rejected_two_three_exact	PASS
+[1] TRUE
+endpoint_collapse_terminal_fusion_torture	PASS
+[1] TRUE
+toy_production_and_terminal_invariant	PASS
+[1] TRUE
+cross_strategy_toy_equality	PASS
+[1] TRUE
+packed_roundtrip_all_test_patterns	PASS
+[1] TRUE
+incomplete_store_rejected	PASS
+[1] TRUE
+record_corruption_rejected	PASS
+[1] TRUE
+three_repeats_reversal_grouped_interleaved_seeded_random_budgets	PASS
+[1] TRUE
+support_denominator_zero_is_missing	PASS
+[1] TRUE
+catnip10_272_primitive_and_composites	PASS
+[1] TRUE
+302mammal_5x601_fixed_free	PASS
+cross_strategy_302_5x601_fixed_free	PASS
+[1] TRUE
+full_2275_selected_packed_disk_lru	PASS
+[1] TRUE

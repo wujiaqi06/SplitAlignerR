@@ -1,0 +1,7 @@
+method=ps_rss_polling
+target_pid=96270
+poll_interval_seconds=0.020
+samples=49
+peak_rss_bytes=311640064
+monitor_wall_seconds=1.254901
+interpretation=sampled OS RSS maximum; not a kernel high-water mark

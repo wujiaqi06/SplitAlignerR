@@ -1,0 +1,9 @@
+status=PASS
+species_taxa=8
+candidate_patterns=238
+selected_patterns=3
+unique_exact_Bstar=78
+repeated_primitive=B1
+pattern_1_taxa=A,B;NA_struct=11;NA_fuse=2;Bstar=1
+pattern_2_taxa=A,C;NA_struct=10;NA_fuse=3;Bstar=1
+pattern_3_taxa=A,D;NA_struct=9;NA_fuse=4;Bstar=1

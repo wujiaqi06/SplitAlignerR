@@ -1,0 +1,6 @@
+status=PASS
+loci=3
+denominator_zero_internal_count=3
+coordinate_ids=B7,B8,B9
+support_value=NA_real_
+ape_node_label_value=NA

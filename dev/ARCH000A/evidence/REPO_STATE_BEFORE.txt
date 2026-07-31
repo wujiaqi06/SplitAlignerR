@@ -1,0 +1,13 @@
+ARCH000A repository state before construction
+branch=arch000a-bounded-truth-plan-store
+HEAD=50054bd43abc3fbc840a750f50a3e6ac7f357183
+HEAD_tree=e0edb7560b6b36fc03da47ce6085d50f00764ec4
+base_branch=arch000-unified-streaming-feasibility
+base_commit=50054bd43abc3fbc840a750f50a3e6ac7f357183
+working_tree_at_branch_creation=clean
+production_paths_changed=no
+authorized_write_scope=dev/ARCH000A/
+
+The dedicated worktree was created with git worktree add -b from the exact
+ARCH000 commit without changing the checkout used by any release or main
+development work.

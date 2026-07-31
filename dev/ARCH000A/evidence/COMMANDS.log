@@ -1,0 +1,109 @@
+ARCH000A COMMAND LOG (normalized, replayable form)
+
+Path aliases
+  <REPO>             dedicated ARCH000A worktree
+  <AUTHORITY_302>    frozen 302-mammal authority directory
+  <AUTHORITY_2275>   frozen 2,275-gene input directory
+  <RESIDUAL_LEDGER>  frozen 407-cell ledger
+  <ISOLATED_LIBRARY> fresh temporary R package library
+
+Personal absolute paths are replaced by the aliases above to satisfy the
+handoff-package no-personal-path rule. AUTHORITY_SHA256.txt identifies every
+external input byte-for-byte.
+
+1. Dedicated branch
+  git worktree add -b arch000a-bounded-truth-plan-store <REPO> \
+    50054bd43abc3fbc840a750f50a3e6ac7f357183
+  status: SUCCESS; clean base
+
+2. Fresh unchanged package build/install
+  R CMD build <REPO> --no-build-vignettes --no-manual
+  R CMD INSTALL --library=<ISOLATED_LIBRARY> SplitAlignerR_0.1.0.9000.tar.gz
+  source tar SHA-256:
+    4d124ce741eeb79af249975cdf0412a8586dbdac19de91d967e7cd50c9000475
+  status: SUCCESS
+
+3. Formal benchmark matrix
+  R_LIBS_USER=<ISOLATED_LIBRARY> \
+  ARCH000A_302_DIR=<AUTHORITY_302> \
+  ARCH000A_2275_DIR=<AUTHORITY_2275> \
+  ARCH000A_BENCH_RESULT_DIR=/tmp/arch000a-bench-final-results \
+  ARCH000A_BENCH_WORK_DIR=/tmp/arch000a-bench-final-work \
+  sh dev/ARCH000A/benchmark/run_arch000a_benchmarks.sh
+  status: SUCCESS
+  coverage: authority strategies, 32/64/128/256 MiB, five orderings,
+            10/50/90/100 percent uniqueness, 10,000 exact S9 plans,
+            100,000-locus packed storage substrate
+
+  A first retain-all comparison decoded the packed record and was rejected as
+  a memory baseline because that compact view omits verbose ARCH000 auxiliary
+  vectors. The accepted retain-all case was rerun from the S9 constructor:
+
+  Rscript dev/ARCH000A/benchmark/run_arch000a_benchmarks.R \
+    strategy_walk walk_retain_original retain_all original 0
+  accepted status: SUCCESS; verbose plans=191880880 bytes
+
+4. Metric correction and 500,000 projection
+  R_LIBS_USER=<ISOLATED_LIBRARY> \
+  Rscript dev/ARCH000A/benchmark/derive_arch000a_projection.R \
+    /tmp/arch000a-bench-final-results /tmp/arch000a-bench-final-work
+  status: SUCCESS
+  note: sequence-sensitive diagnostic checksums were normalized by gene ID;
+        500,000 peak RSS was intentionally left NOT_MEASURED
+
+5. Addendum smoke/conformance run
+  R_LIBS_USER=<ISOLATED_LIBRARY> \
+  ARCH000A_302_DIR=<AUTHORITY_302> \
+  ARCH000A_EVIDENCE_DIR=/tmp/arch000a-addendum-smoke-evidence \
+  ARCH000A_WORK_DIR=/tmp/arch000a-addendum-smoke-work \
+  ARCH000A_RUN_FULL=0 \
+  Rscript dev/ARCH000A/prototype/run_conformance.R
+  status: SUCCESS; full gate truthfully recorded INCOMPLETE because disabled
+
+6. B-star churn diagnostic and accepted rerun
+  R_LIBS_USER=<ISOLATED_LIBRARY> \
+  ARCH000A_BSTAR_RESULT_DIR=/tmp/arch000a-bstar-final-results \
+  ARCH000A_BSTAR_MEASURED_PATTERNS=250 \
+  ARCH000A_BSTAR_TARGET_LOCI=100000 \
+  ARCH000A_BSTAR_BUFFER_BYTES=65536 \
+  sh dev/ARCH000A/benchmark/run_bstar_churn_stress.sh
+  diagnostic status: SUCCESS, NOT ACCEPTED; forced-collision helper was O(n^2)
+
+  The helper was replaced by primary hash bucket plus exact canonical-byte key
+  and identical(raw) verification. The complete accepted run was repeated at
+  the same seed, scale, threshold, package, and machine:
+
+  ARCH000A_BSTAR_RESULT_DIR=/tmp/arch000a-bstar-final2-results \
+  [same remaining variables] \
+  sh dev/ARCH000A/benchmark/run_bstar_churn_stress.sh
+  accepted status: SUCCESS
+
+7. Full fixed/free authority and residual-407 conformance
+  R_LIBS_USER=<ISOLATED_LIBRARY> \
+  ARCH000A_302_DIR=<AUTHORITY_302> \
+  ARCH000A_2275_DIR=<AUTHORITY_2275> \
+  ARCH000A_RESIDUAL_LEDGER=<RESIDUAL_LEDGER> \
+  ARCH000A_EVIDENCE_DIR=/tmp/arch000a-full-final-evidence-v2 \
+  ARCH000A_WORK_DIR=/tmp/arch000a-full-final-work-v2 \
+  ARCH000A_SELECTED_CACHE_BYTES=67108864 \
+  sh dev/ARCH000A/prototype/run_arch000a_conformance.sh
+  status: recorded in FULL_AUTHORITY_RESULTS.txt
+
+8. Final validation (run after evidence materialization)
+  Rscript -e 'parse every dev/ARCH000A R file'
+  sh -n dev/ARCH000A/benchmark/*.sh dev/ARCH000A/prototype/*.sh
+  LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+  _R_CHECK_FORCE_SUGGESTS_=false R CMD check --no-manual <source tar>
+  git diff --check
+  git status --short
+  status: R syntax PASS; shell syntax PASS; CSV invariants PASS; scope PASS;
+          offline R CMD check completed with 2 existing no-vignette-output
+          warnings and 1 unavailable optional-markdown note
+
+R CMD check boundary notes
+  attempt 1: stopped at dependency gate because optional Suggests `markdown`
+             was absent and the managed environment could not access CRAN
+  attempt 2: forced-Suggests mode still failed because inherited C.UTF-8 is not
+             an installed macOS locale
+  accepted attempt: en_US.UTF-8 plus force-Suggests=false completed code,
+                    install, examples and testthat; 2 WARNINGs, 1 NOTE, 0 ERROR

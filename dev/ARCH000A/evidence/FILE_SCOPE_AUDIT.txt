@@ -1,0 +1,61 @@
+ARCH000A FILE-SCOPE AUDIT
+=========================
+
+Authorized base commit:
+  50054bd43abc3fbc840a750f50a3e6ac7f357183
+
+Dedicated branch:
+  arch000a-bounded-truth-plan-store
+
+Authorized change prefix:
+  dev/ARCH000A/
+
+Materialized paths outside authorized prefix:
+  NONE
+
+Production paths changed:
+  NO
+
+Specifically unchanged by ARCH000A:
+  R/
+  src/
+  tests/
+  tests/testthat/
+  NAMESPACE
+  DESCRIPTION
+  README*
+  NEWS*
+  data/
+  inst/
+  vignettes/
+
+Static validation:
+  all dev/ARCH000A R files parse: PASS
+  all dev/ARCH000A shell files pass sh -n: PASS
+  git diff --check: PASS
+  mandatory benchmark CSV invariants: PASS
+  terminal NA_topo count: 0
+  personal absolute-path and credential-pattern scan: PASS
+
+Package regression boundary:
+  command: R CMD check --no-manual (offline, force-Suggests=false)
+  locale: en_US.UTF-8
+  errors: 0
+  warnings: 2
+  notes: 1
+  tests/examples/install: PASS
+  warning boundary: source archive lacked built vignette outputs
+  note boundary: optional Suggests package markdown unavailable offline
+  complete log: R_CMD_CHECK_OFFLINE.log
+
+Scientific-source modification:
+  NONE
+
+Authority modification:
+  NONE
+
+Release/tag modification:
+  NONE
+
+Audit conclusion:
+  PASS

@@ -1,0 +1,34 @@
+ARCH000A REPOSITORY STATE AFTER MATERIALIZATION
+===============================================
+
+Branch:
+  arch000a-bounded-truth-plan-store
+
+Base commit:
+  50054bd43abc3fbc840a750f50a3e6ac7f357183
+
+Base tree:
+  e0edb7560b6b36fc03da47ce6085d50f00764ec4
+
+Change boundary:
+  dev/ARCH000A/ only
+
+Production paths changed:
+  no
+
+Existing dev/ARCH000 content modified:
+  no
+
+Certified v0.1.0 tag or source modified:
+  no
+
+Commit identity note:
+  The final commit and tree identifiers are recorded in the handoff ZIP's
+  00_PACKAGE_IDENTITY.txt and verified independently after commit creation.
+  They are intentionally not embedded into their own Git tree, which would
+  create an impossible self-referential identity requirement.
+
+Post-commit worktree requirement:
+  clean
+
+Post-commit status is independently verified in the final packaging gate.

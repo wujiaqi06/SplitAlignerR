@@ -1,0 +1,5 @@
+gate	status	detail
+compact_pattern_registry_exact_collision_reverse	PASS	not_applicable
+toy_production_and_terminal_invariant	PASS	not_applicable
+catnip10_272_primitive_and_composites	PASS	not_applicable
+302mammal_5x601_fixed_free	PASS	not_applicable

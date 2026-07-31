@@ -1,0 +1,10 @@
+gate	status	detail
+incomplete_store_rejected	PASS	not_applicable
+record_corruption_rejected	PASS	not_applicable
+
+partial_file_policy=missing footer or wrong exact size is never reusable
+corrupt_record_policy=per-record checksum failure aborts opening
+footer_policy=ordered record-checksum aggregate and record count must match
+restart_policy=rebuild to a new path, fully verify, then publish
+successful_cleanup=disposable stores removed only after evidence is recorded
+verdict=PASS

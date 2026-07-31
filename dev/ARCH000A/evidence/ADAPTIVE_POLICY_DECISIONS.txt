@@ -1,0 +1,50 @@
+ARCH000A adaptive policy decisions
+
+[authority_2275; 32 MiB cache]
+decision=packed_disk_plus_bounded_lru
+loci=2275
+unique_patterns=1974
+unique_pattern_fraction=0.867692307692308
+measured_verbose_full_cache_bytes=191880880
+measured_packed_full_cache_bytes=47012784
+cache_budget_bytes=33554432
+measured_reconstruction_seconds_per_plan=0.073952967032967
+measured_expected_hit_rate=0.132307692307692
+reason=packed full cache exceeds assigned cache budget; validated packed disk plus hard-byte LRU preserves reuse and bound
+
+[authority_2275; 64 MiB cache]
+decision=retain_all_packed_memory
+loci=2275
+unique_patterns=1974
+unique_pattern_fraction=0.867692307692308
+measured_verbose_full_cache_bytes=191880880
+measured_packed_full_cache_bytes=47012784
+cache_budget_bytes=67108864
+reason=packed full cache is 70.05 percent of budget and therefore below the 80 percent admission threshold
+
+[synthetic_302dimension_100000; 64 MiB cache]
+decision=packed_disk_plus_bounded_lru
+evidence_class=MEASURED_STORAGE_SUBSTRATE; engineering stress only
+loci=100000
+unique_patterns=100000
+unique_pattern_fraction=1
+derived_verbose_full_cache_bytes=9720409321
+derived_packed_full_cache_bytes=2381600000
+cache_budget_bytes=67108864
+measured_cache_peak_accounted_bytes=67089672
+measured_cache_hits=0
+measured_cache_misses=100000
+measured_evictions=97183
+measured_temporary_disk_bytes=2303500056
+reason=packed full cache exceeds budget; disk store plus bounded packed LRU keeps the truth-store working term below the configured cap
+
+Local authority physical store throughput:
+write_bytes=45471146
+write_seconds=0.109
+write_MB_per_second=417.166
+read_bytes=52404625
+read_seconds=0.134
+read_MB_per_second=391.079
+
+The selector is experimental and non-public. These decisions do not authorize
+production implementation or a public option.

@@ -1,0 +1,4 @@
+gate	status	detail
+degenerate_zero_one_rejected_two_three_exact	PASS	not_applicable
+endpoint_collapse_terminal_fusion_torture	PASS	not_applicable
+support_denominator_zero_is_missing	PASS	not_applicable

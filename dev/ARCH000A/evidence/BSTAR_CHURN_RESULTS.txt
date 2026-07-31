@@ -1,0 +1,10 @@
+status=PASS
+authority_build_seconds=0.3
+pattern_generation_seconds=0.038
+measured_patterns=250
+target_projection_loci=100000
+records_per_flush=5217,5200,5171,5128,5178,5203,5178,5138,5150,5201,4066
+bytes_per_flush=65536,65544,65544,65536,65544,65536,65544,65540,65540,65548,51260
+unique_Bstar_growth=1713,2106,2343,2505,2613,2667,2736,2797,2857,2888,2916
+hash_collision_policy=forced constant hash resolved by identical exact canonical bytes
+synthetic_input=engineering stress only; not a biological dataset

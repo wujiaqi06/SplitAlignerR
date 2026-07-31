@@ -1,0 +1,24 @@
+ARCH000A R session
+R version 4.4.2 (2024-10-31)
+Platform: aarch64-apple-darwin20
+Running under: macOS Sonoma 14.4
+Matrix products: default
+BLAS: Apple R framework reference BLAS
+LAPACK: Apple R framework reference LAPACK 3.12.0
+locale: C
+time zone: Asia/Tokyo
+
+SplitAlignerR 0.1.0.9000
+ape 5.8.1
+phangorn 2.12.1
+testthat 3.2.3
+ps 1.9.1
+
+The production package was built from the unchanged ARCH000A base source and
+installed into an isolated temporary R library. Prototype scripts were sourced
+only from dev/ARCH000A/. No network, credentials, or external package download
+was used during the recorded run.
+
+Non-blocking environment observation: R reported that X11/libSM was absent
+while probing optional capabilities. ARCH000A does not use X11; all required
+benchmark and conformance code paths loaded and executed without it.
