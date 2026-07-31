@@ -1,0 +1,4 @@
+gate	status	detail
+three_repeated_runs	PASS	canonical registries and matrix payload identical
+reversed_gene_order	PASS	pattern and B* registries identical; categorical rows identical after gene-ID normalization
+hash_iteration_independence	PASS	final registries are explicit exact-key sorts, not environment/hash iteration order

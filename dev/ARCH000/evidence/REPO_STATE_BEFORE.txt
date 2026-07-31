@@ -1,0 +1,20 @@
+capture_date_jst: 2026-07-31
+source_repository_branch: main
+source_repository_head: e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771
+source_repository_status: clean
+ARCH000_worktree_branch: arch000-unified-streaming-feasibility
+ARCH000_worktree_initial_head: e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771
+ARCH000_worktree_initial_status: clean
+
+certified_release_boundary:
+  remote_annotated_tag: v0.1.0
+  remote_tag_object: 085fabdc8a712730042c887ea8d8f0b549ed8f97
+  remote_peeled_commit: 17a0927095c7a067817bf598a2556cbe7348a6d0
+  certified_source_tree: 8df164a570ff7ee540381ab381535174044f7918
+
+verification_notes:
+  - The commit and tree were readable from the local object database.
+  - The local clone did not contain refs/tags/v0.1.0.
+  - A read-only git ls-remote verified the remote annotated tag and peel.
+  - No tag was fetched, created, moved, or rewritten.
+  - No production file was modified before ARCH000 work began.

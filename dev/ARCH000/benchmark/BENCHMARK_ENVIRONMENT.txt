@@ -1,0 +1,26 @@
+captured_utc: 2026-07-31 02:03:28 UTC
+R: R version 4.4.2 (2024-10-31)
+platform: aarch64-apple-darwin20
+SplitAlignerR benchmark mapper: 0.1.0
+post-release source quick replay: 0.1.0.9000
+ape: 5.8.1
+phangorn: 2.12.1
+ps: 1.9.1
+
+operating_system: macOS 14.4 (Build 23E214)
+kernel: Darwin 23.4.0 arm64
+hardware_model: Mac15,6
+physical_memory_bytes: 38654705664
+cpu: Apple M3 Pro
+
+filesystem: APFS
+storage_protocol: Apple Fabric
+device_location: Internal
+solid_state: Yes
+removable: No
+volume_capacity_reported: 1.8 TiB
+volume_available_during_benchmark: 178 GiB
+
+storage_class_label_used_in_results: local_APFS_SSD
+second_storage_class_available: no
+network_or_remote_storage_tested: no

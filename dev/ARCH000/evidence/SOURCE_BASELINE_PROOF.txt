@@ -1,0 +1,17 @@
+ARCH000 base commit:
+e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771
+
+Certified mapper commit:
+17a0927095c7a067817bf598a2556cbe7348a6d0
+
+Command:
+git diff --quiet 17a0927095c7a067817bf598a2556cbe7348a6d0..e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771 -- src R/align.R R/core.R R/tree-input.R R/paired.R R/result.R R/oracle.R R/catnip10.R
+
+Exit status:
+0
+
+Interpretation:
+The scientific mapper, parser, numeric, paired-finalizer, and Catnip10 paths used by ARCH000 are byte-identical between the certified release commit and the post-release base. Post-release R/scaffold and metadata changes are not invoked by the prototype.
+
+Additional replay:
+A source tar was built from the ARCH000 base worktree and installed in a fresh temporary R library as SplitAlignerR 0.1.0.9000. Toy, Catnip10, 302-mammal, full 2,275/407, production-chunk comparison, and determinism gates all passed from that fresh library.

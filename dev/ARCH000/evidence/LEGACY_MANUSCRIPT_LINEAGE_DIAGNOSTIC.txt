@@ -1,0 +1,31 @@
+status: NON-GATING LINEAGE DIFFERENCE
+date_jst: 2026-07-31
+
+Context:
+An additional comparison was attempted against manuscript-distribution matrices that were not included in the RC3 RECERT authority package and are not named as frozen ARCH000 semantic authorities.
+
+Input identity:
+The decompressed manuscript fix/free Newick inputs are byte-identical to the frozen ARCH000/RC3 inputs:
+  fixed: 6bfaa5e134a3bedbd77624134c50855f80f536205ca70d5b0ffe055d7f36b0ab
+  free:  cf19a1befac3ffa007f44867e26f1d63e1c732dfe7367f6058dd8a4bff322efb
+
+Observed difference:
+The current frozen graph-first production core and the ARCH000 compact prototype agree with each other, but both differ categorically from the older manuscript final matrices. In the first 25 genes alone:
+  fixed categorical differences: 178
+  free categorical differences:  186
+
+Example:
+  gene: AASDH
+  primitive: B14
+  current frozen production / ARCH000: NA_fuse
+  manuscript fixed matrix: 0.008744
+  manuscript free matrix:  0.0083909642
+
+Interpretation:
+The older manuscript tables classify some primitive members of a restriction fiber as ordinary numeric coordinates, while the current V1 graph-first contract classifies those primitives as NA_fuse and places numeric evidence on the composite coordinate. Treating the manuscript table as a current primitive-state authority would directly violate ARCH000 invariant 4.1/4.3 and the certified current production behavior.
+
+Gate treatment:
+  - The legacy manuscript matrices are not used to weaken or rewrite current semantics.
+  - ARCH000 full conformance uses the unchanged current production mapper for every primitive/composite state and numeric cell, plus the frozen 407-key residual authority.
+  - Catnip10 and the frozen 302-mammal regression remain independent/frozen external gates.
+  - Any documentation or data-lineage reconciliation for the manuscript-distribution matrices requires a separate main-console task; it is not an ARCH000 architecture change.

@@ -1,0 +1,27 @@
+classification: COMPLETE AUTHORITY COMPARISON PASS
+
+fixed_loci: 2275
+free_loci: 2275
+primitive_coordinates: 601
+unique_retained_taxa_patterns: 1974
+unique_Bstar: 485
+production_primitive_cells_compared_per_side: 1367275
+production_state_numeric_composite_comparison: PASS
+observed_residual_literal_NA_keys: 407
+expected_residual_literal_NA_keys: 407
+exact_key_set_equal: true
+
+final_strengthened_validation_peak_rss_bytes: 1399799808
+final_strengthened_validation_wall_seconds: 968.27
+compact_fixed_plus_free_audit_peak_rss_bytes: 1013055488
+compact_fixed_plus_free_audit_wall_seconds: 677.14
+single_fixed_compact_object_bytes: 258732048
+single_free_compact_object_bytes: 258732048
+peak_method: macOS BSD /usr/bin/time -l maximum resident set size
+
+notes:
+  - The final strengthened process retained fixed/free compact results and replayed unchanged production mapping in bounded chunks.
+  - Its peak is validation overhead, not the architecture memory-mode benchmark.
+  - The compact-only paired audit peak is reported separately for provenance.
+  - The separately measured single-dataset benchmark remains the memory-mode comparison authority.
+  - The final replay used a fresh 0.1.0.9000 source build whose scientific mapper paths are byte-identical to the certified commit.

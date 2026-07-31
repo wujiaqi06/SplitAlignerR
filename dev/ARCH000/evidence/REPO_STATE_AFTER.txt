@@ -1,0 +1,32 @@
+capture_stage: final pre-commit verification content
+branch: arch000-unified-streaming-feasibility
+base_commit: e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771
+final_head_commit: recorded in enclosing 00_PACKAGE_IDENTITY.txt
+
+allowed_changed_prefix:
+dev/ARCH000/
+
+production_paths_changed:
+no
+
+certified_release_boundary_after:
+  remote_tag: v0.1.0
+  remote_tag_object: 085fabdc8a712730042c887ea8d8f0b549ed8f97
+  remote_peeled_commit: 17a0927095c7a067817bf598a2556cbe7348a6d0
+  certified_source_tree: 8df164a570ff7ee540381ab381535174044f7918
+  status: unchanged
+
+scope_gate:
+  R/: unchanged
+  src/: unchanged
+  tests/: unchanged
+  NAMESPACE: unchanged
+  DESCRIPTION: unchanged
+  data/: unchanged
+  inst/extdata/: unchanged
+  vignettes/: unchanged
+  README*: unchanged
+  NEWS*: unchanged
+
+post_commit_cleanliness:
+to be independently verified and recorded in 00_PACKAGE_IDENTITY.txt

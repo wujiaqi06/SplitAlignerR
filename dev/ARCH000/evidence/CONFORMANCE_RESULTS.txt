@@ -1,0 +1,13 @@
+gate	status	detail
+toy_complete_discordance_fusion	PASS	full primitive state, numeric, coordinate, and composite comparison
+toy_residual_literal_NA_boundary	PASS	compact paired final token equals unchanged production paired finalizer
+pattern_cache_and_reverse_order	PASS	one plan per exact retained set; canonical IDs unchanged by reversal
+bounded_bstar_exact_dedup_and_hash_collision	PASS	bounded output equals exact reference under constant and truncated hash collisions
+taxa_scanner_accepted_grammar	PASS	candidate equals complete package parser on quotes, annotations, exponent, marker, multifurcation, root, and multi-record fixtures
+catnip10_272_primitive_and_composites	PASS	272 primitive cells plus composite members/order/numeric values
+302mammal_5x601_fixed_free	PASS	fixed and free share one computational path; frozen categorical and numeric tolerances satisfied
+full_2275_production_state_numeric_composite	PASS	2 x 1,367,275 primitive cells plus every observed composite numeric column
+full_2275_residual_authority	PASS	407/407 exact literal-NA keys
+full_2275_and_residual_407	PASS	2,275 fixed + 2,275 free completed through the same compact mapper path
+determinism_three_repeats_and_reversal	PASS	canonical registries identical; rows identical after gene-ID normalization
+current_main_0.1.0.9000_source_replay	PASS	fresh source build passed toy, Catnip10, 302, full 2,275/407, and determinism gates

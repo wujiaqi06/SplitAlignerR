@@ -1,0 +1,40 @@
+# Paths are expressed through the replay environment to avoid embedding a
+# workstation home path in the handoff package.
+
+git worktree add -b arch000-unified-streaming-feasibility <ARCH000_WORKTREE> e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771
+git ls-remote origin refs/tags/v0.1.0 refs/tags/v0.1.0^{}
+
+export ARCH000_AUTHORITY_ROOT=<FROZEN_SPLITALIGNER_EXAMPLES>
+export ARCH000_302_DIR=$ARCH000_AUTHORITY_ROOT/302mammal
+export ARCH000_2275_DIR=$ARCH000_AUTHORITY_ROOT/preprint_302mammal/input
+export ARCH000_RESIDUAL_LEDGER=<FROZEN_RESIDUAL_AUTHORITY>/01_residual_NA_cell_ledger.tsv
+
+R CMD build --no-build-vignettes --no-manual <ARCH000_WORKTREE>
+R CMD INSTALL --library=<FRESH_MAIN_LIBRARY> <BUILT_0.1.0.9000_SOURCE_TAR>
+
+R_LIBS_USER=<FRESH_MAIN_LIBRARY> \
+ARCH000_RUN_FULL=1 \
+ARCH000_EVIDENCE_DIR=<TEMP_FULL_CONFORMANCE_EVIDENCE> \
+/usr/bin/time -l -o <TEMP_FULL_CONFORMANCE_TIME> \
+Rscript dev/ARCH000/prototype/run_conformance.R
+
+ARCH000_SCANNER_RESULT=<TEMP_SCANNER_DIFFERENTIAL> \
+Rscript dev/ARCH000/prototype/scanner_authority_differential.R
+
+ARCH000_BENCH_RESULT_DIR=<TEMP_BENCH_RAW> \
+ARCH000_BENCH_WORK_DIR=<TEMP_REPLICATED_WORKLOADS> \
+ARCH000_BSTAR_THRESHOLD_BYTES=33554432 \
+ARCH000_STORAGE_TYPE=local_APFS_SSD \
+sh dev/ARCH000/benchmark/run_arch000_benchmarks.sh
+
+# The following bounded phase-isolation cases were also run independently
+# after the principal matrix; they are included in the full runner above.
+sh dev/ARCH000/benchmark/run_arch000_microbenchmarks.sh
+
+sh -n dev/ARCH000/benchmark/run_arch000_benchmarks.sh dev/ARCH000/benchmark/run_arch000_microbenchmarks.sh
+Rscript -e 'parse every R file below dev/ARCH000'
+git diff --check
+git diff --name-only e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771..HEAD
+git status --short --branch
+git bundle create SplitAlignerR_ARCH000_Unified_Streaming_<shortcommit>.bundle arch000-unified-streaming-feasibility
+shasum -a 256 <handoff files>
