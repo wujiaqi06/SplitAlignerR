@@ -1,7 +1,7 @@
 #ifndef SPLITALIGNERR_ENGINE002_CHECKED_MATH_HPP
 #define SPLITALIGNERR_ENGINE002_CHECKED_MATH_HPP
 
-#include "engine002_errors.hpp"
+#include "engine002_errors.h"
 
 #include <cstddef>
 #include <cstdint>

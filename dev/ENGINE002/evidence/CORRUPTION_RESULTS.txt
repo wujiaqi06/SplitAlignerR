@@ -1,0 +1,11 @@
+status=PASS
+plan_regions=magic,header-reserved,retained,state,refs,offsets,query-pool
+plan_truncation=PASS
+plan_trailing_bytes=PASS
+wrong_authority=PASS
+nonzero_padding=PASS
+store_regions=header,records,index,footer
+store_truncation=PASS
+manifest_missing=PASS
+no_clobber_existing_destination=PASS
+failed_store_accepted=0

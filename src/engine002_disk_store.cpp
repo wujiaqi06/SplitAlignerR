@@ -1,9 +1,9 @@
-#include "engine002_disk_store.hpp"
+#include "engine002_disk_store.h"
 
-#include "engine002_atomic_publish.hpp"
-#include "engine002_checked_math.hpp"
-#include "engine002_endian.hpp"
-#include "engine002_errors.hpp"
+#include "engine002_atomic_publish.h"
+#include "engine002_checked_math.h"
+#include "engine002_endian.h"
+#include "engine002_errors.h"
 
 #include <algorithm>
 #include <array>
@@ -668,7 +668,7 @@ DecodedPlan PackedDiskStore::lookup_snapshot(
   }
   TruthPlanView view(authority_, lease.owner, lease.record->data(),
                      lease.record->size(), generation);
-  return view.decoded();
+  return view.snapshot();
 }
 
 std::shared_ptr<const void> PackedDiskStore::debug_pin(

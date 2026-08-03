@@ -1,0 +1,11 @@
+status=PASS
+zero_taxon=stable ENGINE_SCIENTIFIC_INVARIANT rejection
+one_taxon=stable ENGINE_SCIENTIFIC_INVARIANT rejection
+two_taxon=PASS
+three_taxon=PASS
+singleton_endpoint_collapse=PASS
+terminal_fusion=PASS
+multiple_terminal_members=PASS
+terminal_NA_struct_when_retained=0
+pre_empirical_NA_topo=0
+zero_query=not valid under the frozen minimum-two-taxa plus terminal-axis contract

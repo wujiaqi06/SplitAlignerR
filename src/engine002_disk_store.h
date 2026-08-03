@@ -1,9 +1,9 @@
 #ifndef SPLITALIGNERR_ENGINE002_DISK_STORE_HPP
 #define SPLITALIGNERR_ENGINE002_DISK_STORE_HPP
 
-#include "engine002_lru.hpp"
-#include "engine002_manifest.hpp"
-#include "engine002_store.hpp"
+#include "engine002_lru.h"
+#include "engine002_manifest.h"
+#include "engine002_store.h"
 
 #include <filesystem>
 #include <memory>

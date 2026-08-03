@@ -1,7 +1,7 @@
-#include "engine002_lru.hpp"
+#include "engine002_lru.h"
 
-#include "engine002_checked_math.hpp"
-#include "engine002_errors.hpp"
+#include "engine002_checked_math.h"
+#include "engine002_errors.h"
 
 #include <algorithm>
 #include <limits>
@@ -12,6 +12,10 @@ namespace {
 
 std::uint64_t align64(std::uint64_t value) {
   return checked_add<std::uint64_t>(value, 63U, "LRU alignment") & ~UINT64_C(63);
+}
+
+void increment_counter(std::uint64_t& value, const char* context) {
+  value = checked_add<std::uint64_t>(value, 1U, context);
 }
 
 }  // namespace
@@ -70,15 +74,15 @@ LruLease HardBoundedLru::acquire(
     if (found->second.retained != retained) {
       fail(ErrorCode::pattern_mismatch, "LRU key retained bits mismatch");
     }
-    ++stats_.hits;
-    ++found->second.pins;
+    increment_counter(stats_.hits, "LRU hit counter");
+    increment_counter(found->second.pins, "LRU pin counter");
     found->second.last_use = sequence_;
     auto owner = std::make_shared<LeaseOwner>(shared_from_this(), pattern_id,
                                               false, 0);
     return LruLease{std::static_pointer_cast<const void>(owner),
                     found->second.record, false};
   }
-  ++stats_.misses;
+  increment_counter(stats_.misses, "LRU miss counter");
   const std::uint64_t charge = charged_bytes(record_bytes, retained.size());
   if (charge > cache_budget_) {
     if (record_bytes > scratch_budget_) {
@@ -86,12 +90,13 @@ LruLease HardBoundedLru::acquire(
            "record exceeds cache and single-plan scratch budgets");
     }
     if (stats_.active_scratch_bytes != 0) {
-      ++stats_.pin_failures;
+      increment_counter(stats_.pin_failures, "LRU pin-failure counter");
       fail(ErrorCode::memory_budget, "single-plan scratch is already pinned");
     }
     stats_.active_scratch_bytes = record_bytes;
     stats_.scratch_high_water = std::max(stats_.scratch_high_water, record_bytes);
-    ++stats_.oversized_bypasses;
+    increment_counter(stats_.oversized_bypasses,
+                      "LRU oversized-bypass counter");
     lock.unlock();
     std::shared_ptr<const std::vector<std::uint8_t>> record;
     try {
@@ -122,13 +127,13 @@ LruLease HardBoundedLru::acquire(
       }
     }
     if (victim == entries_.end()) {
-      ++stats_.pin_failures;
+      increment_counter(stats_.pin_failures, "LRU pin-failure counter");
       fail(ErrorCode::memory_budget,
            "all eviction candidates are pinned under the hard budget");
     }
     stats_.charged_cache_bytes -= victim->second.charge;
     entries_.erase(victim);
-    ++stats_.evictions;
+    increment_counter(stats_.evictions, "LRU eviction counter");
   }
   lock.unlock();
   const auto record = loader();
@@ -150,7 +155,7 @@ LruLease HardBoundedLru::acquire(
   stats_.charged_cache_bytes += charge;
   stats_.cache_high_water =
       std::max(stats_.cache_high_water, stats_.charged_cache_bytes);
-  ++stats_.insertions;
+  increment_counter(stats_.insertions, "LRU insertion counter");
   assert_bounds();
   auto owner = std::make_shared<LeaseOwner>(shared_from_this(), pattern_id,
                                             false, 0);
@@ -194,4 +199,3 @@ void HardBoundedLru::clear() {
 
 }  // namespace engine002
 }  // namespace splitaligner
-

@@ -18,11 +18,20 @@ Implement canonical immutable memory store, disk store, hard-budgeted LRU and
 scratch paths, manifest validation, lifecycle/context guards, and atomic
 no-clobber publication.
 
+The package-portable header suffix is .h; the earlier ordinary commits used
+.hpp, and TESTS records the mechanical rename required for zero-warning
+R CMD check.
+
 ## Commit 4: ENGINE002-TESTS
 
 Add independent golden vectors, all 1,974 authority plans, degenerate/fusion,
 forced collision, lifecycle, corruption, failpoint, cross-session, large-offset,
 and three-platform gates without changing existing scientific fixtures.
+
+Local macOS evidence closes the exact 1,974-plan, golden, degenerate, lifecycle,
+budget, corruption, 15-stage failpoint, package-build, and package-check gates.
+Large-offset and non-macOS evidence remain explicitly incomplete until hosted
+runs exist.
 
 ## Commit 5: ENGINE002-BENCH
 
@@ -32,4 +41,3 @@ and final classification.
 
 The empirical mapper, truth constructor, matrix backend, public API, default
 engine, release identity, and package metadata remain unchanged throughout.
-

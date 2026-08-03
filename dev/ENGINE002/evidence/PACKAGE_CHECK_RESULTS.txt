@@ -1,0 +1,15 @@
+status=PASS
+package=SplitAlignerR_0.1.0.9000.tar.gz
+R_CMD_build=OK
+R_CMD_check_no_manual=OK
+errors=0
+warnings=0
+notes=0
+tests=OK
+examples=OK
+vignettes=OK
+compiled_code=OK
+platform=aarch64-apple-darwin20
+R=4.4.2
+compiler=Apple clang 15.0.0
+check_log=/private/tmp/sar-engine002-check.ZvTWpH/SplitAlignerR.Rcheck/00check.log

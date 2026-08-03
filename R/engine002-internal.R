@@ -28,6 +28,13 @@
   cpp_engine002_plan_view_snapshot(authority, record)
 }
 
+.engine002_plan_view_probe <- function(authority, record, primitive_ids,
+                                       repeats = 1L) {
+  cpp_engine002_plan_view_probe(
+    authority, record, as.integer(primitive_ids), as.integer(repeats)
+  )
+}
+
 .engine002_memory_store <- function(authority, pattern_count) {
   cpp_engine002_memory_store_create(authority, as.double(pattern_count))
 }

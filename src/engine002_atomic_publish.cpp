@@ -1,7 +1,7 @@
-#include "engine002_atomic_publish.hpp"
+#include "engine002_atomic_publish.h"
 
-#include "engine002_checked_math.hpp"
-#include "engine002_errors.hpp"
+#include "engine002_checked_math.h"
+#include "engine002_errors.h"
 
 #include <array>
 #include <atomic>

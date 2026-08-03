@@ -1,0 +1,13 @@
+status=PASS
+BUILDING_lookup_rejection=PASS
+arbitrary_insertion_order=PASS
+double_finalize_idempotence=PASS
+close_with_active_memory_pin=ENGINE_STORE_BUSY
+close_with_active_disk_pin=ENGINE_STORE_BUSY
+repeated_close=PASS
+read_after_close=ENGINE_CONTEXT_CLOSED
+durable_reopen=PASS
+zero_cache_scratch_path=PASS
+pinned_eviction_failure=ENGINE_MEMORY_BUDGET
+budget_cases=0,below-smallest,exactly-one-record,32MiB,64MiB
+counter_overflow_checks=implemented

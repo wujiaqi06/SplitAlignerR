@@ -1,8 +1,8 @@
-#include "engine002_plan_codec.hpp"
+#include "engine002_plan_codec.h"
 
-#include "engine002_checked_math.hpp"
-#include "engine002_endian.hpp"
-#include "engine002_errors.hpp"
+#include "engine002_checked_math.h"
+#include "engine002_endian.h"
+#include "engine002_errors.h"
 
 #include <algorithm>
 #include <array>
@@ -201,6 +201,10 @@ std::vector<std::uint8_t> encode_plan_record(
   }
   validate_padding_bits(input.retained, authority.global_taxon_count,
                         "retained pattern");
+  if (popcount_bytes(input.retained.data(), input.retained.size()) < 2U) {
+    fail(ErrorCode::scientific_invariant,
+         "truth plans require at least two retained taxa");
+  }
   const auto packed_states = pack_states(input.states);
   validate_terminal_states(authority, input.retained, input.states);
 
@@ -371,6 +375,10 @@ DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
   out.retained.assign(payload, payload + retained_bytes);
   validate_padding_bits(out.retained, authority.global_taxon_count,
                         "retained pattern");
+  if (popcount_bytes(out.retained.data(), out.retained.size()) < 2U) {
+    fail(ErrorCode::scientific_invariant,
+         "decoded truth plan has fewer than two retained taxa");
+  }
   out.states = unpack_states(payload + retained_end, authority.primitive_count,
                              state_bytes);
   validate_terminal_states(authority, out.retained, out.states);
@@ -481,11 +489,13 @@ TruthPlanView::TruthPlanView(
       record_(record ? record->data() : nullptr),
       record_size_(record ? record->size() : 0),
       generation_(generation),
-      decoded_() {
+      pattern_id_(0) {
   if (!authority_ || !owner_) {
     fail(ErrorCode::invalid_argument, "view requires authority and record owner");
   }
-  decoded_ = decode_plan_record(*authority_, record_, record_size_);
+  const DecodedPlan validated =
+      decode_plan_record(*authority_, record_, record_size_);
+  pattern_id_ = validated.pattern_id;
 }
 
 TruthPlanView::TruthPlanView(SpeciesAuthorityPtr authority,
@@ -498,11 +508,79 @@ TruthPlanView::TruthPlanView(SpeciesAuthorityPtr authority,
       record_(record),
       record_size_(record_size),
       generation_(generation),
-      decoded_() {
+      pattern_id_(0) {
   if (!authority_ || !owner_ || (record_ == nullptr && record_size_ != 0)) {
     fail(ErrorCode::invalid_argument, "view requires authority and record owner");
   }
-  decoded_ = decode_plan_record(*authority_, record_, record_size_);
+  const DecodedPlan validated =
+      decode_plan_record(*authority_, record_, record_size_);
+  pattern_id_ = validated.pattern_id;
+}
+
+bool TruthPlanView::retained(std::uint32_t taxon_id) const {
+  if (taxon_id >= authority_->global_taxon_count) {
+    fail(ErrorCode::invalid_argument, "view taxon ID is out of range");
+  }
+  return bit_is_set(record_ + kPlanHeaderBytes, taxon_id);
+}
+
+std::uint8_t TruthPlanView::state(std::uint32_t primitive_id) const {
+  if (primitive_id >= authority_->primitive_count) {
+    fail(ErrorCode::invalid_argument, "view primitive ID is out of range");
+  }
+  const std::uint32_t retained_bytes = load_u32_le(record_ + 28);
+  const std::uint8_t packed =
+      record_[kPlanHeaderBytes + retained_bytes + primitive_id / 4U];
+  return static_cast<std::uint8_t>(
+      (packed >> (2U * (primitive_id % 4U))) & 3U);
+}
+
+std::vector<std::uint8_t> TruthPlanView::primitive_query(
+    std::uint32_t primitive_id) const {
+  const std::uint8_t primitive_state = state(primitive_id);
+  if (primitive_state == 1U) return {};
+  const std::uint32_t retained_bytes = load_u32_le(record_ + 28);
+  const std::uint32_t state_bytes = load_u32_le(record_ + 32);
+  const std::uint32_t active_count = load_u32_le(record_ + 36);
+  const std::uint32_t query_count = load_u32_le(record_ + 40);
+  const std::uint8_t* payload = record_ + kPlanHeaderBytes;
+  std::uint32_t active_index = 0;
+  for (std::uint32_t primitive = 0; primitive < primitive_id; ++primitive) {
+    const std::uint8_t packed =
+        payload[retained_bytes + primitive / 4U];
+    const std::uint8_t value = static_cast<std::uint8_t>(
+        (packed >> (2U * (primitive % 4U))) & 3U);
+    if (value == 0U || value == 2U) ++active_index;
+  }
+  const std::size_t refs_begin = checked_add<std::size_t>(
+      retained_bytes, state_bytes, "direct-view refs offset");
+  if (active_index >= active_count) {
+    fail(ErrorCode::store_corrupt, "direct-view active reference is absent");
+  }
+  const std::uint32_t ref =
+      load_u32_le(payload + refs_begin + 4U * active_index);
+  const std::size_t offsets_begin = checked_add<std::size_t>(
+      refs_begin, checked_mul<std::size_t>(active_count, 4U,
+                                          "direct-view refs bytes"),
+      "direct-view offsets location");
+  const std::size_t pool_begin = checked_add<std::size_t>(
+      offsets_begin,
+      checked_mul<std::size_t>(
+          checked_add<std::size_t>(query_count, 1U,
+                                   "direct-view offset count"),
+          4U, "direct-view offsets bytes"),
+      "direct-view pool location");
+  const std::uint32_t begin = load_u32_le(payload + offsets_begin + 4U * ref);
+  const std::uint32_t end =
+      load_u32_le(payload + offsets_begin + 4U * (ref + 1U));
+  std::vector<std::uint8_t> retained_bits(
+      payload, payload + retained_bytes);
+  return parse_query(payload + pool_begin + begin, end - begin, retained_bits,
+                     authority_->global_taxon_count).dense;
+}
+
+DecodedPlan TruthPlanView::snapshot() const {
+  return decode_plan_record(*authority_, record_, record_size_);
 }
 
 }  // namespace engine002

@@ -1,0 +1,10 @@
+status=PASS
+R_testthat_golden_cases=plan_header,retained,state,refs,offsets,dense_query,store_header,index,footer,manifest
+python_independent_verifier=PASS
+plan_record_bytes=218
+plan_record_xxh64=0123cc5ef291df50
+store_bytes=906
+xxh64_reference_vectors=3/3
+sha256_reference_vectors=3/3
+byte_order=little-endian
+big_endian_interpretation=explicit_little_endian_decoder_only

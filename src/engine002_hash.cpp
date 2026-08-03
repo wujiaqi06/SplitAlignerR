@@ -1,6 +1,6 @@
-#include "engine002_hash.hpp"
+#include "engine002_hash.h"
 
-#include "engine002_endian.hpp"
+#include "engine002_endian.h"
 
 #include <algorithm>
 #include <array>

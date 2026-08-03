@@ -1,8 +1,8 @@
-#include "engine002_species_authority_binding.hpp"
+#include "engine002_species_authority_binding.h"
 
-#include "engine002_checked_math.hpp"
-#include "engine002_endian.hpp"
-#include "engine002_errors.hpp"
+#include "engine002_checked_math.h"
+#include "engine002_endian.h"
+#include "engine002_errors.h"
 
 #include <algorithm>
 #include <array>

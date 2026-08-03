@@ -1,7 +1,7 @@
-#include "engine002_store.hpp"
+#include "engine002_store.h"
 
-#include "engine002_checked_math.hpp"
-#include "engine002_errors.hpp"
+#include "engine002_checked_math.h"
+#include "engine002_errors.h"
 
 #include <algorithm>
 
@@ -108,7 +108,8 @@ void PackedMemoryStore::insert(
     fail(ErrorCode::invalid_state, "insertion requires BUILDING state");
   }
   builder_->insert(std::move(record));
-  ++inserted_;
+  inserted_ = checked_add<std::uint64_t>(inserted_, 1U,
+                                         "memory-store insertion counter");
 }
 
 void PackedMemoryStore::finalize() {
@@ -166,8 +167,10 @@ std::shared_ptr<PackedMemoryStore::PinOwner> PackedMemoryStore::acquire_pin(
     fail(ErrorCode::pattern_mismatch,
          "lookup retained bits do not match pattern ID");
   }
-  ++active_pins_;
-  ++lookups_;
+  active_pins_ = checked_add<std::uint64_t>(
+      active_pins_, 1U, "memory-store active-pin counter");
+  lookups_ = checked_add<std::uint64_t>(lookups_, 1U,
+                                        "memory-store lookup counter");
   return std::make_shared<PinOwner>(shared_from_this(), arena_);
 }
 
@@ -189,7 +192,7 @@ DecodedPlan PackedMemoryStore::lookup_snapshot(
   TruthPlanView view(authority_, std::static_pointer_cast<const void>(pin),
                      pin->arena->data() + checked_size(entry.offset, "arena offset"),
                      checked_size(entry.bytes, "record bytes"), generation);
-  return view.decoded();
+  return view.snapshot();
 }
 
 std::shared_ptr<const void> PackedMemoryStore::debug_pin(
@@ -235,4 +238,3 @@ const FinalizedPlanSet& PackedMemoryStore::finalized() const {
 
 }  // namespace engine002
 }  // namespace splitaligner
-

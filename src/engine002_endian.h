@@ -1,7 +1,7 @@
 #ifndef SPLITALIGNERR_ENGINE002_ENDIAN_HPP
 #define SPLITALIGNERR_ENGINE002_ENDIAN_HPP
 
-#include "engine002_checked_math.hpp"
+#include "engine002_checked_math.h"
 
 #include <algorithm>
 #include <array>

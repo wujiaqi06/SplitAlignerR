@@ -1,0 +1,9 @@
+status=PASS
+protocol_stages=15
+injected_failpoints=15/15
+validated_manifest_after_injected_failure=0
+preexisting_component_overwritten=0
+same_filesystem_atomic_no_replace=PASS
+final_VALIDATED_manifest_published_last=PASS
+symlink_redirection=REJECTED
+copy_fallback=ABSENT

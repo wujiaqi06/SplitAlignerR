@@ -1,7 +1,7 @@
 #ifndef SPLITALIGNERR_ENGINE002_ATOMIC_PUBLISH_HPP
 #define SPLITALIGNERR_ENGINE002_ATOMIC_PUBLISH_HPP
 
-#include "engine002_hash.hpp"
+#include "engine002_hash.h"
 
 #include <cstddef>
 #include <cstdint>

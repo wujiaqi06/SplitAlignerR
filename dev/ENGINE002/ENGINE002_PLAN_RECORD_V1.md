@@ -25,6 +25,12 @@ only major 1, minor 0, header size 144, flags 0, byte-order marker 1, state
 encoding 1, and reference width 4. Unknown values fail closed. Trailing bytes
 are rejected.
 
+The package input contract requires at least two retained taxa. Both encoder
+and decoder therefore reject zero- and one-taxon records with the stable
+scientific-invariant condition. A zero-query wire shape is structurally
+defined below for completeness, but is not emitted for a valid phylogenetic
+SpeciesAuthority whose retained terminal axes enforce an active query.
+
 Pattern IDs and primitive IDs are zero-based. Finalized pattern IDs are
 contiguous and deterministic after unsigned lexicographic sorting of the exact
 full-species-universe retained bitsets. Primitive IDs use the immutable
@@ -148,4 +154,3 @@ record_xxh64  = XXH64(all 144 header bytes || payload, seed=0)
 
 `record_xxh64` is returned by the standalone codec and stored in the store
 index. It is corruption detection, not scientific identity.
-

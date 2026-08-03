@@ -16,7 +16,7 @@ constructor or empirical mapper and does not add a public R API.
 ## Authorized paths
 
 ```text
-src/engine002_*.hpp
+src/engine002_*.h
 src/engine002_*.cpp
 R/engine002-internal.R
 tests/testthat/test-engine002-*.R
@@ -44,4 +44,3 @@ semantics, numeric policy, and matrix implementation are locked.
 5. `ENGINE002-BENCH`
 
 No durable writer is permitted before the specification validator passes.
-

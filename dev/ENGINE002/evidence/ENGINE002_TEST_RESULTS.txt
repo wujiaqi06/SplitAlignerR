@@ -1,0 +1,16 @@
+status=PASS
+platform=macOS-arm64
+testthat_engine002_pass=110
+testthat_engine002_fail=0
+testthat_engine002_warn=0
+testthat_engine002_skip=0
+atomic_publication_failpoints=15/15
+logical_plan_corruption_regions=7/7
+logical_store_corruption_regions=4/4
+LRU_budget_cases=0,below_record,one_record,32MiB,64MiB
+source_command=NOT_CRAN=true Rscript testthat::test_dir(filter=engine002)
+R_CMD_build=PASS
+R_CMD_check_no_manual=PASS
+R_CMD_check_status=OK
+check_locale=en_US.UTF-8
+temporary_dependency=markdown installed under /private/tmp only

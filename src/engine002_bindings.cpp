@@ -1,13 +1,14 @@
 #include <Rcpp.h>
 
-#include "engine002_endian.hpp"
-#include "engine002_atomic_publish.hpp"
-#include "engine002_disk_store.hpp"
-#include "engine002_errors.hpp"
-#include "engine002_hash.hpp"
-#include "engine002_plan_codec.hpp"
-#include "engine002_species_authority_binding.hpp"
-#include "engine002_store.hpp"
+#include "engine002_endian.h"
+#include "engine002_atomic_publish.h"
+#include "engine002_checked_math.h"
+#include "engine002_disk_store.h"
+#include "engine002_errors.h"
+#include "engine002_hash.h"
+#include "engine002_plan_codec.h"
+#include "engine002_species_authority_binding.h"
+#include "engine002_store.h"
 
 #include <array>
 #include <cmath>
@@ -363,7 +364,47 @@ Rcpp::List cpp_engine002_plan_view_snapshot(SEXP authority_pointer,
     auto owner = std::make_shared<const std::vector<std::uint8_t>>(
         as_bytes(record));
     TruthPlanView view(handle.authority, owner, handle.generation);
-    return decoded_to_list(view.decoded());
+    return decoded_to_list(view.snapshot());
+  });
+}
+
+// [[Rcpp::export]]
+Rcpp::List cpp_engine002_plan_view_probe(SEXP authority_pointer,
+                                         Rcpp::RawVector record,
+                                         Rcpp::IntegerVector primitive_ids,
+                                         int repeats) {
+  return translate_engine_errors([&]() {
+    if (repeats < 1) {
+      splitaligner::engine002::fail(ErrorCode::invalid_argument,
+                                    "view probe repeats must be positive");
+    }
+    const auto& handle = authority_handle(authority_pointer);
+    auto owner = std::make_shared<const std::vector<std::uint8_t>>(
+        as_bytes(record));
+    TruthPlanView view(handle.authority, owner, handle.generation);
+    std::uint64_t query_bytes = 0;
+    std::uint64_t state_sum = 0;
+    for (int iteration = 0; iteration < repeats; ++iteration) {
+      for (int primitive : primitive_ids) {
+        if (primitive < 0) {
+          splitaligner::engine002::fail(ErrorCode::invalid_argument,
+                                        "view probe primitive ID is negative");
+        }
+        const auto id = static_cast<std::uint32_t>(primitive);
+        const std::uint8_t state = view.state(id);
+        state_sum = splitaligner::engine002::checked_add<std::uint64_t>(
+            state_sum, state, "view-probe state checksum");
+        if (state != 1U) {
+          query_bytes = splitaligner::engine002::checked_add<std::uint64_t>(
+              query_bytes, view.primitive_query(id).size(),
+              "view-probe query bytes");
+        }
+      }
+    }
+    return Rcpp::List::create(
+        Rcpp::_["pattern_id"] = static_cast<double>(view.pattern_id()),
+        Rcpp::_["state_sum"] = static_cast<double>(state_sum),
+        Rcpp::_["query_bytes"] = static_cast<double>(query_bytes));
   });
 }
 

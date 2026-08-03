@@ -1,8 +1,8 @@
 #ifndef SPLITALIGNERR_ENGINE002_PLAN_CODEC_HPP
 #define SPLITALIGNERR_ENGINE002_PLAN_CODEC_HPP
 
-#include "engine002_hash.hpp"
-#include "engine002_species_authority_binding.hpp"
+#include "engine002_hash.h"
+#include "engine002_species_authority_binding.h"
 
 #include <cstdint>
 #include <memory>
@@ -59,9 +59,13 @@ class TruthPlanView {
   TruthPlanView(TruthPlanView&&) noexcept = default;
   TruthPlanView& operator=(TruthPlanView&&) noexcept = default;
 
-  std::uint64_t pattern_id() const noexcept { return decoded_.pattern_id; }
+  std::uint64_t pattern_id() const noexcept { return pattern_id_; }
   std::uint64_t generation() const noexcept { return generation_; }
-  const DecodedPlan& decoded() const noexcept { return decoded_; }
+  bool retained(std::uint32_t taxon_id) const;
+  std::uint8_t state(std::uint32_t primitive_id) const;
+  std::vector<std::uint8_t> primitive_query(
+      std::uint32_t primitive_id) const;
+  DecodedPlan snapshot() const;
 
  private:
   SpeciesAuthorityPtr authority_;
@@ -69,7 +73,7 @@ class TruthPlanView {
   const std::uint8_t* record_;
   std::size_t record_size_;
   std::uint64_t generation_;
-  DecodedPlan decoded_;
+  std::uint64_t pattern_id_;
 };
 
 }  // namespace engine002

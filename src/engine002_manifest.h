@@ -1,7 +1,7 @@
 #ifndef SPLITALIGNERR_ENGINE002_MANIFEST_HPP
 #define SPLITALIGNERR_ENGINE002_MANIFEST_HPP
 
-#include "engine002_hash.hpp"
+#include "engine002_hash.h"
 
 #include <cstdint>
 #include <string>

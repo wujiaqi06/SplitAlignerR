@@ -1,6 +1,6 @@
-#include "engine002_manifest.hpp"
+#include "engine002_manifest.h"
 
-#include "engine002_errors.hpp"
+#include "engine002_errors.h"
 
 #include <algorithm>
 #include <array>

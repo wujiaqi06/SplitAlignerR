@@ -84,6 +84,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_engine002_plan_view_probe
+Rcpp::List cpp_engine002_plan_view_probe(SEXP authority_pointer, Rcpp::RawVector record, Rcpp::IntegerVector primitive_ids, int repeats);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_view_probe(SEXP authority_pointerSEXP, SEXP recordSEXP, SEXP primitive_idsSEXP, SEXP repeatsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type primitive_ids(primitive_idsSEXP);
+    Rcpp::traits::input_parameter< int >::type repeats(repeatsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_view_probe(authority_pointer, record, primitive_ids, repeats));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_engine002_hash_reference_vectors
 Rcpp::List cpp_engine002_hash_reference_vectors();
 RcppExport SEXP _SplitAlignerR_cpp_engine002_hash_reference_vectors() {
@@ -289,6 +303,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_plan_encode", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_encode, 5},
     {"_SplitAlignerR_cpp_engine002_plan_decode", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_decode, 2},
     {"_SplitAlignerR_cpp_engine002_plan_view_snapshot", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_snapshot, 2},
+    {"_SplitAlignerR_cpp_engine002_plan_view_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_probe, 4},
     {"_SplitAlignerR_cpp_engine002_hash_reference_vectors", (DL_FUNC) &_SplitAlignerR_cpp_engine002_hash_reference_vectors, 0},
     {"_SplitAlignerR_cpp_engine002_memory_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_memory_store_create, 2},
     {"_SplitAlignerR_cpp_engine002_disk_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_create, 7},

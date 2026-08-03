@@ -1,7 +1,7 @@
 #ifndef SPLITALIGNERR_ENGINE002_SPECIES_AUTHORITY_BINDING_HPP
 #define SPLITALIGNERR_ENGINE002_SPECIES_AUTHORITY_BINDING_HPP
 
-#include "engine002_hash.hpp"
+#include "engine002_hash.h"
 
 #include <cstdint>
 #include <memory>

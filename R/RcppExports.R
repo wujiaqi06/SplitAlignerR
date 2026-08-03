@@ -25,6 +25,10 @@ cpp_engine002_plan_view_snapshot <- function(authority_pointer, record) {
     .Call(`_SplitAlignerR_cpp_engine002_plan_view_snapshot`, authority_pointer, record)
 }
 
+cpp_engine002_plan_view_probe <- function(authority_pointer, record, primitive_ids, repeats) {
+    .Call(`_SplitAlignerR_cpp_engine002_plan_view_probe`, authority_pointer, record, primitive_ids, repeats)
+}
+
 cpp_engine002_hash_reference_vectors <- function() {
     .Call(`_SplitAlignerR_cpp_engine002_hash_reference_vectors`)
 }

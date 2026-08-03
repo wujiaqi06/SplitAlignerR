@@ -1,0 +1,8 @@
+status=PASS_WITH_LIMIT
+exact_pattern_identity_under_constant_bucket=PASS
+query_identity=ordered exact dense bytes; no fast-hash identity path
+fiber_identity=ordered exact primitive member IDs; no fast-hash identity path
+record_index_identity=pattern ID plus exact retained bytes and SHA-256
+LRU_identity=pattern ID plus exact retained bytes
+constant_hash_injection_hook=NOT PRESENT because production registries do not use fast hash as identity
+limit=reviewer may require an explicit test-only hash seam despite absence of hash-indexed scientific registries
