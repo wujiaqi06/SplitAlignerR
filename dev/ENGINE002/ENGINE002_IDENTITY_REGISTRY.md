@@ -33,13 +33,15 @@ for primitive_id = 0..primitive_count-1:
   terminal_flag:u8
   reserved_zero[3]
   terminal_taxon_id:u32       # 0xffffffff for an internal primitive
-  canonical_full_split:bytes  # global-axis canonical selected-side bitset
+  authority_edge_split:bytes  # terminal singleton; internal canonical side
 ```
 
 The split bitset width is exactly `ceil(global_taxon_count/8)` with zero padding
 bits. Terminal entries have `terminal_flag=1`, an in-range taxon ID, and the
-singleton split for that taxon. Internal entries have flag 0 and sentinel
-`0xffffffff`. Primitive order is part of the identity.
+singleton split for that taxon. This remains the named terminal singleton in
+the two-taxon degenerate authority even when the query-side tie rule would pick
+the opposite singleton. Internal entries have flag 0, sentinel `0xffffffff`,
+and the canonical unrooted selected side. Primitive order is part of identity.
 
 ENGINE002 accepts an expected authority digest only after recomputing this
 canonical descriptor. A digest supplied without the descriptor cannot create a

@@ -10,6 +10,90 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// cpp_engine002_authority_create
+SEXP cpp_engine002_authority_create(Rcpp::CharacterVector taxon_labels, Rcpp::IntegerVector terminal_taxon_ids, Rcpp::List primitive_splits);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_authority_create(SEXP taxon_labelsSEXP, SEXP terminal_taxon_idsSEXP, SEXP primitive_splitsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type taxon_labels(taxon_labelsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type terminal_taxon_ids(terminal_taxon_idsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type primitive_splits(primitive_splitsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_authority_create(taxon_labels, terminal_taxon_ids, primitive_splits));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_authority_info
+Rcpp::List cpp_engine002_authority_info(SEXP authority_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_authority_info(SEXP authority_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_authority_info(authority_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_authority_close
+bool cpp_engine002_authority_close(SEXP authority_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_authority_close(SEXP authority_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_authority_close(authority_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_encode
+Rcpp::RawVector cpp_engine002_plan_encode(SEXP authority_pointer, double pattern_id, Rcpp::RawVector retained, Rcpp::IntegerVector states, Rcpp::List primitive_queries);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_encode(SEXP authority_pointerSEXP, SEXP pattern_idSEXP, SEXP retainedSEXP, SEXP statesSEXP, SEXP primitive_queriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_id(pattern_idSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type retained(retainedSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type states(statesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type primitive_queries(primitive_queriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_encode(authority_pointer, pattern_id, retained, states, primitive_queries));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_decode
+Rcpp::List cpp_engine002_plan_decode(SEXP authority_pointer, Rcpp::RawVector record);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_decode(SEXP authority_pointerSEXP, SEXP recordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_decode(authority_pointer, record));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_view_snapshot
+Rcpp::List cpp_engine002_plan_view_snapshot(SEXP authority_pointer, Rcpp::RawVector record);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_view_snapshot(SEXP authority_pointerSEXP, SEXP recordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_view_snapshot(authority_pointer, record));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_hash_reference_vectors
+Rcpp::List cpp_engine002_hash_reference_vectors();
+RcppExport SEXP _SplitAlignerR_cpp_engine002_hash_reference_vectors() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_hash_reference_vectors());
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_splitaligner_core_info
 Rcpp::List cpp_splitaligner_core_info();
 RcppExport SEXP _SplitAlignerR_cpp_splitaligner_core_info() {
@@ -58,6 +142,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SplitAlignerR_cpp_engine002_authority_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_authority_create, 3},
+    {"_SplitAlignerR_cpp_engine002_authority_info", (DL_FUNC) &_SplitAlignerR_cpp_engine002_authority_info, 1},
+    {"_SplitAlignerR_cpp_engine002_authority_close", (DL_FUNC) &_SplitAlignerR_cpp_engine002_authority_close, 1},
+    {"_SplitAlignerR_cpp_engine002_plan_encode", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_encode, 5},
+    {"_SplitAlignerR_cpp_engine002_plan_decode", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_decode, 2},
+    {"_SplitAlignerR_cpp_engine002_plan_view_snapshot", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_snapshot, 2},
+    {"_SplitAlignerR_cpp_engine002_hash_reference_vectors", (DL_FUNC) &_SplitAlignerR_cpp_engine002_hash_reference_vectors, 0},
     {"_SplitAlignerR_cpp_splitaligner_core_info", (DL_FUNC) &_SplitAlignerR_cpp_splitaligner_core_info, 0},
     {"_SplitAlignerR_cpp_validate_branch_length_tokens", (DL_FUNC) &_SplitAlignerR_cpp_validate_branch_length_tokens, 1},
     {"_SplitAlignerR_cpp_validate_species_tree", (DL_FUNC) &_SplitAlignerR_cpp_validate_species_tree, 1},

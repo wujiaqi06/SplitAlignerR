@@ -1,0 +1,15 @@
+ENGINE002_CODEC_SMOKE_PASS
+platform=macOS arm64
+compiler=Apple clang 15.0.0
+cxx_standard=C++17
+compile_warnings=0
+sha256_reference_vectors=PASS
+xxh64_seed0_reference_vectors=PASS
+truth_semantics_sha256=8323c706880b2e95628e803a408a459113b0ac3edeb4d69e9e0626a77fc57935
+authority_binding=PASS
+encode_decode_reencode_byte_identity=PASS
+direct_view_snapshot_equals_decode=PASS
+payload_corruption_rejected=PASS
+closed_authority_rejected=PASS
+smoke_record_bytes=239
+smoke_record_xxh64=805f51e5b75d490e
