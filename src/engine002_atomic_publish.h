@@ -12,6 +12,14 @@
 namespace splitaligner {
 namespace engine002 {
 
+enum class WriterRegion {
+  generic,
+  header,
+  record,
+  index,
+  footer
+};
+
 class ExclusiveBinaryWriter {
  public:
   explicit ExclusiveBinaryWriter(const std::filesystem::path& path);
@@ -19,7 +27,8 @@ class ExclusiveBinaryWriter {
   ExclusiveBinaryWriter& operator=(const ExclusiveBinaryWriter&) = delete;
   ~ExclusiveBinaryWriter() noexcept;
 
-  void write_all(const std::uint8_t* data, std::size_t size);
+  void write_all(const std::uint8_t* data, std::size_t size,
+                 WriterRegion region = WriterRegion::generic);
   void seek(std::uint64_t offset);
   void sync();
   void close();
@@ -47,6 +56,8 @@ void sync_directory(const std::filesystem::path& directory);
 void remove_recognized_temp(const std::filesystem::path& path) noexcept;
 void set_publication_failpoint(int stage) noexcept;
 void publication_failpoint(int stage);
+void set_io_faultpoint(int fault) noexcept;
+void cancellation_point();
 
 }  // namespace engine002
 }  // namespace splitaligner

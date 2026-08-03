@@ -37,6 +37,18 @@ cpp_engine002_large_offset_arithmetic_probe <- function(record_bytes_value, patt
     .Call(`_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe`, record_bytes_value, pattern_count_value)
 }
 
+cpp_engine002_sha_invariant_probe <- function(scenario) {
+    .Call(`_SplitAlignerR_cpp_engine002_sha_invariant_probe`, scenario)
+}
+
+cpp_engine002_set_constant_fast_hash <- function(enabled) {
+    .Call(`_SplitAlignerR_cpp_engine002_set_constant_fast_hash`, enabled)
+}
+
+cpp_engine002_constant_hash_registry_probe <- function() {
+    .Call(`_SplitAlignerR_cpp_engine002_constant_hash_registry_probe`)
+}
+
 cpp_engine002_memory_store_create <- function(authority_pointer, pattern_count) {
     .Call(`_SplitAlignerR_cpp_engine002_memory_store_create`, authority_pointer, pattern_count)
 }
@@ -79,6 +91,10 @@ cpp_engine002_store_close <- function(store_pointer) {
 
 cpp_engine002_set_publication_failpoint <- function(stage) {
     .Call(`_SplitAlignerR_cpp_engine002_set_publication_failpoint`, stage)
+}
+
+cpp_engine002_set_io_faultpoint <- function(fault) {
+    .Call(`_SplitAlignerR_cpp_engine002_set_io_faultpoint`, fault)
 }
 
 cpp_splitaligner_core_info <- function() {

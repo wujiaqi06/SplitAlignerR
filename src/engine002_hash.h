@@ -36,6 +36,8 @@ class Sha256State {
   Sha256 digest() const;
 
  private:
+  friend Sha256 sha256_guard_probe_for_test(std::uint64_t total,
+                                             std::size_t buffered);
   std::array<std::uint32_t, 8> state_;
   std::array<std::uint8_t, 64> buffer_{};
   std::uint64_t total_;
@@ -50,6 +52,8 @@ inline std::uint64_t xxh64(const std::vector<std::uint8_t>& data,
 }
 
 Sha256 sha256(const std::uint8_t* data, std::size_t size);
+Sha256 sha256_guard_probe_for_test(std::uint64_t total,
+                                   std::size_t buffered);
 inline Sha256 sha256(const std::vector<std::uint8_t>& data) {
   return sha256(data.data(), data.size());
 }

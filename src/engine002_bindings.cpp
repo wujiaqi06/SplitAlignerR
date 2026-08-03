@@ -5,6 +5,7 @@
 #include "engine002_checked_math.h"
 #include "engine002_disk_store.h"
 #include "engine002_errors.h"
+#include "engine002_fast_hash.h"
 #include "engine002_hash.h"
 #include "engine002_plan_codec.h"
 #include "engine002_species_authority_binding.h"
@@ -14,9 +15,11 @@
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using splitaligner::engine002::DecodedPlan;
@@ -469,6 +472,58 @@ Rcpp::List cpp_engine002_large_offset_arithmetic_probe(
 }
 
 // [[Rcpp::export]]
+std::string cpp_engine002_sha_invariant_probe(int scenario) {
+  return translate_engine_errors([&]() {
+    std::uint64_t total = 0;
+    std::size_t buffered = 0;
+    if (scenario == 1) {
+      buffered = 64;
+    } else if (scenario == 2) {
+      total = std::numeric_limits<std::uint64_t>::max() / 8U + 1U;
+    } else if (scenario != 0) {
+      splitaligner::engine002::fail(
+          ErrorCode::invalid_argument, "SHA invariant scenario must be 0..2");
+    }
+    return splitaligner::engine002::hex_lower(
+        splitaligner::engine002::sha256_guard_probe_for_test(total, buffered));
+  });
+}
+
+// [[Rcpp::export]]
+bool cpp_engine002_set_constant_fast_hash(bool enabled) {
+  return translate_engine_errors([&]() {
+    splitaligner::engine002::set_constant_fast_hash_for_tests(enabled);
+    return true;
+  });
+}
+
+// [[Rcpp::export]]
+Rcpp::IntegerVector cpp_engine002_constant_hash_registry_probe() {
+  return translate_engine_errors([&]() {
+    using splitaligner::engine002::ExactBytesHasher;
+    using splitaligner::engine002::FastHashDomain;
+    const std::vector<std::vector<std::uint8_t>> values{
+        {UINT8_C(0x01)}, {UINT8_C(0x02)}, {UINT8_C(0x03)}};
+    const std::array<FastHashDomain, 7> domains{{
+        FastHashDomain::retained_pattern, FastHashDomain::query_pool,
+        FastHashDomain::bstar_members, FastHashDomain::record_index,
+        FastHashDomain::memory_lookup, FastHashDomain::disk_lookup,
+        FastHashDomain::lru_key}};
+    Rcpp::IntegerVector counts(domains.size());
+    for (std::size_t i = 0; i < domains.size(); ++i) {
+      std::unordered_set<std::vector<std::uint8_t>, ExactBytesHasher> registry(
+          0, ExactBytesHasher(domains[i]));
+      registry.insert(values.begin(), values.end());
+      counts[i] = static_cast<int>(registry.size());
+    }
+    counts.names() = Rcpp::CharacterVector::create(
+        "retained_pattern", "query_pool", "bstar_members", "record_index",
+        "memory_lookup", "disk_lookup", "lru_key");
+    return counts;
+  });
+}
+
+// [[Rcpp::export]]
 SEXP cpp_engine002_memory_store_create(SEXP authority_pointer,
                                        double pattern_count) {
   return translate_engine_errors([&]() -> SEXP {
@@ -702,6 +757,18 @@ bool cpp_engine002_set_publication_failpoint(int stage) {
                                     "publication failpoint must be 0..15");
     }
     splitaligner::engine002::set_publication_failpoint(stage);
+    return true;
+  });
+}
+
+// [[Rcpp::export]]
+bool cpp_engine002_set_io_faultpoint(int fault) {
+  return translate_engine_errors([&]() {
+    if (fault < 0 || fault > 9) {
+      splitaligner::engine002::fail(
+          ErrorCode::invalid_argument, "I/O faultpoint must be 0..9");
+    }
+    splitaligner::engine002::set_io_faultpoint(fault);
     return true;
   });
 }

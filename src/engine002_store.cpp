@@ -42,7 +42,9 @@ PatternRegistryPtr make_pattern_registry(
 
 StoreBuilder::StoreBuilder(SpeciesAuthorityPtr authority,
                            std::uint64_t expected_count)
-    : authority_(std::move(authority)), expected_count_(expected_count) {
+    : authority_(std::move(authority)), expected_count_(expected_count),
+      by_id_(),
+      by_pattern_(0, ExactBytesHasher(FastHashDomain::retained_pattern)) {
   if (!authority_) fail(ErrorCode::invalid_argument, "store requires authority");
   if (expected_count_ > static_cast<std::uint64_t>(SIZE_MAX)) {
     fail(ErrorCode::memory_budget, "pattern count exceeds host size limit");
@@ -120,6 +122,7 @@ struct PackedMemoryStore::PinOwner {
 PackedMemoryStore::PackedMemoryStore(SpeciesAuthorityPtr authority,
                                      std::uint64_t pattern_count)
     : authority_(std::move(authority)),
+      constant_fast_hash_(constant_fast_hash_for_tests()),
       state_(StoreState::building),
       generation_(1),
       inserted_(0),
@@ -169,6 +172,8 @@ void PackedMemoryStore::finalize() {
     target.bytes = entry.record->size();
     target.retained = entry.retained;
     target.pattern_sha256 = entry.pattern_sha256;
+    target.lookup_fast_hash = fast_hash_bytes(
+        FastHashDomain::memory_lookup, entry.retained, constant_fast_hash_);
     arena->insert(arena->end(), entry.record->begin(), entry.record->end());
     index.push_back(std::move(target));
   }
@@ -195,7 +200,9 @@ std::shared_ptr<PackedMemoryStore::PinOwner> PackedMemoryStore::acquire_pin(
   if (pattern_id >= index_.size()) {
     fail(ErrorCode::pattern_mismatch, "lookup pattern ID is out of range");
   }
-  if (index_[pattern_id].retained != retained) {
+  if (index_[pattern_id].lookup_fast_hash != fast_hash_bytes(
+          FastHashDomain::memory_lookup, retained, constant_fast_hash_) ||
+      index_[pattern_id].retained != retained) {
     fail(ErrorCode::pattern_mismatch,
          "lookup retained bits do not match pattern ID");
   }
@@ -260,12 +267,6 @@ MemoryStoreStats PackedMemoryStore::stats() const noexcept {
   out.generation = generation_;
   out.arena_bytes = arena_ ? arena_->size() : 0;
   return out;
-}
-
-const FinalizedPlanSet& PackedMemoryStore::finalized() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-  require_open_immutable();
-  return *finalized_;
 }
 
 }  // namespace engine002

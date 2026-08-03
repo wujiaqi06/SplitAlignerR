@@ -317,6 +317,9 @@ ValidatedDiskStore validate_disk_store(
       fail(ErrorCode::store_corrupt, "index and record identity differ");
     }
     parsed.retained = decoded.retained;
+    parsed.lookup_fast_hash = fast_hash_bytes(
+        FastHashDomain::record_index, parsed.retained,
+        constant_fast_hash_for_tests());
     if (!patterns.empty() && !(patterns.back() < parsed.retained)) {
       fail(ErrorCode::duplicate_pattern,
            "disk patterns are not canonical and unique");
@@ -383,6 +386,7 @@ PackedDiskStore::PackedDiskStore(
     std::uint64_t index_budget, std::uint64_t metadata_budget,
     std::uint64_t combined_runtime_bound)
     : authority_(std::move(authority)), registry_(std::move(registry)),
+      constant_fast_hash_(constant_fast_hash_for_tests()),
       state_(StoreState::building), generation_(1), writer_(),
       directory_(directory), run_store_id_(run_store_id), component_temp_(),
       candidate_temp_(), validated_temp_(), component_final_(),
@@ -431,7 +435,8 @@ PackedDiskStore::PackedDiskStore(
   try {
     writer_ = std::make_unique<ExclusiveBinaryWriter>(component_temp_);
     std::array<std::uint8_t, kStoreHeaderBytes> placeholder{};
-    writer_->write_all(placeholder.data(), placeholder.size());
+    writer_->write_all(placeholder.data(), placeholder.size(),
+                       WriterRegion::header);
     temporary_disk_high_water_ = kStoreHeaderBytes;
   } catch (...) {
     cleanup_builder_temporary();
@@ -445,6 +450,7 @@ PackedDiskStore::PackedDiskStore(
     std::uint64_t scratch_budget, std::uint64_t index_budget,
     std::uint64_t metadata_budget, std::uint64_t combined_runtime_bound)
     : authority_(std::move(authority)), registry_(),
+      constant_fast_hash_(constant_fast_hash_for_tests()),
       state_(StoreState::open_validated), generation_(1), writer_(),
       directory_(), run_store_id_(), component_temp_(), candidate_temp_(),
       validated_temp_(), component_final_(), manifest_final_(), index_wire_(),
@@ -460,6 +466,10 @@ PackedDiskStore::PackedDiskStore(
       combined_runtime_bound_(combined_runtime_bound),
       file_bytes_(validated.manifest.store_bytes),
       index_charged_bytes_(index_charge(index_)), metadata_charged_bytes_(4096) {
+  for (auto& entry : index_) {
+    entry.lookup_fast_hash = fast_hash_bytes(
+        FastHashDomain::disk_lookup, entry.retained, constant_fast_hash_);
+  }
   validate_runtime_budgets();
 }
 
@@ -543,6 +553,7 @@ void PackedDiskStore::insert(
     fail(ErrorCode::invalid_state, "disk insertion requires BUILDING state");
   }
   if (!record) fail(ErrorCode::invalid_argument, "cannot insert null record");
+  cancellation_point();
   const std::uint64_t pattern_count = registry_->retained_patterns.size();
   if (next_pattern_id_ >= pattern_count) {
     fail(ErrorCode::pattern_mismatch,
@@ -570,7 +581,7 @@ void PackedDiskStore::insert(
       kStoreHeaderBytes, records_bytes_, "streaming record offset");
   update_builder_high_water(record_bytes);
   try {
-    writer_->write_all(record->data(), record->size());
+    writer_->write_all(record->data(), record->size(), WriterRegion::record);
   } catch (...) {
     state_ = StoreState::closed;
     ++generation_;
@@ -632,21 +643,24 @@ std::filesystem::path PackedDiskStore::finalize_publish(
   bool manifest_published = false;
   bool component_published = false;
   try {
+    cancellation_point();
     publication_failpoint(1);
-    writer_->write_all(index_wire_.data(), index_wire_.size());
+    writer_->write_all(index_wire_.data(), index_wire_.size(),
+                       WriterRegion::index);
     publication_failpoint(2);
     writer_->seek(0);
-    writer_->write_all(header.data(), header.size());
+    writer_->write_all(header.data(), header.size(), WriterRegion::header);
     publication_failpoint(3);
     writer_->seek(footer_offset);
-    writer_->write_all(footer.data(), footer.size());
+    writer_->write_all(footer.data(), footer.size(), WriterRegion::footer);
     publication_failpoint(4);
     writer_->sync();
     publication_failpoint(5);
     const Sha256 complete_sha = normalized_file_sha(
         component_temp_, file_bytes, footer_offset + 80U, 32U);
     writer_->seek(footer_offset + 80U);
-    writer_->write_all(complete_sha.data(), complete_sha.size());
+    writer_->write_all(complete_sha.data(), complete_sha.size(),
+                       WriterRegion::footer);
     writer_->sync();
     writer_->close();
     writer_.reset();
@@ -697,6 +711,10 @@ std::filesystem::path PackedDiskStore::finalize_publish(
     component_path_ = component_final_;
     manifest_path_ = manifest_final_;
     index_ = final_validated.index;
+    for (auto& entry : index_) {
+      entry.lookup_fast_hash = fast_hash_bytes(
+          FastHashDomain::disk_lookup, entry.retained, constant_fast_hash_);
+    }
     file_bytes_ = file_bytes;
     temporary_disk_high_water_ = std::max(temporary_disk_high_water_, file_bytes);
     index_charged_bytes_ = index_charge(index_);
@@ -744,7 +762,9 @@ LruLease PackedDiskStore::acquire(
       fail(ErrorCode::pattern_mismatch, "disk lookup ID is out of range");
     }
     entry = index_[pattern_id];
-    if (entry.retained != retained) {
+    if (entry.lookup_fast_hash != fast_hash_bytes(
+            FastHashDomain::disk_lookup, retained, constant_fast_hash_) ||
+        entry.retained != retained) {
       fail(ErrorCode::pattern_mismatch,
            "disk lookup retained bits do not match pattern ID");
     }

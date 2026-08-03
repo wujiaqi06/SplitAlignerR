@@ -41,6 +41,7 @@ HardBoundedLru::HardBoundedLru(std::uint64_t cache_budget,
                                std::uint64_t scratch_budget)
     : cache_budget_(cache_budget),
       scratch_budget_(scratch_budget),
+      constant_fast_hash_(constant_fast_hash_for_tests()),
       sequence_(0),
       lru_head_(kNoLruEntry),
       lru_tail_(kNoLruEntry),
@@ -113,7 +114,9 @@ LruLease HardBoundedLru::acquire(
   ++sequence_;
   auto found = entries_.find(pattern_id);
   if (found != entries_.end()) {
-    if (found->second.retained != retained) {
+    if (found->second.lookup_fast_hash != fast_hash_bytes(
+            FastHashDomain::lru_key, retained, constant_fast_hash_) ||
+        found->second.retained != retained) {
       fail(ErrorCode::pattern_mismatch, "LRU key retained bits mismatch");
     }
     if (found->second.pins == 0) unlink_lru(pattern_id);
@@ -187,6 +190,8 @@ LruLease HardBoundedLru::acquire(
   entry.retained = retained;
   entry.record = record;
   entry.charge = charge;
+  entry.lookup_fast_hash = fast_hash_bytes(
+      FastHashDomain::lru_key, retained, constant_fast_hash_);
   entry.last_use = sequence_;
   entry.pins = 1;
   entries_.emplace(pattern_id, std::move(entry));

@@ -1,7 +1,7 @@
 #ifndef SPLITALIGNERR_ENGINE002_LRU_HPP
 #define SPLITALIGNERR_ENGINE002_LRU_HPP
 
-#include "engine002_hash.h"
+#include "engine002_fast_hash.h"
 
 #include <cstdint>
 #include <functional>
@@ -56,6 +56,7 @@ class HardBoundedLru : public std::enable_shared_from_this<HardBoundedLru> {
     std::vector<std::uint8_t> retained;
     std::shared_ptr<const std::vector<std::uint8_t>> record;
     std::uint64_t charge = 0;
+    std::uint64_t lookup_fast_hash = 0;
     std::uint64_t last_use = 0;
     std::uint64_t pins = 0;
     std::uint64_t lru_previous = std::numeric_limits<std::uint64_t>::max();
@@ -73,6 +74,7 @@ class HardBoundedLru : public std::enable_shared_from_this<HardBoundedLru> {
   mutable std::mutex mutex_;
   std::uint64_t cache_budget_;
   std::uint64_t scratch_budget_;
+  bool constant_fast_hash_;
   std::uint64_t sequence_;
   std::uint64_t lru_head_;
   std::uint64_t lru_tail_;

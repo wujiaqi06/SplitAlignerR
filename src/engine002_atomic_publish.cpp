@@ -26,6 +26,7 @@ namespace engine002 {
 namespace {
 
 std::atomic<int> g_publication_failpoint{0};
+std::atomic<int> g_io_failpoint{0};
 
 std::string system_message(const char* context) {
   return std::string(context) + ": " + std::strerror(errno);
@@ -55,6 +56,41 @@ int close_descriptor(int descriptor) noexcept {
 #endif
 }
 
+bool consume_io_fault(int expected) noexcept {
+  int observed = expected;
+  return g_io_failpoint.compare_exchange_strong(observed, 0);
+}
+
+void write_descriptor_all(int descriptor, const std::uint8_t* data,
+                          std::size_t size) {
+  std::size_t written = 0;
+  while (written < size) {
+#ifdef _WIN32
+    const unsigned chunk = static_cast<unsigned>(
+        std::min<std::size_t>(size - written, UINT_MAX));
+    const int result = _write(descriptor, data + written, chunk);
+#else
+    const ssize_t result = ::write(descriptor, data + written, size - written);
+#endif
+    if (result <= 0) {
+      fail(errno == ENOSPC ? ErrorCode::disk_full : ErrorCode::io_failure,
+           system_message("binary short write"));
+    }
+    written += static_cast<std::size_t>(result);
+  }
+}
+
+int partial_fault_for_region(WriterRegion region) noexcept {
+  switch (region) {
+    case WriterRegion::header: return 2;
+    case WriterRegion::record: return 3;
+    case WriterRegion::index: return 4;
+    case WriterRegion::footer: return 5;
+    case WriterRegion::generic: return 0;
+  }
+  return 0;
+}
+
 }  // namespace
 
 ExclusiveBinaryWriter::ExclusiveBinaryWriter(const std::filesystem::path& path)
@@ -65,22 +101,19 @@ ExclusiveBinaryWriter::~ExclusiveBinaryWriter() noexcept {
 }
 
 void ExclusiveBinaryWriter::write_all(const std::uint8_t* data,
-                                      std::size_t size) {
-  std::size_t written = 0;
-  while (written < size) {
-#ifdef _WIN32
-    const unsigned chunk = static_cast<unsigned>(
-        std::min<std::size_t>(size - written, UINT_MAX));
-    const int result = _write(descriptor_, data + written, chunk);
-#else
-    const ssize_t result = ::write(descriptor_, data + written, size - written);
-#endif
-    if (result <= 0) {
-      fail(errno == ENOSPC ? ErrorCode::disk_full : ErrorCode::io_failure,
-           system_message("binary short write"));
-    }
-    written += static_cast<std::size_t>(result);
+                                      std::size_t size,
+                                      WriterRegion region) {
+  if (consume_io_fault(8)) {
+    fail(ErrorCode::disk_full, "injected ENOSPC before binary write");
   }
+  const int regional_fault = partial_fault_for_region(region);
+  if (consume_io_fault(1) ||
+      (regional_fault != 0 && consume_io_fault(regional_fault))) {
+    const std::size_t partial = size == 0 ? 0 : std::max<std::size_t>(1, size / 2);
+    write_descriptor_all(descriptor_, data, partial);
+    fail(ErrorCode::io_failure, "injected partial binary write");
+  }
+  write_descriptor_all(descriptor_, data, size);
 }
 
 void ExclusiveBinaryWriter::seek(std::uint64_t offset) {
@@ -97,6 +130,9 @@ void ExclusiveBinaryWriter::seek(std::uint64_t offset) {
 }
 
 void ExclusiveBinaryWriter::sync() {
+  if (consume_io_fault(6)) {
+    fail(ErrorCode::io_failure, "injected file flush failure");
+  }
 #ifdef _WIN32
   if (_commit(descriptor_) != 0) {
 #else
@@ -110,7 +146,11 @@ void ExclusiveBinaryWriter::close() {
   if (descriptor_ < 0) return;
   const int descriptor = descriptor_;
   descriptor_ = -1;
-  if (close_descriptor(descriptor) != 0) {
+  const int result = close_descriptor(descriptor);
+  if (consume_io_fault(7)) {
+    fail(ErrorCode::io_failure, "injected file close failure");
+  }
+  if (result != 0) {
     fail(ErrorCode::io_failure, system_message("file close failed"));
   }
 }
@@ -286,6 +326,16 @@ void publication_failpoint(int stage) {
     fail(ErrorCode::io_failure,
          std::string("injected publication failpoint after stage ") +
              std::to_string(stage));
+  }
+}
+
+void set_io_faultpoint(int fault) noexcept {
+  g_io_failpoint.store(fault);
+}
+
+void cancellation_point() {
+  if (consume_io_fault(9)) {
+    fail(ErrorCode::interrupted, "injected streaming-store cancellation");
   }
 }
 

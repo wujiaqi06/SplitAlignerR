@@ -2,12 +2,14 @@
 #define SPLITALIGNERR_ENGINE002_STORE_HPP
 
 #include "engine002_plan_codec.h"
+#include "engine002_fast_hash.h"
 
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace splitaligner {
@@ -58,7 +60,8 @@ class StoreBuilder {
   SpeciesAuthorityPtr authority_;
   std::uint64_t expected_count_;
   std::map<std::uint64_t, PlanRecordEntry> by_id_;
-  std::map<std::vector<std::uint8_t>, std::uint64_t> by_pattern_;
+  std::unordered_map<std::vector<std::uint8_t>, std::uint64_t,
+                     ExactBytesHasher> by_pattern_;
 };
 
 struct MemoryStoreStats {
@@ -82,7 +85,6 @@ class PackedMemoryStore
   void close();
   StoreState state() const noexcept;
   MemoryStoreStats stats() const noexcept;
-  const FinalizedPlanSet& finalized() const;
 
  private:
   struct ArenaEntry {
@@ -90,6 +92,7 @@ class PackedMemoryStore
     std::uint64_t bytes = 0;
     std::vector<std::uint8_t> retained;
     Sha256 pattern_sha256{};
+    std::uint64_t lookup_fast_hash = 0;
   };
   struct PinOwner;
 
@@ -100,6 +103,7 @@ class PackedMemoryStore
   void require_open_immutable() const;
 
   SpeciesAuthorityPtr authority_;
+  bool constant_fast_hash_;
   mutable std::mutex mutex_;
   StoreState state_;
   std::uint64_t generation_;

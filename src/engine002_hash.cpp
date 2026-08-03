@@ -218,8 +218,11 @@ Sha256State::Sha256State() noexcept
 
 void Sha256State::update(const std::uint8_t* data, std::size_t size) {
   if (size == 0) return;
-  if (size > std::numeric_limits<std::uint64_t>::max() - total_) {
-    fail(ErrorCode::store_corrupt, "SHA-256 byte-count overflow");
+  constexpr std::uint64_t kMaxShaBytes =
+      std::numeric_limits<std::uint64_t>::max() / 8U;
+  if (total_ > kMaxShaBytes ||
+      static_cast<std::uint64_t>(size) > kMaxShaBytes - total_) {
+    fail(ErrorCode::internal_failure, "SHA-256 bit-length overflow");
   }
   total_ += static_cast<std::uint64_t>(size);
   const std::uint8_t* p = data;
@@ -243,6 +246,15 @@ void Sha256State::update(const std::uint8_t* data, std::size_t size) {
 }
 
 Sha256 Sha256State::digest() const {
+  constexpr std::uint64_t kMaxShaBytes =
+      std::numeric_limits<std::uint64_t>::max() / 8U;
+  if (buffered_ > 63U) {
+    fail(ErrorCode::internal_failure,
+         "SHA-256 buffered-byte invariant exceeds 63");
+  }
+  if (total_ > kMaxShaBytes) {
+    fail(ErrorCode::internal_failure, "SHA-256 bit-length invariant overflow");
+  }
   Sha256State copy = *this;
   std::array<std::uint8_t, 128> tail{};
   if (copy.buffered_ != 0) {
@@ -322,6 +334,11 @@ std::uint64_t xxh64(const std::uint8_t* data, std::size_t size,
 }
 
 Sha256 sha256(const std::uint8_t* data, std::size_t size) {
+  constexpr std::uint64_t kMaxShaBytes =
+      std::numeric_limits<std::uint64_t>::max() / 8U;
+  if (static_cast<std::uint64_t>(size) > kMaxShaBytes) {
+    fail(ErrorCode::internal_failure, "SHA-256 one-shot bit-length overflow");
+  }
   std::array<std::uint32_t, 8> state = {{
       UINT32_C(0x6a09e667), UINT32_C(0xbb67ae85), UINT32_C(0x3c6ef372),
       UINT32_C(0xa54ff53a), UINT32_C(0x510e527f), UINT32_C(0x9b05688c),
@@ -355,6 +372,14 @@ Sha256 sha256(const std::uint8_t* data, std::size_t size) {
     store_u32_be(digest.data() + 4 * i, state[i]);
   }
   return digest;
+}
+
+Sha256 sha256_guard_probe_for_test(std::uint64_t total,
+                                   std::size_t buffered) {
+  Sha256State state;
+  state.total_ = total;
+  state.buffered_ = buffered;
+  return state.digest();
 }
 
 std::string hex_lower(const std::uint8_t* data, std::size_t size) {

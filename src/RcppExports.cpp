@@ -120,6 +120,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_engine002_sha_invariant_probe
+std::string cpp_engine002_sha_invariant_probe(int scenario);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_sha_invariant_probe(SEXP scenarioSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type scenario(scenarioSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_sha_invariant_probe(scenario));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_set_constant_fast_hash
+bool cpp_engine002_set_constant_fast_hash(bool enabled);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_set_constant_fast_hash(SEXP enabledSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type enabled(enabledSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_set_constant_fast_hash(enabled));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_constant_hash_registry_probe
+Rcpp::IntegerVector cpp_engine002_constant_hash_registry_probe();
+RcppExport SEXP _SplitAlignerR_cpp_engine002_constant_hash_registry_probe() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_constant_hash_registry_probe());
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_engine002_memory_store_create
 SEXP cpp_engine002_memory_store_create(SEXP authority_pointer, double pattern_count);
 RcppExport SEXP _SplitAlignerR_cpp_engine002_memory_store_create(SEXP authority_pointerSEXP, SEXP pattern_countSEXP) {
@@ -263,6 +295,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_engine002_set_io_faultpoint
+bool cpp_engine002_set_io_faultpoint(int fault);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_set_io_faultpoint(SEXP faultSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type fault(faultSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_set_io_faultpoint(fault));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_splitaligner_core_info
 Rcpp::List cpp_splitaligner_core_info();
 RcppExport SEXP _SplitAlignerR_cpp_splitaligner_core_info() {
@@ -320,6 +363,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_plan_view_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_probe, 4},
     {"_SplitAlignerR_cpp_engine002_hash_reference_vectors", (DL_FUNC) &_SplitAlignerR_cpp_engine002_hash_reference_vectors, 0},
     {"_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe, 2},
+    {"_SplitAlignerR_cpp_engine002_sha_invariant_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_sha_invariant_probe, 1},
+    {"_SplitAlignerR_cpp_engine002_set_constant_fast_hash", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_constant_fast_hash, 1},
+    {"_SplitAlignerR_cpp_engine002_constant_hash_registry_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_constant_hash_registry_probe, 0},
     {"_SplitAlignerR_cpp_engine002_memory_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_memory_store_create, 2},
     {"_SplitAlignerR_cpp_engine002_disk_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_create, 9},
     {"_SplitAlignerR_cpp_engine002_disk_store_open", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_open, 7},
@@ -331,6 +377,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_store_stats", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_stats, 1},
     {"_SplitAlignerR_cpp_engine002_store_close", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_close, 1},
     {"_SplitAlignerR_cpp_engine002_set_publication_failpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_publication_failpoint, 1},
+    {"_SplitAlignerR_cpp_engine002_set_io_faultpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_io_faultpoint, 1},
     {"_SplitAlignerR_cpp_splitaligner_core_info", (DL_FUNC) &_SplitAlignerR_cpp_splitaligner_core_info, 0},
     {"_SplitAlignerR_cpp_validate_branch_length_tokens", (DL_FUNC) &_SplitAlignerR_cpp_validate_branch_length_tokens, 1},
     {"_SplitAlignerR_cpp_validate_species_tree", (DL_FUNC) &_SplitAlignerR_cpp_validate_species_tree, 1},

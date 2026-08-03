@@ -3,12 +3,14 @@
 #include "engine002_checked_math.h"
 #include "engine002_endian.h"
 #include "engine002_errors.h"
+#include "engine002_fast_hash.h"
 
 #include <algorithm>
 #include <array>
 #include <cstring>
 #include <limits>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <string>
 
@@ -208,7 +210,9 @@ std::vector<std::uint8_t> encode_plan_record(
   const auto packed_states = pack_states(input.states);
   validate_terminal_states(authority, input.retained, input.states);
 
-  std::map<std::vector<std::uint8_t>, EncodedQuery> unique_queries;
+  std::unordered_map<std::vector<std::uint8_t>, EncodedQuery,
+                     ExactBytesHasher>
+      unique_queries(0, ExactBytesHasher(FastHashDomain::query_pool));
   std::vector<std::vector<std::uint8_t>> active_dense;
   std::vector<std::uint8_t> active_states;
   for (std::uint32_t primitive = 0; primitive < authority.primitive_count;
@@ -229,12 +233,21 @@ std::vector<std::uint8_t> encode_plan_record(
     active_states.push_back(state);
   }
 
-  std::map<std::vector<std::uint8_t>, std::uint32_t> query_ids;
-  std::vector<EncodedQuery> sorted_queries;
+  std::unordered_map<std::vector<std::uint8_t>, std::uint32_t,
+                     ExactBytesHasher>
+      query_ids(0, ExactBytesHasher(FastHashDomain::query_pool));
+  std::vector<std::vector<std::uint8_t>> sorted_dense_queries;
+  sorted_dense_queries.reserve(unique_queries.size());
   for (const auto& item : unique_queries) {
+    sorted_dense_queries.push_back(item.first);
+  }
+  std::sort(sorted_dense_queries.begin(), sorted_dense_queries.end());
+  std::vector<EncodedQuery> sorted_queries;
+  sorted_queries.reserve(sorted_dense_queries.size());
+  for (const auto& dense : sorted_dense_queries) {
     const std::uint32_t id = checked_u32(sorted_queries.size(), "query ID");
-    query_ids.emplace(item.first, id);
-    sorted_queries.push_back(item.second);
+    query_ids.emplace(dense, id);
+    sorted_queries.push_back(unique_queries.at(dense));
   }
   std::vector<std::vector<std::uint8_t>> grouped_states(sorted_queries.size());
   for (std::size_t i = 0; i < active_dense.size(); ++i) {

@@ -21,6 +21,7 @@ struct DiskIndexEntry {
   std::uint64_t record_bytes = 0;
   Sha256 pattern_sha256{};
   std::uint64_t record_xxh64 = 0;
+  std::uint64_t lookup_fast_hash = 0;
   std::vector<std::uint8_t> retained;
 };
 
@@ -109,6 +110,7 @@ class PackedDiskStore : public std::enable_shared_from_this<PackedDiskStore> {
 
   SpeciesAuthorityPtr authority_;
   PatternRegistryPtr registry_;
+  bool constant_fast_hash_;
   mutable std::mutex mutex_;
   StoreState state_;
   std::uint64_t generation_;
