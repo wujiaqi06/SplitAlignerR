@@ -45,19 +45,33 @@ authority <- engine002_make_authority(reference_authority)
 
 records <- vector("list", length(registry$pattern_ids))
 record_bytes <- numeric(length(records))
+phase <- c(reference = 0, encode = 0, decode = 0, direct_view = 0,
+           reencode = 0)
 for (i in seq_along(records)) {
   retained <- a_unpack_ids(registry$exact_pattern_bits[[i]],
                            registry$universe_size)
+  phase_start <- proc.time()[["elapsed"]]
   reference <- arch_build_truth_plan(reference_authority, retained)
   queries <- engine002_plan_queries(
     reference_authority, retained, reference$state_template
   )
+  phase[["reference"]] <- phase[["reference"]] +
+    proc.time()[["elapsed"]] - phase_start
+  phase_start <- proc.time()[["elapsed"]]
   record <- SplitAlignerR:::.engine002_plan_encode(
     authority, i - 1L, registry$exact_pattern_bits[[i]],
     reference$state_template, queries
   )
+  phase[["encode"]] <- phase[["encode"]] +
+    proc.time()[["elapsed"]] - phase_start
+  phase_start <- proc.time()[["elapsed"]]
   decoded <- SplitAlignerR:::.engine002_plan_decode(authority, record)
+  phase[["decode"]] <- phase[["decode"]] +
+    proc.time()[["elapsed"]] - phase_start
+  phase_start <- proc.time()[["elapsed"]]
   view <- SplitAlignerR:::.engine002_plan_view_snapshot(authority, record)
+  phase[["direct_view"]] <- phase[["direct_view"]] +
+    proc.time()[["elapsed"]] - phase_start
   equal <- engine002_plan_equal_reference(decoded, reference, queries)
   if (!isTRUE(equal)) {
     detail <- ""
@@ -80,10 +94,13 @@ for (i in seq_along(records)) {
   if (!identical(decoded, view)) {
     stop(sprintf("direct view mismatch at pattern %d", i - 1L), call. = FALSE)
   }
+  phase_start <- proc.time()[["elapsed"]]
   reencoded <- SplitAlignerR:::.engine002_plan_encode(
     authority, decoded$pattern_id, decoded$retained, decoded$states,
     decoded$primitive_queries
   )
+  phase[["reencode"]] <- phase[["reencode"]] +
+    proc.time()[["elapsed"]] - phase_start
   if (!identical(record, reencoded)) {
     stop(sprintf("re-encode mismatch at pattern %d", i - 1L), call. = FALSE)
   }
@@ -108,6 +125,35 @@ for (i in c(1L, 2L, length(records) %/% 2L, length(records))) {
 memory_stats <- SplitAlignerR:::cpp_engine002_store_stats(memory)
 SplitAlignerR:::cpp_engine002_store_close(memory)
 
+MiB <- 1024^2
+disk_directory <- tempfile("engine002-authority-", tmpdir = "/private/tmp")
+dir.create(disk_directory, mode = "0700")
+on.exit(unlink(disk_directory, recursive = TRUE), add = TRUE)
+disk <- SplitAlignerR:::.engine002_disk_store(
+  authority, length(records), 64 * MiB, MiB, MiB, MiB, 67 * MiB
+)
+disk_build_start <- proc.time()[["elapsed"]]
+for (i in rev(seq_along(records))) {
+  SplitAlignerR:::cpp_engine002_store_insert(disk, records[[i]])
+}
+disk_build_seconds <- proc.time()[["elapsed"]] - disk_build_start
+disk_finalize_start <- proc.time()[["elapsed"]]
+manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
+  disk, disk_directory, "dddddddddddddddddddddddddddddddd"
+)
+disk_finalize_seconds <- proc.time()[["elapsed"]] - disk_finalize_start
+disk_stats <- SplitAlignerR:::cpp_engine002_store_stats(disk)
+for (i in c(1L, 2L, length(records) %/% 2L, length(records))) {
+  got <- SplitAlignerR:::cpp_engine002_store_lookup_snapshot(
+    disk, i - 1L, registry$exact_pattern_bits[[i]]
+  )
+  stopifnot(identical(got$states,
+                      SplitAlignerR:::.engine002_plan_decode(
+                        authority, records[[i]]
+                      )$states))
+}
+SplitAlignerR:::cpp_engine002_store_close(disk)
+
 elapsed <- unname(proc.time()[["elapsed"]] - started)
 lines <- c(
   "status=PASS",
@@ -123,6 +169,13 @@ lines <- c(
   paste0("record_bytes_min=", min(record_bytes)),
   paste0("record_bytes_max=", max(record_bytes)),
   paste0("memory_arena_bytes=", memory_stats$arena_bytes),
+  paste0("disk_store_bytes=", disk_stats$file_bytes),
+  paste0("disk_build_seconds=", sprintf("%.3f", disk_build_seconds)),
+  paste0("disk_finalize_validate_publish_seconds=",
+         sprintf("%.3f", disk_finalize_seconds)),
+  paste0("phase_seconds=", paste(
+    names(phase), sprintf("%.3f", phase), sep = ":", collapse = ","
+  )),
   paste0("elapsed_seconds=", sprintf("%.3f", elapsed)),
   paste0("input_md5_stability=", paste(observed_sha, collapse = ","))
 )

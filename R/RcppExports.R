@@ -33,6 +33,10 @@ cpp_engine002_hash_reference_vectors <- function() {
     .Call(`_SplitAlignerR_cpp_engine002_hash_reference_vectors`)
 }
 
+cpp_engine002_large_offset_arithmetic_probe <- function(record_bytes_value, pattern_count_value) {
+    .Call(`_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe`, record_bytes_value, pattern_count_value)
+}
+
 cpp_engine002_memory_store_create <- function(authority_pointer, pattern_count) {
     .Call(`_SplitAlignerR_cpp_engine002_memory_store_create`, authority_pointer, pattern_count)
 }

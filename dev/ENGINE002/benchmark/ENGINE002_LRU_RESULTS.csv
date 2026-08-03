@@ -1,0 +1,4 @@
+"workload","repetition","cache_budget","scratch_budget","hits","misses","insertions","evictions","oversized_bypasses","pin_failures","cache_high_water","scratch_high_water"
+"synthetic_storage_only",1,33554432,1048576,188538,151464,151464,64083,0,0,33554304,0
+"synthetic_storage_only",2,33554432,1048576,188538,151464,151464,64083,0,0,33554304,0
+"synthetic_storage_only",3,33554432,1048576,188538,151464,151464,64083,0,0,33554304,0

@@ -1,0 +1,9 @@
+status=PASS
+workload=100000 synthetic storage-only records
+repetitions_per_case=3
+wall_seconds_total=44.23
+user_seconds_total=20.73
+system_seconds_total=23.23
+maximum_resident_set_size_bytes=417759232
+peak_memory_footprint_bytes=296208832
+method=/usr/bin/time -l external process measurement

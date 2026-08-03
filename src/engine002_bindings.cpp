@@ -434,6 +434,41 @@ Rcpp::List cpp_engine002_hash_reference_vectors() {
 }
 
 // [[Rcpp::export]]
+Rcpp::List cpp_engine002_large_offset_arithmetic_probe(
+    double record_bytes_value, double pattern_count_value) {
+  return translate_engine_errors([&]() {
+    const std::uint64_t record_bytes =
+        exact_u64(record_bytes_value, "record_bytes");
+    const std::uint64_t pattern_count =
+        exact_u64(pattern_count_value, "pattern_count");
+    const std::uint64_t records_bytes =
+        splitaligner::engine002::checked_mul<std::uint64_t>(
+            record_bytes, pattern_count, "large-offset records bytes");
+    const std::uint64_t index_offset =
+        splitaligner::engine002::checked_add<std::uint64_t>(
+            256U, records_bytes, "large-offset index");
+    const std::uint64_t index_bytes =
+        splitaligner::engine002::checked_mul<std::uint64_t>(
+            pattern_count, 64U, "large-offset index bytes");
+    const std::uint64_t footer_offset =
+        splitaligner::engine002::checked_add<std::uint64_t>(
+            index_offset, index_bytes, "large-offset footer");
+    const std::uint64_t file_bytes =
+        splitaligner::engine002::checked_add<std::uint64_t>(
+            footer_offset, 128U, "large-offset file bytes");
+    return Rcpp::List::create(
+        Rcpp::_["records_start"] = 256.0,
+        Rcpp::_["records_bytes"] = static_cast<double>(records_bytes),
+        Rcpp::_["index_offset"] = static_cast<double>(index_offset),
+        Rcpp::_["index_bytes"] = static_cast<double>(index_bytes),
+        Rcpp::_["footer_offset"] = static_cast<double>(footer_offset),
+        Rcpp::_["file_bytes"] = static_cast<double>(file_bytes),
+        Rcpp::_["crosses_2GiB"] = index_offset > UINT64_C(2147483648),
+        Rcpp::_["crosses_4GiB"] = index_offset > UINT64_C(4294967296));
+  });
+}
+
+// [[Rcpp::export]]
 SEXP cpp_engine002_memory_store_create(SEXP authority_pointer,
                                        double pattern_count) {
   return translate_engine_errors([&]() -> SEXP {

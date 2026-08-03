@@ -1,0 +1,7 @@
+status=INCOMPLETE
+normal_compiler_warnings=0
+R_CMD_check_compiled_code=PASS
+ASAN=NOT RUN
+UBSAN=NOT RUN
+Valgrind=NOT AVAILABLE ON THIS macOS ARM64 RUN
+classification_blocker=YES

@@ -7,6 +7,7 @@ close_with_active_disk_pin=ENGINE_STORE_BUSY
 repeated_close=PASS
 read_after_close=ENGINE_CONTEXT_CLOSED
 durable_reopen=PASS
+new_R_session_reopen=PASS
 zero_cache_scratch_path=PASS
 pinned_eviction_failure=ENGINE_MEMORY_BUDGET
 budget_cases=0,below-smallest,exactly-one-record,32MiB,64MiB

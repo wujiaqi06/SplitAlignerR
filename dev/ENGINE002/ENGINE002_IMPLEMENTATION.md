@@ -39,5 +39,13 @@ Run and record the frozen performance/RSS matrix, full package regression,
 cross-platform results, scope audit, checksums, exact diff/archive identities,
 and final classification.
 
+The first 100,000-record random-access run exposed linear victim scanning in
+the initial LRU implementation (544.52 seconds total benchmark wall time).
+BENCH replaces only that victim-selection mechanism with an allocation-free
+intrusive doubly-linked unpinned order. Exact retained-pattern comparison,
+pins, deterministic counters, charged-byte accounting, scratch semantics, and
+error contracts are unchanged. The accepted post-fix benchmark completed in
+44.23 seconds total with the same hit/miss/eviction counts in every repetition.
+
 The empirical mapper, truth constructor, matrix backend, public API, default
 engine, release identity, and package metadata remain unchanged throughout.

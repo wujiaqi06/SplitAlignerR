@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -57,17 +58,24 @@ class HardBoundedLru : public std::enable_shared_from_this<HardBoundedLru> {
     std::uint64_t charge = 0;
     std::uint64_t last_use = 0;
     std::uint64_t pins = 0;
+    std::uint64_t lru_previous = std::numeric_limits<std::uint64_t>::max();
+    std::uint64_t lru_next = std::numeric_limits<std::uint64_t>::max();
+    bool in_lru = false;
   };
   struct LeaseOwner;
 
   void release(std::uint64_t pattern_id, bool scratch,
                std::uint64_t scratch_bytes) noexcept;
+  void link_lru_tail(std::uint64_t pattern_id) noexcept;
+  void unlink_lru(std::uint64_t pattern_id) noexcept;
   void assert_bounds() const;
 
   mutable std::mutex mutex_;
   std::uint64_t cache_budget_;
   std::uint64_t scratch_budget_;
   std::uint64_t sequence_;
+  std::uint64_t lru_head_;
+  std::uint64_t lru_tail_;
   std::map<std::uint64_t, Entry> entries_;
   LruStats stats_;
 };
@@ -76,4 +84,3 @@ class HardBoundedLru : public std::enable_shared_from_this<HardBoundedLru> {
 }  // namespace splitaligner
 
 #endif
-

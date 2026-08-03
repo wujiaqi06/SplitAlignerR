@@ -369,3 +369,13 @@ test_that("ENGINE002 LRU and scratch budgets are hard at boundary values", {
     SplitAlignerR:::cpp_engine002_store_close(roomy)
   }
 })
+
+test_that("ENGINE002 u64 store arithmetic crosses 2 GiB and 4 GiB exactly", {
+  offsets <- SplitAlignerR:::.engine002_large_offset_arithmetic_probe(
+    2^31, 3
+  )
+  expect_true(offsets$crosses_2GiB)
+  expect_true(offsets$crosses_4GiB)
+  expect_identical(offsets$index_offset, 256 + 3 * 2^31)
+  expect_identical(offsets$file_bytes, 256 + 3 * 2^31 + 3 * 64 + 128)
+})

@@ -1,0 +1,8 @@
+R=R version 4.4.2 (2024-10-31)
+platform=aarch64-apple-darwin20
+machine=arm64
+os=Darwin 23.4.0
+record_count=100000
+seed=20260803
+authority=synthetic 40-taxon/one-terminal storage-only authority
+timing=proc.time; external peak RSS captured by wrapper

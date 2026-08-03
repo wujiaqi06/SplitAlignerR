@@ -108,6 +108,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_engine002_large_offset_arithmetic_probe
+Rcpp::List cpp_engine002_large_offset_arithmetic_probe(double record_bytes_value, double pattern_count_value);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe(SEXP record_bytes_valueSEXP, SEXP pattern_count_valueSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type record_bytes_value(record_bytes_valueSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count_value(pattern_count_valueSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_large_offset_arithmetic_probe(record_bytes_value, pattern_count_value));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_engine002_memory_store_create
 SEXP cpp_engine002_memory_store_create(SEXP authority_pointer, double pattern_count);
 RcppExport SEXP _SplitAlignerR_cpp_engine002_memory_store_create(SEXP authority_pointerSEXP, SEXP pattern_countSEXP) {
@@ -305,6 +317,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_plan_view_snapshot", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_snapshot, 2},
     {"_SplitAlignerR_cpp_engine002_plan_view_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_probe, 4},
     {"_SplitAlignerR_cpp_engine002_hash_reference_vectors", (DL_FUNC) &_SplitAlignerR_cpp_engine002_hash_reference_vectors, 0},
+    {"_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe, 2},
     {"_SplitAlignerR_cpp_engine002_memory_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_memory_store_create, 2},
     {"_SplitAlignerR_cpp_engine002_disk_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_create, 7},
     {"_SplitAlignerR_cpp_engine002_disk_store_open", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_open, 7},

@@ -1,0 +1,4 @@
+"workload","repetition","record_count","final_disk_bytes","index_charged_bytes","metadata_charged_bytes","temporary_disk_high_water","temporary_disk_high_water_basis"
+"synthetic_storage_only",1,100000,24200384,25600000,4096,48400768,"DERIVED: final component plus equal-size unpublished temporary"
+"synthetic_storage_only",2,100000,24200384,25600000,4096,48400768,"DERIVED: final component plus equal-size unpublished temporary"
+"synthetic_storage_only",3,100000,24200384,25600000,4096,48400768,"DERIVED: final component plus equal-size unpublished temporary"

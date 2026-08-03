@@ -1,0 +1,9 @@
+R version 4.4.2 (2024-10-31)
+Platform: aarch64-apple-darwin20
+OS: macOS Sonoma 14.4 / Darwin 23.4.0
+Machine: arm64
+C++: Apple clang 15.0.0
+C++ standard: C++17
+R CMD check locale: en_US.UTF-8
+Benchmark seed: 20260803
+Benchmark timing: proc.time plus external /usr/bin/time -l peak RSS

@@ -1,0 +1,13 @@
+status=PASS
+production_paths=R/engine002-internal.R,src/engine002_*.h,src/engine002_*.cpp
+generated_registration=R/RcppExports.R,src/RcppExports.cpp
+tests=tests/testthat/test-engine002-*,tests/testthat/fixtures/engine002
+tools=tools/engine002
+evidence=dev/ENGINE002
+DESCRIPTION_changed=NO
+NAMESPACE_changed=NO
+public_exports_changed=NO
+existing_mapper_changed=NO
+scientific_authority_changed=NO
+release_identity_changed=NO
+default_engine_changed=NO

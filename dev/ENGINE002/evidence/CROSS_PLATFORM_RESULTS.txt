@@ -1,0 +1,9 @@
+status=INCOMPLETE
+macOS_arm64_compile=PASS
+macOS_arm64_ENGINE002_testthat=114/114
+macOS_arm64_R_CMD_check=PASS
+macOS_arm64_authority_1974=1974/1974
+Linux=NOT RUN
+Windows=NOT RUN
+big_endian_interpretation=explicit little-endian golden decoder test
+classification_blocker=YES

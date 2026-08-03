@@ -10,6 +10,9 @@ namespace splitaligner {
 namespace engine002 {
 namespace {
 
+constexpr std::uint64_t kNoLruEntry =
+    std::numeric_limits<std::uint64_t>::max();
+
 std::uint64_t align64(std::uint64_t value) {
   return checked_add<std::uint64_t>(value, 63U, "LRU alignment") & ~UINT64_C(63);
 }
@@ -39,8 +42,47 @@ HardBoundedLru::HardBoundedLru(std::uint64_t cache_budget,
     : cache_budget_(cache_budget),
       scratch_budget_(scratch_budget),
       sequence_(0),
+      lru_head_(kNoLruEntry),
+      lru_tail_(kNoLruEntry),
       entries_(),
       stats_() {}
+
+void HardBoundedLru::unlink_lru(std::uint64_t pattern_id) noexcept {
+  const auto found = entries_.find(pattern_id);
+  if (found == entries_.end() || !found->second.in_lru) return;
+  Entry& entry = found->second;
+  if (entry.lru_previous == kNoLruEntry) {
+    lru_head_ = entry.lru_next;
+  } else {
+    const auto previous = entries_.find(entry.lru_previous);
+    if (previous != entries_.end()) previous->second.lru_next = entry.lru_next;
+  }
+  if (entry.lru_next == kNoLruEntry) {
+    lru_tail_ = entry.lru_previous;
+  } else {
+    const auto next = entries_.find(entry.lru_next);
+    if (next != entries_.end()) next->second.lru_previous = entry.lru_previous;
+  }
+  entry.lru_previous = kNoLruEntry;
+  entry.lru_next = kNoLruEntry;
+  entry.in_lru = false;
+}
+
+void HardBoundedLru::link_lru_tail(std::uint64_t pattern_id) noexcept {
+  const auto found = entries_.find(pattern_id);
+  if (found == entries_.end() || found->second.in_lru) return;
+  Entry& entry = found->second;
+  entry.lru_previous = lru_tail_;
+  entry.lru_next = kNoLruEntry;
+  entry.in_lru = true;
+  if (lru_tail_ == kNoLruEntry) {
+    lru_head_ = pattern_id;
+  } else {
+    const auto previous = entries_.find(lru_tail_);
+    if (previous != entries_.end()) previous->second.lru_next = pattern_id;
+  }
+  lru_tail_ = pattern_id;
+}
 
 std::uint64_t HardBoundedLru::charged_bytes(std::uint64_t record_bytes,
                                             std::size_t retained_bytes) {
@@ -74,6 +116,7 @@ LruLease HardBoundedLru::acquire(
     if (found->second.retained != retained) {
       fail(ErrorCode::pattern_mismatch, "LRU key retained bits mismatch");
     }
+    if (found->second.pins == 0) unlink_lru(pattern_id);
     increment_counter(stats_.hits, "LRU hit counter");
     increment_counter(found->second.pins, "LRU pin counter");
     found->second.last_use = sequence_;
@@ -115,22 +158,17 @@ LruLease HardBoundedLru::acquire(
   }
 
   while (stats_.charged_cache_bytes > cache_budget_ - charge) {
-    auto victim = entries_.end();
-    for (auto candidate = entries_.begin(); candidate != entries_.end();
-         ++candidate) {
-      if (candidate->second.pins != 0) continue;
-      if (victim == entries_.end() ||
-          candidate->second.last_use < victim->second.last_use ||
-          (candidate->second.last_use == victim->second.last_use &&
-           candidate->first < victim->first)) {
-        victim = candidate;
-      }
-    }
-    if (victim == entries_.end()) {
+    if (lru_head_ == kNoLruEntry) {
       increment_counter(stats_.pin_failures, "LRU pin-failure counter");
       fail(ErrorCode::memory_budget,
            "all eviction candidates are pinned under the hard budget");
     }
+    const std::uint64_t victim_id = lru_head_;
+    auto victim = entries_.find(victim_id);
+    if (victim == entries_.end() || victim->second.pins != 0) {
+      fail(ErrorCode::internal_failure, "LRU intrusive order is inconsistent");
+    }
+    unlink_lru(victim_id);
     stats_.charged_cache_bytes -= victim->second.charge;
     entries_.erase(victim);
     increment_counter(stats_.evictions, "LRU eviction counter");
@@ -174,6 +212,7 @@ void HardBoundedLru::release(std::uint64_t pattern_id, bool scratch,
   const auto found = entries_.find(pattern_id);
   if (found != entries_.end() && found->second.pins != 0) {
     --found->second.pins;
+    if (found->second.pins == 0) link_lru_tail(pattern_id);
   }
 }
 
@@ -193,6 +232,8 @@ void HardBoundedLru::clear() {
     fail(ErrorCode::store_busy, "LRU scratch has an active pin");
   }
   entries_.clear();
+  lru_head_ = kNoLruEntry;
+  lru_tail_ = kNoLruEntry;
   stats_.charged_cache_bytes = 0;
   assert_bounds();
 }

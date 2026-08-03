@@ -35,6 +35,13 @@
   )
 }
 
+.engine002_large_offset_arithmetic_probe <- function(record_bytes,
+                                                      pattern_count) {
+  cpp_engine002_large_offset_arithmetic_probe(
+    as.double(record_bytes), as.double(pattern_count)
+  )
+}
+
 .engine002_memory_store <- function(authority, pattern_count) {
   cpp_engine002_memory_store_create(authority, as.double(pattern_count))
 }

@@ -1,0 +1,42 @@
+captured_before_required_ENGINE002-BENCH_commit=TRUE
+## engine002-core-schema-storage-primitives
+M  R/RcppExports.R
+M  R/engine002-internal.R
+A  dev/ENGINE002/ENGINE002_FINAL_HANDOFF.md
+M  dev/ENGINE002/ENGINE002_IMPLEMENTATION.md
+M  dev/ENGINE002/PRO_PREFLIGHT_ADOPTION.md
+A  dev/ENGINE002/benchmark/ENGINE002_BENCHMARK_ENVIRONMENT.txt
+A  dev/ENGINE002/benchmark/ENGINE002_BENCHMARK_SUMMARY.md
+A  dev/ENGINE002/benchmark/ENGINE002_LRU_RESULTS.csv
+A  dev/ENGINE002/benchmark/ENGINE002_MEMORY_RESULTS.csv
+AM dev/ENGINE002/benchmark/ENGINE002_PEAK_RSS_METHOD.md
+A  dev/ENGINE002/benchmark/ENGINE002_RUNTIME_RESULTS.csv
+A  dev/ENGINE002/benchmark/ENGINE002_STORE_RESULTS.csv
+A  dev/ENGINE002/benchmark/run_engine002_benchmarks.R
+A  dev/ENGINE002/evidence/AUTHORITY_1974_RESULTS.raw.txt
+M  dev/ENGINE002/evidence/AUTHORITY_1974_RESULTS.txt
+A  dev/ENGINE002/evidence/BENCHMARK_EXTERNAL_RSS.txt
+AM dev/ENGINE002/evidence/CHANGED_FILES.txt
+A  dev/ENGINE002/evidence/COMMANDS.log
+A  dev/ENGINE002/evidence/CROSS_PLATFORM_RESULTS.txt
+M  dev/ENGINE002/evidence/ENGINE002_TEST_RESULTS.txt
+A  dev/ENGINE002/evidence/FILE_SCOPE_AUDIT.txt
+A  dev/ENGINE002/evidence/LARGE_OFFSET_RESULTS.txt
+M  dev/ENGINE002/evidence/LIFECYCLE_RESULTS.txt
+M  dev/ENGINE002/evidence/PACKAGE_CHECK_RESULTS.txt
+A  dev/ENGINE002/evidence/REPO_STATE_AFTER.txt
+A  dev/ENGINE002/evidence/R_CMD_CHECK_00check.log
+A  dev/ENGINE002/evidence/SANITIZER_RESULTS.txt
+A  dev/ENGINE002/evidence/SESSION_INFO.txt
+A  dev/ENGINE002/evidence/SHA256SUMS
+M  src/RcppExports.cpp
+M  src/engine002_bindings.cpp
+M  src/engine002_lru.cpp
+M  src/engine002_lru.h
+M  tests/testthat/test-engine002-stores.R
+M  tools/engine002/authority_1974.R
+A  tools/engine002/finalize_evidence.R
+AM tools/engine002/new_session_prepare.R
+A  tools/engine002/new_session_reopen.R
+current_HEAD=321f5ad3787b7adff4fe7ddd3dc78bdda8865dfd
+current_tree=731a9a827d33f59996d71d52890ea0a00bd48103

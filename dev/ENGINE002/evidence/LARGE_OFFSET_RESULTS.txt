@@ -1,0 +1,8 @@
+status=INCOMPLETE
+checked_u64_arithmetic=PASS
+host_streamoff_boundary_checks=IMPLEMENTED
+greater_than_2_GiB_physical_store=NOT RUN
+greater_than_4_GiB_physical_store=NOT RUN
+last_record_lookup_above_2_GiB=NOT RUN
+last_record_lookup_above_4_GiB=NOT RUN
+classification_blocker=YES

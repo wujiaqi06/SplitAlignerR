@@ -16,7 +16,4 @@ disk_build_seconds=0.473
 disk_finalize_validate_publish_seconds=2.835
 phase_seconds=reference:464.220,encode:2.542,decode:0.633,direct_view:1.012,reencode:2.360
 elapsed_seconds=515.872
-external_maximum_resident_set_size_bytes=321519616
-external_peak_memory_footprint_bytes=149801472
-implementation=final source semantics plus authority memory/disk stores
 input_md5_stability=b3a7150e142adca31c837e762326b83f,294ddeb2a220fd7589e869b727fa2821,db0d15b324e19b43edb2d97094f1ab73

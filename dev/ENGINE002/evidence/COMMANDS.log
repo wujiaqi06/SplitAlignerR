@@ -1,0 +1,11 @@
+git switch -c engine002-core-schema-storage-primitives 93e8bf79ff6fb6b6419d794b7ef70bac702b8665
+Rcpp::compileAttributes(".")
+R CMD INSTALL --preclean -l /private/tmp/sar-engine002-tests .
+NOT_CRAN=true Rscript testthat::test_dir("tests/testthat", filter="engine002")
+python3 tools/engine002/verify_golden.py tests/testthat/fixtures/engine002/plan_three_taxon_dense_v1.hex
+LC_ALL=en_US.UTF-8 /usr/bin/time -l Rscript tools/engine002/authority_1974.R /private/tmp/sar-engine002-tests /Users/jiaqiwu/Documents/work/Bird_mammal/Mammal517_alignment/SplitAligner/SplitAligner_RECERT013_Published_20260723_JST/program/SplitAligner-main/examples /private/tmp/ENGINE002_AUTHORITY_1974_FINAL_RESULTS.txt
+LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 R_LIBS_USER=/private/tmp/sar-engine002-r-lib R CMD build /Users/jiaqiwu/Documents/Codex/2026-07-24/zhe/SplitAlignerR_ENGINE001_worktree
+LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 R_LIBS_USER=/private/tmp/sar-engine002-r-lib R CMD check --no-manual /private/tmp/SplitAlignerR_0.1.0.9000.tar.gz
+LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 /usr/bin/time -l Rscript dev/ENGINE002/benchmark/run_engine002_benchmarks.R /private/tmp/sar-engine002-tests dev/ENGINE002/benchmark 100000
+LC_ALL=en_US.UTF-8 Rscript tools/engine002/new_session_prepare.R /private/tmp/sar-engine002-tests /private/tmp/sar-engine002-reopen.d8Yx7e
+LC_ALL=en_US.UTF-8 Rscript tools/engine002/new_session_reopen.R /private/tmp/sar-engine002-tests /private/tmp/sar-engine002-reopen.d8Yx7e
