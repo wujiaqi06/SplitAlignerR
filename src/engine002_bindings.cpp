@@ -13,6 +13,7 @@
 #include "engine002_stress_fixture.h"
 
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
@@ -532,9 +533,12 @@ Rcpp::List cpp_engine002_build_authority_scale_store(
     double cache_budget, double scratch_budget, double index_budget,
     double metadata_budget, double combined_runtime_bound) {
   return translate_engine_errors([&]() {
+    using Clock = std::chrono::steady_clock;
     const std::uint64_t count = exact_u64(pattern_count, "pattern_count");
+    const auto fixture_started = Clock::now();
     auto fixture =
         splitaligner::engine002::make_authority_scale_fixture(count);
+    const auto fixture_finished = Clock::now();
     auto store = std::make_shared<splitaligner::engine002::PackedDiskStore>(
         fixture.authority, fixture.registry, std::filesystem::path(directory),
         run_store_id, exact_u64(cache_budget, "cache_budget"),
@@ -546,25 +550,34 @@ Rcpp::List cpp_engine002_build_authority_scale_store(
     std::uint64_t minimum_record_bytes =
         count == 0 ? 0 : std::numeric_limits<std::uint64_t>::max();
     std::uint64_t maximum_record_bytes = 0;
+    std::chrono::duration<double> record_generation_elapsed{0};
+    std::chrono::duration<double> streaming_write_elapsed{0};
     for (std::uint64_t pattern = 0; pattern < count; ++pattern) {
       if ((pattern & UINT64_C(0xff)) == 0) Rcpp::checkUserInterrupt();
       const auto& retained =
           fixture.registry->retained_patterns[
               splitaligner::engine002::checked_size(
                   pattern, "authority-scale pattern position")];
+      const auto record_started = Clock::now();
       const auto record =
           splitaligner::engine002::make_authority_scale_record(
               *fixture.authority, pattern, retained);
+      const auto record_finished = Clock::now();
+      record_generation_elapsed += record_finished - record_started;
       const std::uint64_t bytes = record->size();
       total_record_bytes =
           splitaligner::engine002::checked_add<std::uint64_t>(
               total_record_bytes, bytes, "authority-scale record bytes");
       minimum_record_bytes = std::min(minimum_record_bytes, bytes);
       maximum_record_bytes = std::max(maximum_record_bytes, bytes);
+      const auto write_started = Clock::now();
       store->insert(record);
+      streaming_write_elapsed += Clock::now() - write_started;
     }
+    const auto finalize_started = Clock::now();
     const auto manifest = store->finalize_publish(
         std::filesystem::path(directory), run_store_id);
+    const auto finalize_finished = Clock::now();
     const auto stats = store->stats();
     store->close();
     return Rcpp::List::create(
@@ -580,6 +593,16 @@ Rcpp::List cpp_engine002_build_authority_scale_store(
             static_cast<double>(minimum_record_bytes),
         Rcpp::_["maximum_record_bytes"] =
             static_cast<double>(maximum_record_bytes),
+        Rcpp::_["fixture_seconds"] =
+            std::chrono::duration<double>(fixture_finished - fixture_started)
+                .count(),
+        Rcpp::_["record_generation_seconds"] =
+            record_generation_elapsed.count(),
+        Rcpp::_["streaming_write_seconds"] =
+            streaming_write_elapsed.count(),
+        Rcpp::_["finalize_validate_publish_seconds"] =
+            std::chrono::duration<double>(finalize_finished - finalize_started)
+                .count(),
         Rcpp::_["final_store_bytes"] =
             static_cast<double>(stats.file_bytes),
         Rcpp::_["builder_charged_high_water"] =
@@ -590,6 +613,15 @@ Rcpp::List cpp_engine002_build_authority_scale_store(
             static_cast<double>(stats.write_buffer_high_water),
         Rcpp::_["temporary_disk_high_water"] =
             static_cast<double>(stats.temporary_disk_high_water),
+        Rcpp::_["finalize_io_seconds"] = stats.finalize_io_seconds,
+        Rcpp::_["temporary_validation_seconds"] =
+            stats.temporary_validation_seconds,
+        Rcpp::_["manifest_prepare_seconds"] =
+            stats.manifest_prepare_seconds,
+        Rcpp::_["atomic_publication_seconds"] =
+            stats.atomic_publication_seconds,
+        Rcpp::_["published_validation_seconds"] =
+            stats.published_validation_seconds,
         Rcpp::_["index_charged_bytes"] =
             static_cast<double>(stats.index_charged_bytes));
   });
@@ -601,6 +633,7 @@ Rcpp::List cpp_engine002_reopen_authority_scale_store(
     double cache_budget, double scratch_budget, double index_budget,
     double metadata_budget, double combined_runtime_bound) {
   return translate_engine_errors([&]() {
+    using Clock = std::chrono::steady_clock;
     const std::uint64_t count = exact_u64(pattern_count, "pattern_count");
     if (count == 0) {
       splitaligner::engine002::fail(
@@ -609,6 +642,7 @@ Rcpp::List cpp_engine002_reopen_authority_scale_store(
     }
     auto fixture =
         splitaligner::engine002::make_authority_scale_fixture(count);
+    const auto open_started = Clock::now();
     auto store = splitaligner::engine002::PackedDiskStore::open_existing(
         fixture.authority, std::filesystem::path(manifest_path),
         exact_u64(cache_budget, "cache_budget"),
@@ -616,8 +650,10 @@ Rcpp::List cpp_engine002_reopen_authority_scale_store(
         exact_u64(index_budget, "index_budget"),
         exact_u64(metadata_budget, "metadata_budget"),
         exact_u64(combined_runtime_bound, "combined_runtime_bound"));
+    const auto open_finished = Clock::now();
     const std::array<std::uint64_t, 3> probe_ids{{
         0, count / 2U, count - 1U}};
+    const auto boundary_started = Clock::now();
     for (const auto id : probe_ids) {
       const auto& retained =
           fixture.registry->retained_patterns[
@@ -630,6 +666,53 @@ Rcpp::List cpp_engine002_reopen_authority_scale_store(
             "authority-scale reopened lookup differs from registry");
       }
     }
+    const auto boundary_finished = Clock::now();
+    const std::uint64_t probe_count = std::min<std::uint64_t>(count, 100U);
+    const auto sequential_started = Clock::now();
+    for (std::uint64_t id = 0; id < probe_count; ++id) {
+      const auto& retained = fixture.registry->retained_patterns[
+          splitaligner::engine002::checked_size(
+              id, "authority-scale sequential lookup position")];
+      const auto decoded = store->lookup_snapshot(id, retained);
+      if (decoded.pattern_id != id) {
+        splitaligner::engine002::fail(
+            ErrorCode::store_corrupt,
+            "authority-scale sequential lookup returned the wrong record");
+      }
+    }
+    const auto sequential_finished = Clock::now();
+    std::uint64_t random_state = UINT64_C(0x5eed002f1001);
+    const auto random_started = Clock::now();
+    for (std::uint64_t probe = 0; probe < probe_count; ++probe) {
+      random_state = random_state * UINT64_C(6364136223846793005) +
+                     UINT64_C(1442695040888963407);
+      const std::uint64_t id = random_state % count;
+      const auto& retained = fixture.registry->retained_patterns[
+          splitaligner::engine002::checked_size(
+              id, "authority-scale random lookup position")];
+      const auto decoded = store->lookup_snapshot(id, retained);
+      if (decoded.pattern_id != id) {
+        splitaligner::engine002::fail(
+            ErrorCode::store_corrupt,
+            "authority-scale random lookup returned the wrong record");
+      }
+    }
+    const auto random_finished = Clock::now();
+    const std::uint64_t warm_id = count / 2U;
+    const auto& warm_retained = fixture.registry->retained_patterns[
+        splitaligner::engine002::checked_size(
+            warm_id, "authority-scale warm lookup position")];
+    store->lookup_snapshot(warm_id, warm_retained);
+    const auto warm_started = Clock::now();
+    for (std::uint64_t probe = 0; probe < probe_count; ++probe) {
+      const auto decoded = store->lookup_snapshot(warm_id, warm_retained);
+      if (decoded.pattern_id != warm_id) {
+        splitaligner::engine002::fail(
+            ErrorCode::store_corrupt,
+            "authority-scale warm lookup returned the wrong record");
+      }
+    }
+    const auto warm_finished = Clock::now();
     const auto stats = store->stats();
     store->close();
     return Rcpp::List::create(
@@ -639,7 +722,29 @@ Rcpp::List cpp_engine002_reopen_authority_scale_store(
             static_cast<double>(probe_ids[1]),
         Rcpp::_["last_pattern_id"] =
             static_cast<double>(probe_ids[2]),
-        Rcpp::_["file_bytes"] = static_cast<double>(stats.file_bytes));
+        Rcpp::_["file_bytes"] = static_cast<double>(stats.file_bytes),
+        Rcpp::_["open_full_validation_seconds"] =
+            std::chrono::duration<double>(open_finished - open_started).count(),
+        Rcpp::_["boundary_lookup_seconds"] =
+            std::chrono::duration<double>(boundary_finished - boundary_started)
+                .count(),
+        Rcpp::_["sequential_lookup_seconds"] =
+            std::chrono::duration<double>(
+                sequential_finished - sequential_started).count(),
+        Rcpp::_["random_lookup_seconds"] =
+            std::chrono::duration<double>(random_finished - random_started)
+                .count(),
+        Rcpp::_["lru_warm_lookup_seconds"] =
+            std::chrono::duration<double>(warm_finished - warm_started).count(),
+        Rcpp::_["functional_probe_count"] =
+            static_cast<double>(probe_count),
+        Rcpp::_["lru_hits"] = static_cast<double>(stats.lru.hits),
+        Rcpp::_["lru_misses"] = static_cast<double>(stats.lru.misses),
+        Rcpp::_["lru_evictions"] = static_cast<double>(stats.lru.evictions),
+        Rcpp::_["lru_insertions"] =
+            static_cast<double>(stats.lru.insertions),
+        Rcpp::_["lru_cache_high_water"] =
+            static_cast<double>(stats.lru.cache_high_water));
   });
 }
 
@@ -827,6 +932,15 @@ Rcpp::List cpp_engine002_store_stats(SEXP store_pointer) {
             static_cast<double>(stats.write_buffer_high_water),
         Rcpp::_["temporary_disk_high_water"] =
             static_cast<double>(stats.temporary_disk_high_water),
+        Rcpp::_["finalize_io_seconds"] = stats.finalize_io_seconds,
+        Rcpp::_["temporary_validation_seconds"] =
+            stats.temporary_validation_seconds,
+        Rcpp::_["manifest_prepare_seconds"] =
+            stats.manifest_prepare_seconds,
+        Rcpp::_["atomic_publication_seconds"] =
+            stats.atomic_publication_seconds,
+        Rcpp::_["published_validation_seconds"] =
+            stats.published_validation_seconds,
         Rcpp::_["hits"] = static_cast<double>(lru.hits),
         Rcpp::_["misses"] = static_cast<double>(lru.misses),
         Rcpp::_["insertions"] = static_cast<double>(lru.insertions),

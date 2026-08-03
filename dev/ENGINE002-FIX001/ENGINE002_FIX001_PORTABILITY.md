@@ -20,3 +20,24 @@ last records.
 
 Platform and large-file gates are evidence gated. A source inspection or
 arithmetic projection is never recorded as execution PASS.
+
+## Local physical execution
+
+The macOS arm64 run completed three non-sparse, fully hashed and validated
+authority-sized stores:
+
+| records | exact file bytes | large-offset role | fresh reopen |
+|---:|---:|---|---|
+| 100,000 | 1,587,660,960 | mandatory storage stress | PASS |
+| 140,000 | 2,223,669,984 | physical greater-than-2-GiB gate | PASS |
+| 275,000 | 4,371,260,760 | physical greater-than-4-GiB gate | PASS |
+
+For each, the u64 header exact length, filesystem length, footer offset/count,
+last index ID, complete-file integrity, first/middle/last semantic lookup, and
+new-process reopen agree. A separate fixed-seed standalone probe reopened each
+store, performed complete validation, and retrieved exact near-boundary IDs
+99,740, 139,740, and 274,740 respectively (259 records before the last ID).
+
+These results establish the large-offset gate on macOS only. Windows and Linux
+remain execution-evidence blockers; source portability is not substituted for
+hosted execution.

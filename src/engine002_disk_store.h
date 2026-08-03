@@ -45,6 +45,11 @@ struct DiskStoreStats {
   std::uint64_t current_record_high_water = 0;
   std::uint64_t write_buffer_high_water = 0;
   std::uint64_t temporary_disk_high_water = 0;
+  double finalize_io_seconds = 0;
+  double temporary_validation_seconds = 0;
+  double manifest_prepare_seconds = 0;
+  double atomic_publication_seconds = 0;
+  double published_validation_seconds = 0;
   LruStats lru;
 };
 
@@ -132,6 +137,11 @@ class PackedDiskStore : public std::enable_shared_from_this<PackedDiskStore> {
   std::uint64_t current_record_high_water_;
   std::uint64_t write_buffer_high_water_;
   std::uint64_t temporary_disk_high_water_;
+  double finalize_io_seconds_;
+  double temporary_validation_seconds_;
+  double manifest_prepare_seconds_;
+  double atomic_publication_seconds_;
+  double published_validation_seconds_;
   std::filesystem::path component_path_;
   std::filesystem::path manifest_path_;
   std::vector<DiskIndexEntry> index_;

@@ -1,0 +1,69 @@
+WORKDIR=/Users/jiaqiwu/Documents/Codex/2026-07-24/zhe/SplitAlignerR_ENGINE001_worktree
+
+BASELINE
+git rev-parse HEAD
+git rev-parse HEAD^{tree}
+git status --short --branch
+git switch -c engine002-fix001-bounded-streaming-store
+base_commit=8c0d494f57f4594ff5acfd8e02ef546fcc387f0b
+base_tree=d5350a6500671bd70d83f2d46840f596760741ba
+
+FINAL LOCAL TEST FILES
+NOT_CRAN=true R_LIBS_USER=/private/tmp/sar-fix001-bench-lib2 Rscript -e '.libPaths(c("/private/tmp/sar-fix001-bench-lib2", .libPaths())); library(testthat); library(SplitAlignerR); test_file("tests/testthat/test-engine002-fix001.R"); test_file("tests/testthat/test-engine002-stores.R")'
+result=FIX001_63_PASS_0_FAIL; STORES_79_PASS_0_FAIL
+
+FINAL PACKAGE BUILD AND CHECK
+LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 R_LIBS_USER=/private/tmp/sar-engine002-r-lib R CMD build --no-manual /Users/jiaqiwu/Documents/Codex/2026-07-24/zhe/SplitAlignerR_ENGINE001_worktree
+LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 R_LIBS_USER=/private/tmp/sar-engine002-r-lib R CMD check --no-manual /private/tmp/sar-fix001-final-check2.PJu1MA/SplitAlignerR_0.1.0.9000.tar.gz
+result=Status_OK
+
+STRICT CLANG CORE AND DIAGNOSTICS
+/usr/bin/clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -Isrc -fsyntax-only src/engine002_atomic_publish.cpp src/engine002_disk_store.cpp src/engine002_fast_hash.cpp src/engine002_hash.cpp src/engine002_lru.cpp src/engine002_manifest.cpp src/engine002_plan_codec.cpp src/engine002_species_authority_binding.cpp src/engine002_store.cpp src/engine002_stress_fixture.cpp tools/engine002/fix001_sanitizer_harness.cpp tools/engine002/fix001_streaming_benchmark.cpp tools/engine002/fix001_large_boundary_probe.cpp
+result=PASS_NO_WARNINGS
+GCC14=NOT_AVAILABLE_LOCAL
+
+SANITIZER CORE
+/usr/bin/clang++ -std=c++17 -O1 -g -Wall -Wextra -Wpedantic -fsanitize=address,undefined -fno-omit-frame-pointer -Isrc tools/engine002/fix001_sanitizer_harness.cpp src/engine002_atomic_publish.cpp src/engine002_disk_store.cpp src/engine002_fast_hash.cpp src/engine002_hash.cpp src/engine002_lru.cpp src/engine002_manifest.cpp src/engine002_plan_codec.cpp src/engine002_species_authority_binding.cpp src/engine002_store.cpp -o /private/tmp/fix001_sanitizer_harness_final
+ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=print_stacktrace=1 /private/tmp/fix001_sanitizer_harness_final
+result=FIX001_SANITIZER_HARNESS_PASS
+
+REAL AUTHORITY
+/usr/bin/time -l Rscript tools/engine002/authority_1974.R /private/tmp/sar-fix001-lib.sXz1dF /Users/jiaqiwu/Documents/work/Bird_mammal/Mammal517_alignment/SplitAligner/SplitAligner_RECERT013_Published_20260723_JST/program/SplitAligner-main/examples /private/tmp/ENGINE002_FIX001_AUTHORITY_1974_RESULTS.txt
+functional_result=PASS_1974_OF_1974
+rss_result=NOT_MEASURED_SYSCTL_DENIED
+
+REAL INTERRUPTION
+Rscript tools/engine002/fix001_interrupt_probe.R /private/tmp/sar-fix001-lib.sXz1dF /private/tmp/sar-fix001-real-interrupt.cz6vAY /private/tmp/sar-fix001-real-interrupt.cz6vAY/result.txt
+real_ctrl_c_sent_to_running_R_process
+result=ENGINE_INTERRUPTED_NO_MANIFEST_NO_COMPONENT_NO_TEMP
+
+CONTROLLED RETAIN-ALL BASE BUILD
+git archive --format=tar --output=/private/tmp/sar-fix001-base.rTVdR8/base.tar 8c0d494f57f4594ff5acfd8e02ef546fcc387f0b
+bsdtar -xf /private/tmp/sar-fix001-base.rTVdR8/base.tar -C /private/tmp/sar-fix001-base.rTVdR8
+/usr/bin/clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -I/private/tmp/sar-fix001-base.rTVdR8/src tools/engine002/fix001_retain_all_benchmark.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_atomic_publish.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_disk_store.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_hash.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_lru.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_manifest.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_plan_codec.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_species_authority_binding.cpp /private/tmp/sar-fix001-base.rTVdR8/src/engine002_store.cpp -o /private/tmp/sar-fix001-retain-all-benchmark
+
+CONTROLLED STREAMING BUILD
+/usr/bin/clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -Isrc tools/engine002/fix001_streaming_benchmark.cpp src/engine002_atomic_publish.cpp src/engine002_disk_store.cpp src/engine002_fast_hash.cpp src/engine002_hash.cpp src/engine002_lru.cpp src/engine002_manifest.cpp src/engine002_plan_codec.cpp src/engine002_species_authority_binding.cpp src/engine002_store.cpp src/engine002_stress_fixture.cpp -o /private/tmp/sar-fix001-streaming-benchmark-final
+
+R-PACKAGE STREAMING BENCHMARKS
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_benchmarks.sh /private/tmp/sar-fix001-bench-lib2 /private/tmp/sar-fix001-benchmark-results4 1974,10000 3
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_benchmarks.sh /private/tmp/sar-fix001-bench-lib2 /private/tmp/sar-fix001-large-results2 100000 1
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_benchmarks.sh /private/tmp/sar-fix001-bench-lib2 /private/tmp/sar-fix001-large-results2 140000 1
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_benchmarks.sh /private/tmp/sar-fix001-bench-lib2 /private/tmp/sar-fix001-large-results2 275000 1
+
+CONTROLLED OLD/NEW RSS BENCHMARKS
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_retain_all.sh /private/tmp/sar-fix001-retain-all-benchmark /private/tmp/sar-fix001-benchmark-results3 1974,10000 3 0badcafe
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_retain_all.sh /private/tmp/sar-fix001-retain-all-benchmark /private/tmp/sar-fix001-old-100k-final 100000 1 dea11000
+dev/ENGINE002-FIX001/benchmark/run_engine002_fix001_retain_all.sh /private/tmp/sar-fix001-streaming-benchmark-final /private/tmp/sar-fix001-streaming-100k-final 100000 1 c0de1000
+
+NEAR-BOUNDARY LARGE-OFFSET PROBES
+/private/tmp/sar-fix001-large-boundary-probe /private/tmp/sar-fix001-large-results2/store_100000_rep_1/000186a000000001feedfacecafebeef.truthstore.manifest 100000
+/private/tmp/sar-fix001-large-boundary-probe /private/tmp/sar-fix001-large-results2/store_140000_rep_1/000222e000000001feedfacecafebeef.truthstore.manifest 140000
+/private/tmp/sar-fix001-large-boundary-probe /private/tmp/sar-fix001-large-results2/store_275000_rep_1/0004323800000001feedfacecafebeef.truthstore.manifest 275000
+result=PASS_3_OF_3_DISTANCE_FROM_LAST_259
+
+DISCARDED OR LIMITED ATTEMPTS
+The first plain R CMD build failed because the default library lacked markdown; the final build/check above use the frozen dependency library.
+One source-root test_dir invocation used an installed package without sourcing non-exported test helpers; it was invalid and is not accepted evidence.
+The first 100000 runner was hot-updated after store completion and lost only result aggregation; the stable final 100000 run above replaces it.
+macOS /usr/bin/time -l could not obtain RSS under the sandbox; all accepted RSS values use the documented approved ps sampler outside the process sandbox.

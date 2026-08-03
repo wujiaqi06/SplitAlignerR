@@ -1,0 +1,17 @@
+classification=INCOMPLETE
+core_harness=PASS
+address_sanitizer=PASS
+undefined_behavior_sanitizer=PASS
+leak_detection=DISABLED_FOR_RISK_OF_PLATFORM_RUNTIME_NOISE
+covered=record_encode_decode
+covered=validated_direct_view
+covered=memory_store_lifecycle
+covered=streaming_disk_builder
+covered=disk_reopen
+covered=lru_eviction
+covered=oversized_plan_scratch
+covered=fault_injection_cleanup
+covered=constant_hash_collision
+core_output=FIX001_SANITIZER_HARNESS_PASS
+package_level_r_boundary=NOT_RUN
+reason_incomplete=standalone core harness does not replace package/R-boundary sanitizer coverage

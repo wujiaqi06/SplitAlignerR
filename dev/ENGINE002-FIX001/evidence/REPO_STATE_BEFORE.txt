@@ -1,0 +1,8 @@
+branch_requested=engine002-core-schema-storage-primitives
+base_commit=8c0d494f57f4594ff5acfd8e02ef546fcc387f0b
+base_tree=d5350a6500671bd70d83f2d46840f596760741ba
+working_tree_before=clean
+new_branch=engine002-fix001-bounded-streaming-store
+certified_tag=v0.1.0
+certified_peeled_commit=17a0927095c7a067817bf598a2556cbe7348a6d0
+certified_object_modified=no

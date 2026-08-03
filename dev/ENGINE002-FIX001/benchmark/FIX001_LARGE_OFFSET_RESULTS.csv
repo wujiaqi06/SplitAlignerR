@@ -1,0 +1,4 @@
+pattern_count,repetition,final_store_bytes,header_index_offset,header_footer_offset,header_exact_file_bytes,actual_file_bytes,last_index_pattern_id,footer_record_count,new_process_reopen,manifest
+100000,1,1587660960,1581260832,1587660832,1587660960,1587660960,99999,1e+05,PASS,/private/tmp/sar-fix001-large-results2/store_100000_rep_1/000186a000000001feedfacecafebeef.truthstore.manifest
+140000,1,2223669984,2214709856,2223669856,2223669984,2223669984,139999,140000,PASS,/private/tmp/sar-fix001-large-results2/store_140000_rep_1/000222e000000001feedfacecafebeef.truthstore.manifest
+275000,1,4371260760,4353660632,4371260632,4371260760,4371260760,274999,275000,PASS,/private/tmp/sar-fix001-large-results2/store_275000_rep_1/0004323800000001feedfacecafebeef.truthstore.manifest

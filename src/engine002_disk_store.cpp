@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <limits>
 
@@ -424,7 +425,10 @@ PackedDiskStore::PackedDiskStore(
       builder_charged_bytes_(kBuilderMetadataCharge),
       builder_charged_high_water_(kBuilderMetadataCharge),
       current_record_high_water_(0), write_buffer_high_water_(0),
-      temporary_disk_high_water_(0), component_path_(), manifest_path_(),
+      temporary_disk_high_water_(0), finalize_io_seconds_(0),
+      temporary_validation_seconds_(0), manifest_prepare_seconds_(0),
+      atomic_publication_seconds_(0), published_validation_seconds_(0),
+      component_path_(), manifest_path_(),
       index_(),
       cache_(std::make_shared<HardBoundedLru>(cache_budget, scratch_budget)),
       cache_budget_(cache_budget), scratch_budget_(scratch_budget),
@@ -487,6 +491,9 @@ PackedDiskStore::PackedDiskStore(
       builder_charged_bytes_(0), builder_charged_high_water_(0),
       current_record_high_water_(0), write_buffer_high_water_(0),
       temporary_disk_high_water_(0),
+      finalize_io_seconds_(0), temporary_validation_seconds_(0),
+      manifest_prepare_seconds_(0), atomic_publication_seconds_(0),
+      published_validation_seconds_(0),
       component_path_(validated.component_path), manifest_path_(manifest_path),
       index_(validated.index),
       cache_(std::make_shared<HardBoundedLru>(cache_budget, scratch_budget)),
@@ -676,9 +683,11 @@ std::filesystem::path PackedDiskStore::finalize_publish(
                              payload_hash_.digest());
 
   const std::string component_name = run_store_id_ + ".truthstore.bin";
+  using Clock = std::chrono::steady_clock;
   bool manifest_published = false;
   bool component_published = false;
   try {
+    const auto finalize_io_started = Clock::now();
     cancellation_point();
     publication_failpoint(1);
     writer_->write_all(index_wire_.data(), index_wire_.size(),
@@ -700,14 +709,22 @@ std::filesystem::path PackedDiskStore::finalize_publish(
     writer_->sync();
     writer_->close();
     writer_.reset();
+    finalize_io_seconds_ =
+        std::chrono::duration<double>(Clock::now() - finalize_io_started)
+            .count();
     publication_failpoint(6);
+    const auto temporary_validation_started = Clock::now();
     const auto temporary_validated = validate_disk_store(
         *authority_, component_temp_, nullptr, scratch_budget_, index_budget_,
         metadata_budget_);
+    temporary_validation_seconds_ =
+        std::chrono::duration<double>(
+            Clock::now() - temporary_validation_started).count();
     publication_failpoint(7);
     const Sha256 actual_sha = temporary_validated.manifest.store_sha256;
     publication_failpoint(8);
     StoreManifest candidate;
+    const auto manifest_prepare_started = Clock::now();
     candidate.state = ManifestState::incomplete;
     candidate.run_store_id = run_store_id_;
     candidate.store_component = component_name;
@@ -724,18 +741,33 @@ std::filesystem::path PackedDiskStore::finalize_publish(
     final_manifest.state = ManifestState::validated;
     write_text_exclusive(validated_temp_, render_manifest(final_manifest));
     parse_manifest(read_text_file(validated_temp_, UINT64_C(1048576)));
+    manifest_prepare_seconds_ =
+        std::chrono::duration<double>(Clock::now() - manifest_prepare_started)
+            .count();
     publication_failpoint(10);
+    const auto component_publication_started = Clock::now();
     publish_no_replace(component_temp_, component_final_);
+    atomic_publication_seconds_ +=
+        std::chrono::duration<double>(
+            Clock::now() - component_publication_started).count();
     component_published = true;
     publication_failpoint(11);
+    const auto published_validation_started = Clock::now();
     const auto final_validated = validate_disk_store(
         *authority_, component_final_, &final_manifest, scratch_budget_,
         index_budget_, metadata_budget_);
+    published_validation_seconds_ =
+        std::chrono::duration<double>(
+            Clock::now() - published_validation_started).count();
     publication_failpoint(12);
+    const auto manifest_publication_started = Clock::now();
     publish_no_replace(validated_temp_, manifest_final_);
     manifest_published = true;
     publication_failpoint(13);
     sync_directory(directory_);
+    atomic_publication_seconds_ +=
+        std::chrono::duration<double>(
+            Clock::now() - manifest_publication_started).count();
     publication_failpoint(14);
     remove_recognized_temp(candidate_temp_);
     publication_failpoint(15);
@@ -868,6 +900,11 @@ DiskStoreStats PackedDiskStore::stats() const noexcept {
   out.current_record_high_water = current_record_high_water_;
   out.write_buffer_high_water = write_buffer_high_water_;
   out.temporary_disk_high_water = temporary_disk_high_water_;
+  out.finalize_io_seconds = finalize_io_seconds_;
+  out.temporary_validation_seconds = temporary_validation_seconds_;
+  out.manifest_prepare_seconds = manifest_prepare_seconds_;
+  out.atomic_publication_seconds = atomic_publication_seconds_;
+  out.published_validation_seconds = published_validation_seconds_;
   out.lru = cache_->stats();
   return out;
 }

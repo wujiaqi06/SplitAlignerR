@@ -1,0 +1,17 @@
+branch=engine002-fix001-bounded-streaming-store
+base_commit=8c0d494f57f4594ff5acfd8e02ef546fcc387f0b
+base_tree=d5350a6500671bd70d83f2d46840f596760741ba
+commit_1=7779bf1 FIX001-STREAM
+commit_2=64be3ee FIX001-SAFETY
+commit_3=45159c5 FIX001-PORTABILITY
+commit_4=1f4933a FIX001-TESTS
+commit_5=FIX001-BENCH ordinary commit containing final evidence
+state_at_evidence_freeze=all_intended_FIX001_files_present
+unrelated_changes=none
+public_exports_changed=no
+certified_v0.1.0_modified=no
+main_merged=no
+release_created=no
+large_store_files_tracked=no
+compiled_binaries_tracked=no
+final_head_and_tree=recorded_in_external_handoff_manifest_after_commit

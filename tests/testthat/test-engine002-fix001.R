@@ -258,6 +258,17 @@ test_that("FIX001 authority-scale fixture is valid and fresh-process ready", {
     result$builder_charged_high_water,
     result$current_record_high_water + count * 64 + 4096
   )
+  phase_fields <- c(
+    "finalize_io_seconds", "temporary_validation_seconds",
+    "manifest_prepare_seconds", "atomic_publication_seconds",
+    "published_validation_seconds"
+  )
+  expect_true(all(vapply(result[phase_fields], is.numeric, logical(1))))
+  expect_true(all(unlist(result[phase_fields], use.names = FALSE) >= 0))
+  expect_lte(
+    sum(unlist(result[phase_fields], use.names = FALSE)),
+    result$finalize_validate_publish_seconds * 1.05
+  )
   reopened <- SplitAlignerR:::cpp_engine002_reopen_authority_scale_store(
     result$manifest, count,
     0, fix1_mib, index_budget, fix1_mib, index_budget + 2 * fix1_mib

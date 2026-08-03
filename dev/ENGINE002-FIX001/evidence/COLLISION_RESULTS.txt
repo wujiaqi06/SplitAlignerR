@@ -1,0 +1,15 @@
+status=PASS
+constant_fast_hash_enabled=true
+domains_tested=7
+retained_pattern_distinct_exact_entries=3
+query_pool_distinct_exact_entries=3
+bstar_members_distinct_exact_entries=3
+record_index_distinct_exact_entries=3
+memory_lookup_distinct_exact_entries=3
+disk_lookup_distinct_exact_entries=3
+lru_key_distinct_exact_entries=3
+total_domain_entries_preserved_under_one_fast_hash=21
+production_record_bytes_identical_with_seam=PASS
+memory_records_separately_retrievable=2/2
+disk_records_separately_retrievable=2/2
+scientific_identity_from_fast_hash=no

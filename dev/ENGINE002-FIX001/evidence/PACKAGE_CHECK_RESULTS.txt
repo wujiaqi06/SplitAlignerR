@@ -1,0 +1,13 @@
+status=PASS
+platform=macOS arm64
+R_version=4.4.2
+compiler=Apple clang 15.0.0
+command=R CMD check --no-manual SplitAlignerR_0.1.0.9000.tar.gz
+result=Status: OK
+notes=0 errors; 0 warnings; 0 notes
+test_engine002_stores=PASS
+test_engine002_fix001=PASS
+test_engine002_fix001_expectations=63
+test_engine002_stores_expectations=79
+full_existing_package_tests=PASS_VIA_R_CMD_CHECK
+public_exports_changed=no

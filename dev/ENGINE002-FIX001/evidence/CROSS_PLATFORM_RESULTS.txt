@@ -1,0 +1,14 @@
+required_platforms=Linux,macOS,Windows
+macOS=PASS
+macOS_R_CMD_check=PASS
+macOS_golden_codec_store=PASS
+macOS_authority_1974=PASS
+macOS_memory_disk_lifecycle=PASS
+macOS_collision_corruption=PASS
+Linux=INCOMPLETE_NOT_RUN
+GCC14=INCOMPLETE_NOT_AVAILABLE_LOCAL
+Windows=INCOMPLETE_NOT_RUN
+Windows_binary_mode=SOURCE_IMPLEMENTED_NOT_EXECUTION_EVIDENCE
+Windows_u64_offsets=SOURCE_IMPLEMENTED_NOT_EXECUTION_EVIDENCE
+Windows_atomic_no_replace=SOURCE_IMPLEMENTED_NOT_EXECUTION_EVIDENCE
+cross_platform_byte_identity=INCOMPLETE
