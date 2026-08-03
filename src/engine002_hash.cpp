@@ -127,8 +127,150 @@ void sha256_block(const std::uint8_t* block,
 
 }  // namespace
 
+Xxh64State::Xxh64State(std::uint64_t seed) noexcept
+    : seed_(seed),
+      total_(0),
+      v1_(seed + kPrime1 + kPrime2),
+      v2_(seed + kPrime2),
+      v3_(seed),
+      v4_(seed - kPrime1),
+      buffer_(),
+      buffered_(0) {}
+
+void Xxh64State::update(const std::uint8_t* data, std::size_t size) noexcept {
+  if (size == 0) return;
+  total_ += static_cast<std::uint64_t>(size);
+  const std::uint8_t* p = data;
+  const std::uint8_t* const end = data + size;
+  if (buffered_ + size < 32) {
+    std::copy(p, end, buffer_.begin() + buffered_);
+    buffered_ += size;
+    return;
+  }
+  if (buffered_ != 0) {
+    const std::size_t fill = 32 - buffered_;
+    std::copy(p, p + fill, buffer_.begin() + buffered_);
+    const std::uint8_t* b = buffer_.data();
+    v1_ = xxh_round(v1_, load_u64_le(b)); b += 8;
+    v2_ = xxh_round(v2_, load_u64_le(b)); b += 8;
+    v3_ = xxh_round(v3_, load_u64_le(b)); b += 8;
+    v4_ = xxh_round(v4_, load_u64_le(b));
+    p += fill;
+    buffered_ = 0;
+  }
+  while (p + 32 <= end) {
+    v1_ = xxh_round(v1_, load_u64_le(p)); p += 8;
+    v2_ = xxh_round(v2_, load_u64_le(p)); p += 8;
+    v3_ = xxh_round(v3_, load_u64_le(p)); p += 8;
+    v4_ = xxh_round(v4_, load_u64_le(p)); p += 8;
+  }
+  buffered_ = static_cast<std::size_t>(end - p);
+  if (buffered_ != 0) std::copy(p, end, buffer_.begin());
+}
+
+std::uint64_t Xxh64State::digest() const noexcept {
+  std::uint64_t hash;
+  if (total_ >= 32) {
+    hash = rotl64(v1_, 1) + rotl64(v2_, 7) + rotl64(v3_, 12) +
+           rotl64(v4_, 18);
+    hash = xxh_merge(hash, v1_);
+    hash = xxh_merge(hash, v2_);
+    hash = xxh_merge(hash, v3_);
+    hash = xxh_merge(hash, v4_);
+  } else {
+    hash = seed_ + kPrime5;
+  }
+  hash += total_;
+  const std::uint8_t* p = buffer_.data();
+  const std::uint8_t* const end = p + buffered_;
+  while (p + 8 <= end) {
+    const std::uint64_t lane = xxh_round(0, load_u64_le(p));
+    hash ^= lane;
+    hash = rotl64(hash, 27) * kPrime1 + kPrime4;
+    p += 8;
+  }
+  if (p + 4 <= end) {
+    hash ^= static_cast<std::uint64_t>(load_u32_le(p)) * kPrime1;
+    hash = rotl64(hash, 23) * kPrime2 + kPrime3;
+    p += 4;
+  }
+  while (p < end) {
+    hash ^= static_cast<std::uint64_t>(*p) * kPrime5;
+    hash = rotl64(hash, 11) * kPrime1;
+    ++p;
+  }
+  hash ^= hash >> 33U;
+  hash *= kPrime2;
+  hash ^= hash >> 29U;
+  hash *= kPrime3;
+  hash ^= hash >> 32U;
+  return hash;
+}
+
+Sha256State::Sha256State() noexcept
+    : state_({{UINT32_C(0x6a09e667), UINT32_C(0xbb67ae85),
+               UINT32_C(0x3c6ef372), UINT32_C(0xa54ff53a),
+               UINT32_C(0x510e527f), UINT32_C(0x9b05688c),
+               UINT32_C(0x1f83d9ab), UINT32_C(0x5be0cd19)}}),
+      buffer_(),
+      total_(0),
+      buffered_(0) {}
+
+void Sha256State::update(const std::uint8_t* data, std::size_t size) {
+  if (size == 0) return;
+  if (size > std::numeric_limits<std::uint64_t>::max() - total_) {
+    fail(ErrorCode::store_corrupt, "SHA-256 byte-count overflow");
+  }
+  total_ += static_cast<std::uint64_t>(size);
+  const std::uint8_t* p = data;
+  const std::uint8_t* const end = data + size;
+  if (buffered_ != 0) {
+    const std::size_t fill = std::min<std::size_t>(64 - buffered_, size);
+    std::copy(p, p + fill, buffer_.begin() + buffered_);
+    buffered_ += fill;
+    p += fill;
+    if (buffered_ == 64) {
+      sha256_block(buffer_.data(), state_);
+      buffered_ = 0;
+    }
+  }
+  while (p + 64 <= end) {
+    sha256_block(p, state_);
+    p += 64;
+  }
+  buffered_ = static_cast<std::size_t>(end - p);
+  if (buffered_ != 0) std::copy(p, end, buffer_.begin());
+}
+
+Sha256 Sha256State::digest() const {
+  Sha256State copy = *this;
+  std::array<std::uint8_t, 128> tail{};
+  if (copy.buffered_ != 0) {
+    std::copy(copy.buffer_.begin(), copy.buffer_.begin() + copy.buffered_,
+              tail.begin());
+  }
+  tail[copy.buffered_] = 0x80U;
+  const std::size_t blocks = copy.buffered_ < 56 ? 1 : 2;
+  const std::uint64_t bit_length = copy.total_ * 8U;
+  const std::size_t length_offset = blocks * 64 - 8;
+  for (unsigned i = 0; i < 8; ++i) {
+    tail[length_offset + i] = static_cast<std::uint8_t>(
+        (bit_length >> (56U - 8U * i)) & 0xffU);
+  }
+  for (std::size_t block = 0; block < blocks; ++block) {
+    sha256_block(tail.data() + 64 * block, copy.state_);
+  }
+  Sha256 result{};
+  for (std::size_t i = 0; i < copy.state_.size(); ++i) {
+    store_u32_be(result.data() + 4 * i, copy.state_[i]);
+  }
+  return result;
+}
+
 std::uint64_t xxh64(const std::uint8_t* data, std::size_t size,
                     std::uint64_t seed) noexcept {
+  static const std::uint8_t empty = 0;
+  if (size == 0) data = &empty;
   const std::uint8_t* p = data;
   const std::uint8_t* const end = data + size;
   std::uint64_t hash;
@@ -236,4 +378,3 @@ bool constant_time_equal(const Sha256& left, const Sha256& right) noexcept {
 
 }  // namespace engine002
 }  // namespace splitaligner
-

@@ -33,6 +33,12 @@ Sha256 retained_pattern_fingerprint(std::uint32_t global_taxon_count,
                                     const std::vector<std::uint8_t>& retained);
 
 Sha256 truth_semantics_fingerprint();
+Sha256 pattern_registry_fingerprint(
+    std::uint32_t global_taxon_count,
+    const std::vector<std::vector<std::uint8_t>>& retained_patterns);
+Sha256 store_identity_fingerprint(const Sha256& species_authority,
+                                  const Sha256& pattern_registry,
+                                  const Sha256& truth_semantics);
 
 bool bit_is_set(const std::uint8_t* bytes, std::uint32_t id) noexcept;
 std::uint32_t popcount_bytes(const std::uint8_t* bytes,
@@ -49,4 +55,3 @@ void validate_canonical_query(const std::vector<std::uint8_t>& selected,
 }  // namespace splitaligner
 
 #endif
-

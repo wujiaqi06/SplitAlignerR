@@ -29,6 +29,50 @@ cpp_engine002_hash_reference_vectors <- function() {
     .Call(`_SplitAlignerR_cpp_engine002_hash_reference_vectors`)
 }
 
+cpp_engine002_memory_store_create <- function(authority_pointer, pattern_count) {
+    .Call(`_SplitAlignerR_cpp_engine002_memory_store_create`, authority_pointer, pattern_count)
+}
+
+cpp_engine002_disk_store_create <- function(authority_pointer, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound) {
+    .Call(`_SplitAlignerR_cpp_engine002_disk_store_create`, authority_pointer, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound)
+}
+
+cpp_engine002_disk_store_open <- function(authority_pointer, manifest_path, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound) {
+    .Call(`_SplitAlignerR_cpp_engine002_disk_store_open`, authority_pointer, manifest_path, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound)
+}
+
+cpp_engine002_store_insert <- function(store_pointer, record) {
+    .Call(`_SplitAlignerR_cpp_engine002_store_insert`, store_pointer, record)
+}
+
+cpp_engine002_store_finalize <- function(store_pointer, directory, run_store_id) {
+    .Call(`_SplitAlignerR_cpp_engine002_store_finalize`, store_pointer, directory, run_store_id)
+}
+
+cpp_engine002_store_lookup_snapshot <- function(store_pointer, pattern_id, retained) {
+    .Call(`_SplitAlignerR_cpp_engine002_store_lookup_snapshot`, store_pointer, pattern_id, retained)
+}
+
+cpp_engine002_store_debug_pin <- function(store_pointer, pattern_id, retained) {
+    .Call(`_SplitAlignerR_cpp_engine002_store_debug_pin`, store_pointer, pattern_id, retained)
+}
+
+cpp_engine002_pin_release <- function(pin_pointer) {
+    .Call(`_SplitAlignerR_cpp_engine002_pin_release`, pin_pointer)
+}
+
+cpp_engine002_store_stats <- function(store_pointer) {
+    .Call(`_SplitAlignerR_cpp_engine002_store_stats`, store_pointer)
+}
+
+cpp_engine002_store_close <- function(store_pointer) {
+    .Call(`_SplitAlignerR_cpp_engine002_store_close`, store_pointer)
+}
+
+cpp_engine002_set_publication_failpoint <- function(stage) {
+    .Call(`_SplitAlignerR_cpp_engine002_set_publication_failpoint`, stage)
+}
+
 cpp_splitaligner_core_info <- function() {
     .Call(`_SplitAlignerR_cpp_splitaligner_core_info`)
 }

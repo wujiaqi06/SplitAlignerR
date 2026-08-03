@@ -49,6 +49,19 @@ no state or resource change. The no-throw finalizer may mark the shared control
 block closing and defers destructive cleanup until the last guard releases.
 Pinned cache entries cannot be evicted.
 
+The v1 cache charge is deterministic and conservative:
+
+```text
+align64(record_bytes)
++ align64(retained_key_bytes + 8 + 96 + 1 + 16 + 16 + 15)
+```
+
+The second term charges pattern ID, fixed entry metadata, verified state, pin
+metadata, LRU links, and allocator/alignment allowance. Cache and one-plan
+scratch have separate high-water assertions. The decoded disk index and fixed
+store metadata have separate planner budgets; their configured maxima plus
+cache and scratch must not exceed the combined runtime bound.
+
 ## close()
 
 Explicit close and the finalizer share one idempotent no-throw cleanup path.
@@ -84,4 +97,3 @@ or ABI is `ENGINE_SCHEMA_MISMATCH`; stale generation or closed state is
 R never owns a native span and C++ never retains an unprotected pointer into a
 movable R vector. Active calls hold strong local guards. No durable output
 depends on an XPtr remaining alive.
-

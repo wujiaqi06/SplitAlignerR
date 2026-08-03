@@ -208,5 +208,42 @@ Sha256 truth_semantics_fingerprint() {
   return sha256(bytes);
 }
 
+Sha256 pattern_registry_fingerprint(
+    std::uint32_t global_taxon_count,
+    const std::vector<std::vector<std::uint8_t>>& retained_patterns) {
+  std::vector<std::uint8_t> bytes;
+  append_domain(bytes, "SplitAlignerR/PatternRegistry/v1");
+  append_u32_le(bytes, global_taxon_count);
+  append_u64_le(bytes, static_cast<std::uint64_t>(retained_patterns.size()));
+  std::vector<std::uint8_t> previous;
+  for (std::size_t i = 0; i < retained_patterns.size(); ++i) {
+    const auto& retained = retained_patterns[i];
+    validate_padding_bits(retained, global_taxon_count, "registry pattern");
+    if (i != 0 && !(previous < retained)) {
+      fail(ErrorCode::duplicate_pattern,
+           "pattern registry is not strictly sorted and unique");
+    }
+    append_u64_le(bytes, static_cast<std::uint64_t>(i));
+    append_blob(bytes, retained.data(), retained.size());
+    previous = retained;
+  }
+  return sha256(bytes);
+}
+
+Sha256 store_identity_fingerprint(const Sha256& species_authority,
+                                  const Sha256& pattern_registry,
+                                  const Sha256& truth_semantics) {
+  std::vector<std::uint8_t> bytes;
+  append_domain(bytes, "SplitAlignerR/TruthPlanStoreIdentity/v1");
+  append_array(bytes, species_authority);
+  append_array(bytes, pattern_registry);
+  append_array(bytes, truth_semantics);
+  append_u16_le(bytes, 1U);
+  append_u16_le(bytes, 0U);
+  append_u16_le(bytes, 1U);
+  append_u16_le(bytes, 0U);
+  return sha256(bytes);
+}
+
 }  // namespace engine002
 }  // namespace splitaligner

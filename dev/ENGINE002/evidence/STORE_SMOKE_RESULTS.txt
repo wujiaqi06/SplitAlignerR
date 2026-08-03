@@ -1,0 +1,19 @@
+ENGINE002_STORE_SMOKE_PASS
+platform=macOS arm64
+compiler=Apple clang 15.0.0
+cxx_standard=C++17
+compile_warnings=0
+memory_arena_canonical_order=PASS
+lookup_during_building_rejected=PASS
+double_finalize_idempotent=PASS
+close_with_active_memory_pin=ENGINE_STORE_BUSY
+repeated_close=PASS
+disk_header_index_footer_validation=PASS
+manifest_final_last=PASS
+disk_cross_pointer_reopen=PASS
+zero_cache_oversized_scratch=PASS
+scratch_high_water_within_budget=PASS
+close_with_active_disk_pin=ENGINE_STORE_BUSY
+publication_failpoint_stage_7_no_manifest=PASS
+smoke_store_bytes=969
+smoke_memory_arena_bytes=457

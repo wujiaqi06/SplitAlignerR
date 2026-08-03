@@ -28,3 +28,17 @@
   cpp_engine002_plan_view_snapshot(authority, record)
 }
 
+.engine002_memory_store <- function(authority, pattern_count) {
+  cpp_engine002_memory_store_create(authority, as.double(pattern_count))
+}
+
+.engine002_disk_store <- function(authority, pattern_count,
+                                  cache_budget, scratch_budget,
+                                  index_budget, metadata_budget,
+                                  combined_runtime_bound) {
+  cpp_engine002_disk_store_create(
+    authority, as.double(pattern_count), as.double(cache_budget),
+    as.double(scratch_budget), as.double(index_budget),
+    as.double(metadata_budget), as.double(combined_runtime_bound)
+  )
+}

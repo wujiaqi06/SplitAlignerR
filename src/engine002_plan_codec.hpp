@@ -40,11 +40,19 @@ std::vector<std::uint8_t> encode_plan_record(
 
 DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
                                const std::vector<std::uint8_t>& record);
+DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
+                               const std::uint8_t* record,
+                               std::size_t record_size);
 
 class TruthPlanView {
  public:
   TruthPlanView(SpeciesAuthorityPtr authority,
                 std::shared_ptr<const std::vector<std::uint8_t>> record,
+                std::uint64_t generation);
+  TruthPlanView(SpeciesAuthorityPtr authority,
+                std::shared_ptr<const void> owner,
+                const std::uint8_t* record,
+                std::size_t record_size,
                 std::uint64_t generation);
   TruthPlanView(const TruthPlanView&) = delete;
   TruthPlanView& operator=(const TruthPlanView&) = delete;
@@ -57,7 +65,9 @@ class TruthPlanView {
 
  private:
   SpeciesAuthorityPtr authority_;
-  std::shared_ptr<const std::vector<std::uint8_t>> record_;
+  std::shared_ptr<const void> owner_;
+  const std::uint8_t* record_;
+  std::size_t record_size_;
   std::uint64_t generation_;
   DecodedPlan decoded_;
 };
@@ -66,4 +76,3 @@ class TruthPlanView {
 }  // namespace splitaligner
 
 #endif
-

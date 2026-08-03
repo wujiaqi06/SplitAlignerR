@@ -298,10 +298,16 @@ std::vector<std::uint8_t> encode_plan_record(
 
 DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
                                const std::vector<std::uint8_t>& record) {
-  if (record.size() < kPlanHeaderBytes) {
+  return decode_plan_record(authority, record.data(), record.size());
+}
+
+DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
+                               const std::uint8_t* record,
+                               std::size_t record_size) {
+  if (record_size < kPlanHeaderBytes) {
     fail(ErrorCode::store_corrupt, "plan header is truncated");
   }
-  const std::uint8_t* header = record.data();
+  const std::uint8_t* header = record;
   validate_magic(header, "TPLN", 4, "plan");
   if (load_u16_le(header + 4) != 1U || load_u16_le(header + 6) != 0U ||
       load_u16_le(header + 8) != 144U || load_u16_le(header + 10) != 0U ||
@@ -331,8 +337,8 @@ DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
     fail(ErrorCode::store_corrupt, "plan count-derived widths are invalid");
   }
   const std::size_t payload_bytes = checked_size(payload_bytes64, "plan payload");
-  if (record.size() != checked_add<std::size_t>(kPlanHeaderBytes, payload_bytes,
-                                               "plan record length")) {
+  if (record_size != checked_add<std::size_t>(kPlanHeaderBytes, payload_bytes,
+                                              "plan record length")) {
     fail(ErrorCode::store_corrupt,
          "plan payload length or trailing-byte boundary is invalid");
   }
@@ -462,7 +468,7 @@ DecodedPlan decode_plan_record(const SpeciesAuthority& authority,
   out.species_authority_sha256 = authority.fingerprint;
   out.payload_xxh64 = load_u64_le(header + 120);
   out.header_xxh64 = load_u64_le(header + 128);
-  out.record_xxh64 = xxh64(record);
+  out.record_xxh64 = xxh64(record, record_size, 0);
   return out;
 }
 
@@ -471,15 +477,33 @@ TruthPlanView::TruthPlanView(
     std::shared_ptr<const std::vector<std::uint8_t>> record,
     std::uint64_t generation)
     : authority_(std::move(authority)),
-      record_(std::move(record)),
+      owner_(record),
+      record_(record ? record->data() : nullptr),
+      record_size_(record ? record->size() : 0),
       generation_(generation),
       decoded_() {
-  if (!authority_ || !record_) {
+  if (!authority_ || !owner_) {
     fail(ErrorCode::invalid_argument, "view requires authority and record owner");
   }
-  decoded_ = decode_plan_record(*authority_, *record_);
+  decoded_ = decode_plan_record(*authority_, record_, record_size_);
+}
+
+TruthPlanView::TruthPlanView(SpeciesAuthorityPtr authority,
+                             std::shared_ptr<const void> owner,
+                             const std::uint8_t* record,
+                             std::size_t record_size,
+                             std::uint64_t generation)
+    : authority_(std::move(authority)),
+      owner_(std::move(owner)),
+      record_(record),
+      record_size_(record_size),
+      generation_(generation),
+      decoded_() {
+  if (!authority_ || !owner_ || (record_ == nullptr && record_size_ != 0)) {
+    fail(ErrorCode::invalid_argument, "view requires authority and record owner");
+  }
+  decoded_ = decode_plan_record(*authority_, record_, record_size_);
 }
 
 }  // namespace engine002
 }  // namespace splitaligner
-
