@@ -1,0 +1,10 @@
+ENGINE002_SPEC_GATE_PASS
+plan_header_bytes=144
+store_header_bytes=256
+index_entry_bytes=64
+store_footer_bytes=128
+query_prefix_bytes=12
+truth_semantics_stream_bytes=433
+truth_semantics_sha256=8323c706880b2e95628e803a408a459113b0ac3edeb4d69e9e0626a77fc57935
+pro_preflight_sha256=72dfd3d3e88cc167e8ea0178ee8deb99205877870f1fa37b35aacdbc8dd582b2
+durable_writer_present=false

@@ -1,0 +1,20 @@
+# Pro preflight blocker adoption
+
+The byte-identical Pro review is preserved as
+`evidence/SAR_PRO_ENGINE002_PREFLIGHT_REVIEW_20260803.md`; its verified SHA-256
+is `72dfd3d3e88cc167e8ea0178ee8deb99205877870f1fa37b35aacdbc8dd582b2`.
+
+| blocker | frozen contract | implementation target | verification target | current state |
+|---|---|---|---|---|
+| E2-B01 complete store wire format | `ENGINE002_STORE_V1.md`, `ENGINE002_ATOMIC_PUBLICATION.md` | store/manifest/hash modules | wire totals, golden store, corruption | FROZEN; implementation pending |
+| E2-B02 canonical record conventions | `ENGINE002_PLAN_RECORD_V1.md` | codec/view modules | round trip, padding, canonical-query tests | FROZEN; implementation pending |
+| E2-B03 create/open and view lifetime | `ENGINE002_LIFECYCLE_CONTRACT.md`, `ENGINE002_R_CPP_BOUNDARY.md` | store/context/view guards | lifecycle, GC, pin/generation tests | FROZEN; implementation pending |
+| E2-B04 hard LRU and oversized record | lifecycle and benchmark contracts | LRU/scratch/planner modules | budget/high-water/oversize tests | FROZEN; implementation pending |
+| E2-B05 atomic publication | `ENGINE002_ATOMIC_PUBLICATION.md` | disk/manifest/publication modules | stage failpoints/no-clobber tests | FROZEN; implementation pending |
+| E2-B06 identity and collision seam | `ENGINE002_IDENTITY_REGISTRY.md` | hash/registry/cache modules | reference and constant-hash collision tests | FROZEN; implementation pending |
+| E2-B07 authority and benchmark rubric | `ENGINE002_BENCHMARK_CONTRACT.md`, work order sections 16-19 | codec/store benchmark harness | 1,974, 10k, 100k, 2/4-GiB, three-platform gates | FROZEN; execution pending |
+
+This matrix is updated only with evidence paths as later ordinary commits close
+each implementation and test obligation. No blocker is called closed merely
+because its specification now exists.
+

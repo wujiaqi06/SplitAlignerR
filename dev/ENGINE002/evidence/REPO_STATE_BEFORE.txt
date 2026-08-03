@@ -1,0 +1,11 @@
+ENGINE002 baseline captured before authorized edits
+
+branch=engine002-core-schema-storage-primitives
+head=93e8bf79ff6fb6b6419d794b7ef70bac702b8665
+tree=67ec5592f406843341f0966ba50f6b71058d876a
+status=clean
+parent_branch=engine001-production-kernel-design-freeze
+certified_release_commit=17a0927095c7a067817bf598a2556cbe7348a6d0
+arch000a_commit=8ce0d263f0def588f65be4546268ae6d8b2ab38e
+pro_preflight_sha256=72dfd3d3e88cc167e8ea0178ee8deb99205877870f1fa37b35aacdbc8dd582b2
+
