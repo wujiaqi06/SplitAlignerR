@@ -582,7 +582,14 @@ void PackedDiskStore::insert(
     fail(ErrorCode::invalid_state, "disk insertion requires BUILDING state");
   }
   if (!record) fail(ErrorCode::invalid_argument, "cannot insert null record");
-  cancellation_point();
+  try {
+    cancellation_point();
+  } catch (...) {
+    state_ = StoreState::closed;
+    ++generation_;
+    cleanup_builder_temporary();
+    throw;
+  }
   const std::uint64_t pattern_count = registry_->retained_patterns.size();
   if (next_pattern_id_ >= pattern_count) {
     fail(ErrorCode::pattern_mismatch,
