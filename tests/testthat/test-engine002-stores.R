@@ -30,9 +30,14 @@ e2_two_taxon_cd_record <- function(authority = e2_authority(), id = 1) {
   )
 }
 
-e2_disk_store <- function(authority, count, cache = 0, scratch = e2_mib) {
+e2_disk_store <- function(authority, records, destination, run_id,
+                          cache = 0, scratch = e2_mib) {
+  patterns <- lapply(records, function(record) {
+    SplitAlignerR:::.engine002_plan_decode(authority, record)$retained
+  })
   SplitAlignerR:::.engine002_disk_store(
-    authority, count, cache, scratch, e2_mib, e2_mib,
+    authority, patterns, destination, run_id,
+    cache, scratch, e2_mib, e2_mib,
     cache + scratch + 2 * e2_mib
   )
 }
@@ -99,12 +104,13 @@ test_that("ENGINE002 disk store is durable, bounded, and manifest gated", {
   destination <- tempfile("engine002-test-", tmpdir = "/private/tmp")
   dir.create(destination, mode = "0700")
   on.exit(unlink(destination, recursive = TRUE), add = TRUE)
-  store <- e2_disk_store(authority, 2)
-  lapply(rev(records), function(x) {
+  run_id <- "0123456789abcdef0123456789abcdef"
+  store <- e2_disk_store(authority, records, destination, run_id)
+  lapply(records, function(x) {
     SplitAlignerR:::cpp_engine002_store_insert(store, x)
   })
   manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
-    store, destination, "0123456789abcdef0123456789abcdef"
+    store, destination, run_id
   )
   expect_true(file.exists(manifest))
   component <- sub("[.]manifest$", ".bin", manifest)
@@ -176,9 +182,12 @@ test_that("ENGINE002 atomic failpoints never publish an accepted manifest", {
   }, add = TRUE)
   for (stage in 1:15) {
     run_id <- sprintf("%032x", stage)
-    store <- e2_disk_store(authority, 1)
+    record <- e2_two_taxon_record(authority, 0)
+    store <- e2_disk_store(
+      authority, list(record), destination, run_id
+    )
     SplitAlignerR:::cpp_engine002_store_insert(
-      store, e2_two_taxon_record(authority, 0)
+      store, record
     )
     SplitAlignerR:::cpp_engine002_set_publication_failpoint(stage)
     expect_error(
@@ -202,12 +211,18 @@ test_that("ENGINE002 disk corruption and no-clobber publication are rejected", {
   on.exit(unlink(destination, recursive = TRUE), add = TRUE)
   run_id <- "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
   create <- function() {
-    store <- e2_disk_store(authority, 2)
-    SplitAlignerR:::cpp_engine002_store_insert(
-      store, e2_two_taxon_record(authority, 0)
+    records <- list(
+      e2_two_taxon_record(authority, 0),
+      e2_three_taxon_record(authority, 1)
+    )
+    store <- e2_disk_store(
+      authority, records, destination, run_id
     )
     SplitAlignerR:::cpp_engine002_store_insert(
-      store, e2_three_taxon_record(authority, 1)
+      store, records[[1L]]
+    )
+    SplitAlignerR:::cpp_engine002_store_insert(
+      store, records[[2L]]
     )
     store
   }
@@ -295,12 +310,19 @@ test_that("ENGINE002 LRU and scratch budgets are hard at boundary values", {
   destination <- tempfile("engine002-lru-", tmpdir = "/private/tmp")
   dir.create(destination, mode = "0700")
   on.exit(unlink(destination, recursive = TRUE), add = TRUE)
-  build <- e2_disk_store(authority, 2)
-  SplitAlignerR:::cpp_engine002_store_insert(
-    build, e2_two_taxon_record(authority, 0)
+  records <- list(
+    e2_two_taxon_record(authority, 0),
+    e2_two_taxon_cd_record(authority, 1)
+  )
+  build <- e2_disk_store(
+    authority, records, destination,
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   )
   SplitAlignerR:::cpp_engine002_store_insert(
-    build, e2_two_taxon_cd_record(authority, 1)
+    build, records[[1L]]
+  )
+  SplitAlignerR:::cpp_engine002_store_insert(
+    build, records[[2L]]
   )
   manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
     build, destination, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

@@ -24,14 +24,19 @@ MiB <- 1024^2
 destination <- tempfile("engine002-golden-", tmpdir = "/private/tmp")
 dir.create(destination, mode = "0700")
 on.exit(unlink(destination, recursive = TRUE), add = TRUE)
+run_id <- "0123456789abcdef0123456789abcdef"
+patterns <- lapply(records, function(record) {
+  SplitAlignerR:::.engine002_plan_decode(authority, record)$retained
+})
 store <- SplitAlignerR:::.engine002_disk_store(
-  authority, 2, 0, MiB, MiB, MiB, 3 * MiB
+  authority, patterns, destination, run_id,
+  0, MiB, MiB, MiB, 3 * MiB
 )
-lapply(rev(records), function(record) {
+lapply(records, function(record) {
   SplitAlignerR:::cpp_engine002_store_insert(store, record)
 })
 manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
-  store, destination, "0123456789abcdef0123456789abcdef"
+  store, destination, run_id
 )
 component <- sub("[.]manifest$", ".bin", manifest)
 bytes <- readBin(component, raw(), n = file.info(component)$size)

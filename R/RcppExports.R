@@ -41,8 +41,8 @@ cpp_engine002_memory_store_create <- function(authority_pointer, pattern_count) 
     .Call(`_SplitAlignerR_cpp_engine002_memory_store_create`, authority_pointer, pattern_count)
 }
 
-cpp_engine002_disk_store_create <- function(authority_pointer, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound) {
-    .Call(`_SplitAlignerR_cpp_engine002_disk_store_create`, authority_pointer, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound)
+cpp_engine002_disk_store_create <- function(authority_pointer, retained_patterns, directory, run_store_id, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound) {
+    .Call(`_SplitAlignerR_cpp_engine002_disk_store_create`, authority_pointer, retained_patterns, directory, run_store_id, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound)
 }
 
 cpp_engine002_disk_store_open <- function(authority_pointer, manifest_path, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound) {

@@ -31,6 +31,21 @@ struct FinalizedPlanSet {
   Sha256 store_identity_sha256{};
 };
 
+struct PatternRegistry {
+  SpeciesAuthorityPtr authority;
+  std::vector<std::vector<std::uint8_t>> retained_patterns;
+  std::vector<Sha256> pattern_sha256;
+  Sha256 pattern_registry_sha256{};
+  Sha256 truth_semantics_sha256{};
+  Sha256 store_identity_sha256{};
+};
+
+using PatternRegistryPtr = std::shared_ptr<const PatternRegistry>;
+
+PatternRegistryPtr make_pattern_registry(
+    SpeciesAuthorityPtr authority,
+    std::vector<std::vector<std::uint8_t>> retained_patterns);
+
 class StoreBuilder {
  public:
   StoreBuilder(SpeciesAuthorityPtr authority, std::uint64_t expected_count);
@@ -101,4 +116,3 @@ class PackedMemoryStore
 }  // namespace splitaligner
 
 #endif
-

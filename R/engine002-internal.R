@@ -46,12 +46,14 @@
   cpp_engine002_memory_store_create(authority, as.double(pattern_count))
 }
 
-.engine002_disk_store <- function(authority, pattern_count,
+.engine002_disk_store <- function(authority, retained_patterns,
+                                  directory, run_store_id,
                                   cache_budget, scratch_budget,
                                   index_budget, metadata_budget,
                                   combined_runtime_bound) {
   cpp_engine002_disk_store_create(
-    authority, as.double(pattern_count), as.double(cache_budget),
+    authority, retained_patterns, as.character(directory),
+    as.character(run_store_id), as.double(cache_budget),
     as.double(scratch_budget), as.double(index_budget),
     as.double(metadata_budget), as.double(combined_runtime_bound)
   )

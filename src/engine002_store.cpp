@@ -8,6 +8,38 @@
 namespace splitaligner {
 namespace engine002 {
 
+PatternRegistryPtr make_pattern_registry(
+    SpeciesAuthorityPtr authority,
+    std::vector<std::vector<std::uint8_t>> retained_patterns) {
+  if (!authority) {
+    fail(ErrorCode::invalid_argument, "pattern registry requires authority");
+  }
+  if (retained_patterns.size() > static_cast<std::size_t>(UINT64_MAX)) {
+    fail(ErrorCode::memory_budget, "pattern registry exceeds u64 count");
+  }
+  auto registry = std::make_shared<PatternRegistry>();
+  registry->authority = std::move(authority);
+  registry->pattern_sha256.reserve(retained_patterns.size());
+  for (std::size_t i = 0; i < retained_patterns.size(); ++i) {
+    const auto& retained = retained_patterns[i];
+    if (i != 0 && !(retained_patterns[i - 1] < retained)) {
+      fail(ErrorCode::pattern_mismatch,
+           "pattern registry must be exact, unique, and canonical");
+    }
+    registry->pattern_sha256.push_back(retained_pattern_fingerprint(
+        registry->authority->global_taxon_count, retained));
+  }
+  registry->pattern_registry_sha256 = pattern_registry_fingerprint(
+      registry->authority->global_taxon_count, retained_patterns);
+  registry->truth_semantics_sha256 = truth_semantics_fingerprint();
+  registry->store_identity_sha256 = store_identity_fingerprint(
+      registry->authority->fingerprint,
+      registry->pattern_registry_sha256,
+      registry->truth_semantics_sha256);
+  registry->retained_patterns = std::move(retained_patterns);
+  return registry;
+}
+
 StoreBuilder::StoreBuilder(SpeciesAuthorityPtr authority,
                            std::uint64_t expected_count)
     : authority_(std::move(authority)), expected_count_(expected_count) {

@@ -484,13 +484,27 @@ SEXP cpp_engine002_memory_store_create(SEXP authority_pointer,
 
 // [[Rcpp::export]]
 SEXP cpp_engine002_disk_store_create(
-    SEXP authority_pointer, double pattern_count, double cache_budget,
-    double scratch_budget, double index_budget, double metadata_budget,
-    double combined_runtime_bound) {
+    SEXP authority_pointer, Rcpp::List retained_patterns,
+    std::string directory, std::string run_store_id,
+    double cache_budget, double scratch_budget, double index_budget,
+    double metadata_budget, double combined_runtime_bound) {
   return translate_engine_errors([&]() -> SEXP {
     const auto& authority = authority_handle(authority_pointer);
+    std::vector<std::vector<std::uint8_t>> exact_patterns;
+    exact_patterns.reserve(retained_patterns.size());
+    for (R_xlen_t i = 0; i < retained_patterns.size(); ++i) {
+      if (TYPEOF(retained_patterns[i]) != RAWSXP) {
+        splitaligner::engine002::fail(
+            ErrorCode::schema_mismatch,
+            "retained-pattern registry entries must be raw vectors");
+      }
+      exact_patterns.push_back(as_bytes(Rcpp::RawVector(retained_patterns[i])));
+    }
+    const auto registry = splitaligner::engine002::make_pattern_registry(
+        authority.authority, std::move(exact_patterns));
     auto store = std::make_shared<splitaligner::engine002::PackedDiskStore>(
-        authority.authority, exact_u64(pattern_count, "pattern_count"),
+        authority.authority, registry, std::filesystem::path(directory),
+        run_store_id,
         exact_u64(cache_budget, "cache_budget"),
         exact_u64(scratch_budget, "scratch_budget"),
         exact_u64(index_budget, "index_budget"),
@@ -620,6 +634,7 @@ Rcpp::List cpp_engine002_store_stats(SEXP store_pointer) {
         Rcpp::_["state"] = store_state_name(handle.disk->state()),
         Rcpp::_["generation"] = static_cast<double>(stats.generation),
         Rcpp::_["pattern_count"] = static_cast<double>(stats.pattern_count),
+        Rcpp::_["inserted_count"] = static_cast<double>(stats.inserted_count),
         Rcpp::_["file_bytes"] = static_cast<double>(stats.file_bytes),
         Rcpp::_["index_charged_bytes"] =
             static_cast<double>(stats.index_charged_bytes),
@@ -627,6 +642,16 @@ Rcpp::List cpp_engine002_store_stats(SEXP store_pointer) {
             static_cast<double>(stats.metadata_charged_bytes),
         Rcpp::_["combined_runtime_bound"] =
             static_cast<double>(stats.combined_runtime_bound),
+        Rcpp::_["builder_charged_bytes"] =
+            static_cast<double>(stats.builder_charged_bytes),
+        Rcpp::_["builder_charged_high_water"] =
+            static_cast<double>(stats.builder_charged_high_water),
+        Rcpp::_["current_record_high_water"] =
+            static_cast<double>(stats.current_record_high_water),
+        Rcpp::_["write_buffer_high_water"] =
+            static_cast<double>(stats.write_buffer_high_water),
+        Rcpp::_["temporary_disk_high_water"] =
+            static_cast<double>(stats.temporary_disk_high_water),
         Rcpp::_["hits"] = static_cast<double>(lru.hits),
         Rcpp::_["misses"] = static_cast<double>(lru.misses),
         Rcpp::_["insertions"] = static_cast<double>(lru.insertions),

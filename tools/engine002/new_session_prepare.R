@@ -13,12 +13,14 @@ record <- SplitAlignerR:::.engine002_plan_encode(
   list(rb(1L), rb(1L), NULL, NULL, NULL)
 )
 MiB <- 1024^2
+run_id <- "cccccccccccccccccccccccccccccccc"
 store <- SplitAlignerR:::.engine002_disk_store(
-  authority, 1, 0, MiB, MiB, MiB, 3 * MiB
+  authority, list(rb(3L)), args[[2L]], run_id,
+  0, MiB, MiB, MiB, 3 * MiB
 )
 SplitAlignerR:::cpp_engine002_store_insert(store, record)
 manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
-  store, args[[2L]], "cccccccccccccccccccccccccccccccc"
+  store, args[[2L]], run_id
 )
 SplitAlignerR:::cpp_engine002_store_close(store)
 writeLines(manifest, file.path(args[[2L]], "manifest.path"))

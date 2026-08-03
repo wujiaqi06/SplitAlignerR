@@ -17,6 +17,7 @@ namespace {
 constexpr std::size_t kStoreHeaderBytes = 256;
 constexpr std::size_t kIndexEntryBytes = 64;
 constexpr std::size_t kStoreFooterBytes = 128;
+constexpr std::uint64_t kBuilderMetadataCharge = 4096;
 
 void append_domain(Sha256State& state, const char* domain) {
   const std::size_t length = std::char_traits<char>::length(domain);
@@ -51,7 +52,8 @@ bool all_zero(const std::uint8_t* begin, const std::uint8_t* end) {
   return std::all_of(begin, end, [](std::uint8_t value) { return value == 0; });
 }
 
-std::vector<std::uint8_t> build_header(const FinalizedPlanSet& plans,
+std::vector<std::uint8_t> build_header(const PatternRegistry& registry,
+                                       std::uint64_t pattern_count,
                                        std::uint64_t records_bytes,
                                        std::uint64_t index_offset,
                                        std::uint64_t footer_offset,
@@ -70,61 +72,29 @@ std::vector<std::uint8_t> build_header(const FinalizedPlanSet& plans,
   store_u16_le(header.data() + 22, 144U);
   store_u16_le(header.data() + 24, 64U);
   store_u16_le(header.data() + 26, 128U);
-  store_u32_le(header.data() + 32, plans.authority->global_taxon_count);
-  store_u32_le(header.data() + 36, plans.authority->primitive_count);
-  store_u64_le(header.data() + 40, plans.records.size());
+  store_u32_le(header.data() + 32, registry.authority->global_taxon_count);
+  store_u32_le(header.data() + 36, registry.authority->primitive_count);
+  store_u64_le(header.data() + 40, pattern_count);
   store_u64_le(header.data() + 48, 256U);
   store_u64_le(header.data() + 56, index_offset);
   store_u64_le(header.data() + 64, footer_offset);
   store_u64_le(header.data() + 72, file_bytes);
   store_u64_le(header.data() + 80, records_bytes);
   store_u64_le(header.data() + 88,
-               checked_mul<std::uint64_t>(plans.records.size(), 64U,
+               checked_mul<std::uint64_t>(pattern_count, 64U,
                                           "index bytes"));
-  copy_sha(header.data() + 96, plans.authority->fingerprint);
-  copy_sha(header.data() + 128, plans.pattern_registry_sha256);
-  copy_sha(header.data() + 160, plans.truth_semantics_sha256);
-  copy_sha(header.data() + 192, plans.store_identity_sha256);
+  copy_sha(header.data() + 96, registry.authority->fingerprint);
+  copy_sha(header.data() + 128, registry.pattern_registry_sha256);
+  copy_sha(header.data() + 160, registry.truth_semantics_sha256);
+  copy_sha(header.data() + 192, registry.store_identity_sha256);
   store_u64_le(header.data() + 224, xxh64(header.data(), 224, 0));
   return header;
 }
 
-std::vector<std::uint8_t> build_index(const FinalizedPlanSet& plans) {
-  const std::size_t bytes = checked_size(checked_mul<std::uint64_t>(
-      plans.records.size(), 64U, "index allocation"), "index allocation");
-  std::vector<std::uint8_t> index(bytes, 0);
-  std::uint64_t offset = 256;
-  for (std::size_t i = 0; i < plans.records.size(); ++i) {
-    const auto& plan = plans.records[i];
-    std::uint8_t* entry = index.data() + i * kIndexEntryBytes;
-    store_u64_le(entry, plan.pattern_id);
-    store_u64_le(entry + 8, offset);
-    store_u64_le(entry + 16, plan.record->size());
-    copy_sha(entry + 24, plan.pattern_sha256);
-    store_u64_le(entry + 56, plan.record_xxh64);
-    offset = checked_add<std::uint64_t>(offset, plan.record->size(),
-                                        "record offset");
-  }
-  return index;
-}
-
-Sha256 payload_aggregate(const FinalizedPlanSet& plans) {
-  Sha256State state;
-  append_domain(state, "SplitAlignerR/TruthPlanPayloadAggregate/v1");
-  update_u64(state, plans.records.size());
-  for (const auto& plan : plans.records) {
-    update_u64(state, plan.pattern_id);
-    const std::uint64_t payload_bytes = plan.record->size() - kPlanHeaderBytes;
-    update_blob(state, plan.record->data() + kPlanHeaderBytes, payload_bytes);
-  }
-  return state.digest();
-}
-
 std::vector<std::uint8_t> build_footer(
-    const FinalizedPlanSet& plans, std::uint64_t file_bytes,
+    std::uint64_t pattern_count, std::uint64_t file_bytes,
     std::uint64_t records_xxh64, std::uint64_t index_xxh64,
-    const Sha256& payload_sha, const std::vector<std::uint8_t>& header,
-    const std::vector<std::uint8_t>& index) {
+    const Sha256& payload_sha) {
   std::vector<std::uint8_t> footer(kStoreFooterBytes, 0);
   std::copy_n(reinterpret_cast<const std::uint8_t*>("SATDONE1"), 8,
               footer.data());
@@ -132,7 +102,7 @@ std::vector<std::uint8_t> build_footer(
   store_u16_le(footer.data() + 10, 0U);
   store_u16_le(footer.data() + 12, 128U);
   store_u16_le(footer.data() + 14, 0U);
-  store_u64_le(footer.data() + 16, plans.records.size());
+  store_u64_le(footer.data() + 16, pattern_count);
   store_u64_le(footer.data() + 24, file_bytes);
   store_u64_le(footer.data() + 32, records_xxh64);
   store_u64_le(footer.data() + 40, index_xxh64);
@@ -140,16 +110,22 @@ std::vector<std::uint8_t> build_footer(
   std::vector<std::uint8_t> footer_for_hash = footer;
   std::fill(footer_for_hash.begin() + 80, footer_for_hash.begin() + 120, 0);
   store_u64_le(footer.data() + 112, xxh64(footer_for_hash));
-
-  Sha256State complete;
-  complete.update(header.data(), header.size());
-  for (const auto& plan : plans.records) {
-    complete.update(plan.record->data(), plan.record->size());
-  }
-  complete.update(index.data(), index.size());
-  complete.update(footer.data(), footer.size());
-  copy_sha(footer.data() + 80, complete.digest());
   return footer;
+}
+
+void append_index_entry(std::vector<std::uint8_t>& index,
+                        const DecodedPlan& decoded,
+                        std::uint64_t record_offset,
+                        std::uint64_t record_bytes) {
+  const std::size_t begin = index.size();
+  index.resize(checked_add<std::size_t>(
+      begin, kIndexEntryBytes, "streaming index append"), 0);
+  std::uint8_t* entry = index.data() + begin;
+  store_u64_le(entry, decoded.pattern_id);
+  store_u64_le(entry + 8, record_offset);
+  store_u64_le(entry + 16, record_bytes);
+  copy_sha(entry + 24, decoded.retained_pattern_sha256);
+  store_u64_le(entry + 56, decoded.record_xxh64);
 }
 
 std::uint64_t xxh_file_region(const std::filesystem::path& path,
@@ -401,19 +377,66 @@ ValidatedDiskStore validate_disk_store(
 }
 
 PackedDiskStore::PackedDiskStore(
-    SpeciesAuthorityPtr authority, std::uint64_t pattern_count,
+    SpeciesAuthorityPtr authority, PatternRegistryPtr registry,
+    const std::filesystem::path& directory, const std::string& run_store_id,
     std::uint64_t cache_budget, std::uint64_t scratch_budget,
     std::uint64_t index_budget, std::uint64_t metadata_budget,
     std::uint64_t combined_runtime_bound)
-    : authority_(std::move(authority)), state_(StoreState::building),
-      generation_(1), builder_(new StoreBuilder(authority_, pattern_count)),
-      finalized_(), component_path_(), manifest_path_(), index_(),
+    : authority_(std::move(authority)), registry_(std::move(registry)),
+      state_(StoreState::building), generation_(1), writer_(),
+      directory_(directory), run_store_id_(run_store_id), component_temp_(),
+      candidate_temp_(), validated_temp_(), component_final_(),
+      manifest_final_(), index_wire_(), records_hash_(), payload_hash_(),
+      next_pattern_id_(0), records_bytes_(0),
+      builder_charged_bytes_(kBuilderMetadataCharge),
+      builder_charged_high_water_(kBuilderMetadataCharge),
+      current_record_high_water_(0), write_buffer_high_water_(0),
+      temporary_disk_high_water_(0), component_path_(), manifest_path_(),
+      index_(),
       cache_(std::make_shared<HardBoundedLru>(cache_budget, scratch_budget)),
       cache_budget_(cache_budget), scratch_budget_(scratch_budget),
       index_budget_(index_budget), metadata_budget_(metadata_budget),
       combined_runtime_bound_(combined_runtime_bound), file_bytes_(0),
       index_charged_bytes_(0), metadata_charged_bytes_(4096) {
+  if (!authority_ || !registry_ || registry_->authority.get() != authority_.get()) {
+    fail(ErrorCode::authority_mismatch,
+         "streaming disk store requires its exact authority registry");
+  }
+  if (!valid_run_store_id(run_store_id_)) {
+    fail(ErrorCode::invalid_argument, "run_store_id must be 32 lowercase hex");
+  }
+  reject_symlink_path(directory_);
+  const std::uint64_t index_bytes = checked_mul<std::uint64_t>(
+      registry_->retained_patterns.size(), kIndexEntryBytes,
+      "streaming index bytes");
+  if (index_bytes > index_budget_) {
+    fail(ErrorCode::memory_budget, "streaming index exceeds disk-index budget");
+  }
+  index_wire_.reserve(checked_size(index_bytes, "streaming index reserve"));
   validate_runtime_budgets();
+  append_domain(payload_hash_, "SplitAlignerR/TruthPlanPayloadAggregate/v1");
+  update_u64(payload_hash_, registry_->retained_patterns.size());
+
+  const std::string nonce = random_nonce_hex();
+  const std::string component_name = run_store_id_ + ".truthstore.bin";
+  const std::string manifest_name = run_store_id_ + ".truthstore.manifest";
+  component_final_ = directory_ / component_name;
+  manifest_final_ = directory_ / manifest_name;
+  component_temp_ = directory_ /
+      (component_name + ".engine002-tmp-" + nonce);
+  candidate_temp_ = directory_ /
+      (manifest_name + ".candidate.engine002-tmp-" + nonce);
+  validated_temp_ = directory_ /
+      (manifest_name + ".validated.engine002-tmp-" + nonce);
+  try {
+    writer_ = std::make_unique<ExclusiveBinaryWriter>(component_temp_);
+    std::array<std::uint8_t, kStoreHeaderBytes> placeholder{};
+    writer_->write_all(placeholder.data(), placeholder.size());
+    temporary_disk_high_water_ = kStoreHeaderBytes;
+  } catch (...) {
+    cleanup_builder_temporary();
+    throw;
+  }
 }
 
 PackedDiskStore::PackedDiskStore(
@@ -421,8 +444,14 @@ PackedDiskStore::PackedDiskStore(
     const std::filesystem::path& manifest_path, std::uint64_t cache_budget,
     std::uint64_t scratch_budget, std::uint64_t index_budget,
     std::uint64_t metadata_budget, std::uint64_t combined_runtime_bound)
-    : authority_(std::move(authority)), state_(StoreState::open_validated),
-      generation_(1), builder_(), finalized_(),
+    : authority_(std::move(authority)), registry_(),
+      state_(StoreState::open_validated), generation_(1), writer_(),
+      directory_(), run_store_id_(), component_temp_(), candidate_temp_(),
+      validated_temp_(), component_final_(), manifest_final_(), index_wire_(),
+      records_hash_(), payload_hash_(), next_pattern_id_(0), records_bytes_(0),
+      builder_charged_bytes_(0), builder_charged_high_water_(0),
+      current_record_high_water_(0), write_buffer_high_water_(0),
+      temporary_disk_high_water_(0),
       component_path_(validated.component_path), manifest_path_(manifest_path),
       index_(validated.index),
       cache_(std::make_shared<HardBoundedLru>(cache_budget, scratch_budget)),
@@ -432,6 +461,32 @@ PackedDiskStore::PackedDiskStore(
       file_bytes_(validated.manifest.store_bytes),
       index_charged_bytes_(index_charge(index_)), metadata_charged_bytes_(4096) {
   validate_runtime_budgets();
+}
+
+PackedDiskStore::~PackedDiskStore() noexcept {
+  cleanup_builder_temporary();
+}
+
+void PackedDiskStore::cleanup_builder_temporary() noexcept {
+  writer_.reset();
+  remove_recognized_temp(component_temp_);
+  remove_recognized_temp(candidate_temp_);
+  remove_recognized_temp(validated_temp_);
+}
+
+void PackedDiskStore::update_builder_high_water(
+    std::uint64_t current_record_bytes) {
+  current_record_high_water_ = std::max(current_record_high_water_,
+                                        current_record_bytes);
+  builder_charged_bytes_ = checked_add<std::uint64_t>(
+      index_wire_.size(), kBuilderMetadataCharge,
+      "streaming builder charged bytes");
+  std::uint64_t working = checked_add<std::uint64_t>(
+      builder_charged_bytes_, current_record_bytes,
+      "streaming builder working bytes");
+  working = checked_add<std::uint64_t>(
+      working, write_buffer_high_water_, "streaming builder working bytes");
+  builder_charged_high_water_ = std::max(builder_charged_high_water_, working);
 }
 
 void PackedDiskStore::validate_runtime_budgets() const {
@@ -487,7 +542,53 @@ void PackedDiskStore::insert(
   if (state_ != StoreState::building) {
     fail(ErrorCode::invalid_state, "disk insertion requires BUILDING state");
   }
-  builder_->insert(std::move(record));
+  if (!record) fail(ErrorCode::invalid_argument, "cannot insert null record");
+  const std::uint64_t pattern_count = registry_->retained_patterns.size();
+  if (next_pattern_id_ >= pattern_count) {
+    fail(ErrorCode::pattern_mismatch,
+         "streaming disk store received too many records");
+  }
+  const DecodedPlan decoded = decode_plan_record(*authority_, *record);
+  if (decoded.pattern_id < next_pattern_id_) {
+    fail(ErrorCode::duplicate_record,
+         "streaming disk store received a duplicate prior pattern ID");
+  }
+  if (decoded.pattern_id > next_pattern_id_) {
+    fail(ErrorCode::pattern_mismatch,
+         "streaming disk store requires the next contiguous pattern ID");
+  }
+  const std::size_t position = checked_size(
+      next_pattern_id_, "streaming registry position");
+  if (decoded.retained != registry_->retained_patterns[position] ||
+      !constant_time_equal(decoded.retained_pattern_sha256,
+                           registry_->pattern_sha256[position])) {
+    fail(ErrorCode::pattern_mismatch,
+         "record retained identity differs from finalized registry");
+  }
+  const std::uint64_t record_bytes = record->size();
+  const std::uint64_t record_offset = checked_add<std::uint64_t>(
+      kStoreHeaderBytes, records_bytes_, "streaming record offset");
+  update_builder_high_water(record_bytes);
+  try {
+    writer_->write_all(record->data(), record->size());
+  } catch (...) {
+    state_ = StoreState::closed;
+    ++generation_;
+    cleanup_builder_temporary();
+    throw;
+  }
+  records_hash_.update(record->data(), record->size());
+  update_u64(payload_hash_, decoded.pattern_id);
+  update_blob(payload_hash_, record->data() + kPlanHeaderBytes,
+              record_bytes - kPlanHeaderBytes);
+  append_index_entry(index_wire_, decoded, record_offset, record_bytes);
+  records_bytes_ = checked_add<std::uint64_t>(
+      records_bytes_, record_bytes, "streaming records bytes");
+  next_pattern_id_ = checked_add<std::uint64_t>(
+      next_pattern_id_, 1U, "streaming next pattern ID");
+  temporary_disk_high_water_ = checked_add<std::uint64_t>(
+      kStoreHeaderBytes, records_bytes_, "streaming temporary bytes");
+  update_builder_high_water(0);
 }
 
 std::filesystem::path PackedDiskStore::finalize_publish(
@@ -500,112 +601,104 @@ std::filesystem::path PackedDiskStore::finalize_publish(
   if (state_ != StoreState::building) {
     fail(ErrorCode::invalid_state, "disk finalization requires BUILDING state");
   }
-  if (!valid_run_store_id(run_store_id)) {
-    fail(ErrorCode::invalid_argument, "run_store_id must be 32 lowercase hex");
+  if (directory != directory_ || run_store_id != run_store_id_) {
+    fail(ErrorCode::invalid_argument,
+         "finalization destination differs from construction destination");
   }
-  reject_symlink_path(directory);
-  auto plans = std::make_unique<FinalizedPlanSet>(builder_->finalize());
-  std::uint64_t records_bytes = 0;
-  Xxh64State records_hash;
-  for (const auto& plan : plans->records) {
-    records_bytes = checked_add<std::uint64_t>(
-        records_bytes, plan.record->size(), "store records bytes");
-    records_hash.update(plan.record->data(), plan.record->size());
+  const std::uint64_t pattern_count = registry_->retained_patterns.size();
+  if (next_pattern_id_ != pattern_count) {
+    fail(ErrorCode::incomplete_run,
+         "streaming disk store was finalized before all records arrived");
   }
   const std::uint64_t index_offset = checked_add<std::uint64_t>(
-      256U, records_bytes, "store index offset");
+      kStoreHeaderBytes, records_bytes_, "store index offset");
   const std::uint64_t index_bytes = checked_mul<std::uint64_t>(
-      plans->records.size(), 64U, "store index bytes");
-  if (index_bytes > index_budget_) {
-    fail(ErrorCode::memory_budget, "store index exceeds disk-index budget");
+      pattern_count, kIndexEntryBytes, "store index bytes");
+  if (index_bytes != index_wire_.size()) {
+    fail(ErrorCode::internal_failure,
+         "streaming index size differs from finalized registry");
   }
   const std::uint64_t footer_offset = checked_add<std::uint64_t>(
       index_offset, index_bytes, "store footer offset");
   const std::uint64_t file_bytes = checked_add<std::uint64_t>(
       footer_offset, 128U, "store file bytes");
-  const auto header = build_header(*plans, records_bytes, index_offset,
-                                   footer_offset, file_bytes);
-  const auto index = build_index(*plans);
-  const auto footer = build_footer(
-      *plans, file_bytes, records_hash.digest(), xxh64(index),
-      payload_aggregate(*plans), header, index);
+  const auto header = build_header(*registry_, pattern_count, records_bytes_,
+                                   index_offset, footer_offset, file_bytes);
+  auto footer = build_footer(pattern_count, file_bytes,
+                             records_hash_.digest(), xxh64(index_wire_),
+                             payload_hash_.digest());
 
-  const std::string nonce = random_nonce_hex();
-  const std::string component_name = run_store_id + ".truthstore.bin";
-  const std::string manifest_name = run_store_id + ".truthstore.manifest";
-  const auto component_final = directory / component_name;
-  const auto manifest_final = directory / manifest_name;
-  const auto component_temp = directory /
-      (component_name + ".engine002-tmp-" + nonce);
-  const auto candidate_temp = directory /
-      (manifest_name + ".candidate.engine002-tmp-" + nonce);
-  const auto validated_temp = directory /
-      (manifest_name + ".validated.engine002-tmp-" + nonce);
+  const std::string component_name = run_store_id_ + ".truthstore.bin";
   bool manifest_published = false;
+  bool component_published = false;
   try {
-    ExclusiveBinaryWriter writer(component_temp);
     publication_failpoint(1);
-    std::vector<std::uint8_t> placeholder(kStoreHeaderBytes, 0);
-    writer.write_all(placeholder.data(), placeholder.size());
-    for (const auto& plan : plans->records) {
-      writer.write_all(plan.record->data(), plan.record->size());
-    }
-    writer.write_all(index.data(), index.size());
+    writer_->write_all(index_wire_.data(), index_wire_.size());
     publication_failpoint(2);
-    writer.seek(0);
-    writer.write_all(header.data(), header.size());
+    writer_->seek(0);
+    writer_->write_all(header.data(), header.size());
     publication_failpoint(3);
-    writer.seek(footer_offset);
-    writer.write_all(footer.data(), footer.size());
+    writer_->seek(footer_offset);
+    writer_->write_all(footer.data(), footer.size());
     publication_failpoint(4);
-    writer.sync();
+    writer_->sync();
     publication_failpoint(5);
-    writer.close();
+    const Sha256 complete_sha = normalized_file_sha(
+        component_temp_, file_bytes, footer_offset + 80U, 32U);
+    writer_->seek(footer_offset + 80U);
+    writer_->write_all(complete_sha.data(), complete_sha.size());
+    writer_->sync();
+    writer_->close();
+    writer_.reset();
     publication_failpoint(6);
     const auto temporary_validated = validate_disk_store(
-        *authority_, component_temp, nullptr, scratch_budget_, index_budget_,
+        *authority_, component_temp_, nullptr, scratch_budget_, index_budget_,
         metadata_budget_);
     publication_failpoint(7);
     const Sha256 actual_sha = temporary_validated.manifest.store_sha256;
     publication_failpoint(8);
     StoreManifest candidate;
     candidate.state = ManifestState::incomplete;
-    candidate.run_store_id = run_store_id;
+    candidate.run_store_id = run_store_id_;
     candidate.store_component = component_name;
     candidate.store_bytes = file_bytes;
     candidate.store_sha256 = actual_sha;
     candidate.species_authority_sha256 = authority_->fingerprint;
-    candidate.pattern_registry_sha256 = plans->pattern_registry_sha256;
-    candidate.truth_semantics_sha256 = plans->truth_semantics_sha256;
-    candidate.pattern_count = plans->records.size();
-    write_text_exclusive(candidate_temp, render_manifest(candidate));
-    parse_manifest(read_text_file(candidate_temp, UINT64_C(1048576)));
+    candidate.pattern_registry_sha256 = registry_->pattern_registry_sha256;
+    candidate.truth_semantics_sha256 = registry_->truth_semantics_sha256;
+    candidate.pattern_count = pattern_count;
+    write_text_exclusive(candidate_temp_, render_manifest(candidate));
+    parse_manifest(read_text_file(candidate_temp_, UINT64_C(1048576)));
     publication_failpoint(9);
     StoreManifest final_manifest = candidate;
     final_manifest.state = ManifestState::validated;
-    write_text_exclusive(validated_temp, render_manifest(final_manifest));
-    parse_manifest(read_text_file(validated_temp, UINT64_C(1048576)));
+    write_text_exclusive(validated_temp_, render_manifest(final_manifest));
+    parse_manifest(read_text_file(validated_temp_, UINT64_C(1048576)));
     publication_failpoint(10);
-    publish_no_replace(component_temp, component_final);
+    publish_no_replace(component_temp_, component_final_);
+    component_published = true;
     publication_failpoint(11);
     const auto final_validated = validate_disk_store(
-        *authority_, component_final, &final_manifest, scratch_budget_,
+        *authority_, component_final_, &final_manifest, scratch_budget_,
         index_budget_, metadata_budget_);
     publication_failpoint(12);
-    publish_no_replace(validated_temp, manifest_final);
+    publish_no_replace(validated_temp_, manifest_final_);
     manifest_published = true;
     publication_failpoint(13);
-    sync_directory(directory);
+    sync_directory(directory_);
     publication_failpoint(14);
-    remove_recognized_temp(candidate_temp);
+    remove_recognized_temp(candidate_temp_);
     publication_failpoint(15);
 
-    finalized_ = std::move(plans);
-    builder_.reset();
-    component_path_ = component_final;
-    manifest_path_ = manifest_final;
+    registry_.reset();
+    index_wire_.clear();
+    index_wire_.shrink_to_fit();
+    builder_charged_bytes_ = 0;
+    component_path_ = component_final_;
+    manifest_path_ = manifest_final_;
     index_ = final_validated.index;
     file_bytes_ = file_bytes;
+    temporary_disk_high_water_ = std::max(temporary_disk_high_water_, file_bytes);
     index_charged_bytes_ = index_charge(index_);
     validate_runtime_budgets();
     state_ = StoreState::open_validated;
@@ -614,14 +707,24 @@ std::filesystem::path PackedDiskStore::finalize_publish(
     if (manifest_published) {
       std::error_code cleanup_error;
       const auto status = std::filesystem::symlink_status(
-          manifest_final, cleanup_error);
+          manifest_final_, cleanup_error);
       if (!cleanup_error && !std::filesystem::is_symlink(status)) {
-        std::filesystem::remove(manifest_final, cleanup_error);
+        std::filesystem::remove(manifest_final_, cleanup_error);
       }
     }
-    remove_recognized_temp(component_temp);
-    remove_recognized_temp(candidate_temp);
-    remove_recognized_temp(validated_temp);
+    if (component_published) {
+      std::error_code cleanup_error;
+      const auto status = std::filesystem::symlink_status(
+          component_final_, cleanup_error);
+      if (!cleanup_error && !std::filesystem::is_symlink(status)) {
+        std::filesystem::remove(component_final_, cleanup_error);
+      }
+    }
+    state_ = StoreState::closed;
+    ++generation_;
+    registry_.reset();
+    index_wire_.clear();
+    cleanup_builder_temporary();
     throw;
   }
 }
@@ -680,10 +783,11 @@ void PackedDiskStore::close() {
   std::lock_guard<std::mutex> lock(mutex_);
   if (state_ == StoreState::closed) return;
   cache_->clear();
+  cleanup_builder_temporary();
   state_ = StoreState::closed;
   ++generation_;
-  builder_.reset();
-  finalized_.reset();
+  registry_.reset();
+  index_wire_.clear();
   index_.clear();
 }
 
@@ -696,11 +800,18 @@ DiskStoreStats PackedDiskStore::stats() const noexcept {
   std::lock_guard<std::mutex> lock(mutex_);
   DiskStoreStats out;
   out.generation = generation_;
-  out.pattern_count = index_.size();
+  out.pattern_count = registry_ ? registry_->retained_patterns.size()
+                                : index_.size();
+  out.inserted_count = next_pattern_id_;
   out.file_bytes = file_bytes_;
   out.index_charged_bytes = index_charged_bytes_;
   out.metadata_charged_bytes = metadata_charged_bytes_;
   out.combined_runtime_bound = combined_runtime_bound_;
+  out.builder_charged_bytes = builder_charged_bytes_;
+  out.builder_charged_high_water = builder_charged_high_water_;
+  out.current_record_high_water = current_record_high_water_;
+  out.write_buffer_high_water = write_buffer_high_water_;
+  out.temporary_disk_high_water = temporary_disk_high_water_;
   out.lru = cache_->stats();
   return out;
 }

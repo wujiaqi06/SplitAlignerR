@@ -129,17 +129,19 @@ MiB <- 1024^2
 disk_directory <- tempfile("engine002-authority-", tmpdir = "/private/tmp")
 dir.create(disk_directory, mode = "0700")
 on.exit(unlink(disk_directory, recursive = TRUE), add = TRUE)
+run_id <- "dddddddddddddddddddddddddddddddd"
 disk <- SplitAlignerR:::.engine002_disk_store(
-  authority, length(records), 64 * MiB, MiB, MiB, MiB, 67 * MiB
+  authority, registry$exact_pattern_bits, disk_directory, run_id,
+  64 * MiB, MiB, MiB, MiB, 67 * MiB
 )
 disk_build_start <- proc.time()[["elapsed"]]
-for (i in rev(seq_along(records))) {
+for (i in seq_along(records)) {
   SplitAlignerR:::cpp_engine002_store_insert(disk, records[[i]])
 }
 disk_build_seconds <- proc.time()[["elapsed"]] - disk_build_start
 disk_finalize_start <- proc.time()[["elapsed"]]
 manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
-  disk, disk_directory, "dddddddddddddddddddddddddddddddd"
+  disk, disk_directory, run_id
 )
 disk_finalize_seconds <- proc.time()[["elapsed"]] - disk_finalize_start
 disk_stats <- SplitAlignerR:::cpp_engine002_store_stats(disk)
