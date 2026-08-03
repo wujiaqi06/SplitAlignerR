@@ -1,0 +1,6 @@
+gate	status
+ordinary_snapshot_is_independent	PASS
+first_close_changes_state	PASS
+second_close_is_idempotent	PASS
+closed_context_fails_safely	PASS
+snapshot_survives_pointer_gc	PASS

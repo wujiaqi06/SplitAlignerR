@@ -1,0 +1,60 @@
+ENGINE001 FILE-SCOPE AUDIT
+==========================
+
+Authorized base:
+  8ce0d263f0def588f65be4546268ae6d8b2ab38e
+
+Authorized branch:
+  engine001-production-kernel-design-freeze
+
+Authorized write prefix:
+  dev/ENGINE001/
+
+Paths materialized outside authorized prefix:
+  NONE
+
+Production paths changed:
+  NO
+
+Specifically unchanged:
+  R/
+  src/
+  tests/
+  tests/testthat/
+  NAMESPACE
+  DESCRIPTION
+  README*
+  NEWS*
+  data/
+  inst/
+  vignettes/
+  dev/ARCH000/
+  dev/ARCH000A/
+
+Validation:
+  ENGINE001 R files parse: PASS
+  benchmark shell syntax: PASS
+  isolated C++ ownership sketch compiles/runs: PASS
+  manifest validation replay: PASS
+  ownership lifecycle replay: PASS
+  design gates: 15/15 PASS
+  ARCH000 embedded SHA256SUMS: PASS
+  ARCH000A embedded SHA256SUMS: PASS
+  whitespace check: PASS
+  generated binary/cache scan: PASS
+  personal absolute-path and credential-pattern scan: PASS
+  untracked paths outside dev/ENGINE001: NONE
+
+Package R CMD check:
+  NOT RUN — ENGINE001 contains no package/production modification and links no
+  prototype into the package. The isolated R sources, C++ sketch and gates were
+  executed directly instead.
+
+Scientific authority modification:
+  NONE
+
+Tag/release/default-engine modification:
+  NONE
+
+Conclusion:
+  PASS

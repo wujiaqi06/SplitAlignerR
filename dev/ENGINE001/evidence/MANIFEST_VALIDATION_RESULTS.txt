@@ -1,0 +1,6 @@
+case	expected	observed	status
+complete_run_accepted	ACCEPTED	ACCEPTED	PASS
+missing_footer_rejected	[ENGINE_INCOMPLETE_RUN]	[ENGINE_INCOMPLETE_RUN] exact file length differs.	PASS
+truncated_matrix_rejected	[ENGINE_INCOMPLETE_RUN]	[ENGINE_INCOMPLETE_RUN] exact file length differs.	PASS
+wrong_species_fingerprint_rejected	[ENGINE_AUTHORITY_MISMATCH]	[ENGINE_AUTHORITY_MISMATCH] species fingerprint differs.	PASS
+wrong_schema_rejected	[ENGINE_SCHEMA_MISMATCH]	[ENGINE_SCHEMA_MISMATCH] schema version differs.	PASS

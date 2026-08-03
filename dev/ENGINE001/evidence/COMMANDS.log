@@ -1,0 +1,62 @@
+ENGINE001 COMMAND LOG
+=====================
+
+Repository paths and authority locations are represented by placeholders so
+the committed evidence contains no personal absolute paths.
+
+1. Baseline verification
+   git rev-parse HEAD HEAD^{tree}
+   git status --short --branch
+   status: PASS
+   commit: 8ce0d263f0def588f65be4546268ae6d8b2ab38e
+   tree:   5c38e46ba4db4a9757deb3dfcd83a11976a85a3c
+
+Further accepted commands are appended after prototype execution.
+
+2. Static prototype smoke gates
+   Rscript -e 'parse every dev/ENGINE001 R file'
+   sh -n dev/ENGINE001/benchmark/run_engine001_benchmarks.sh
+   Rscript dev/ENGINE001/benchmark/run_engine001_benchmarks.R manifest <OUTPUT>
+   Rscript dev/ENGINE001/benchmark/run_engine001_benchmarks.R ownership <OUTPUT>
+   status: PASS
+
+3. Full packed schema and first matrix layout benchmark
+   ENGINE001_SPECIES_TREE=<SPECIES_AUTHORITY> \
+   ENGINE001_FIXED_TREES=<FIXED_AUTHORITY> \
+   ENGINE001_FREE_TREES=<FREE_AUTHORITY> \
+   ENGINE001_RESULT_DIR=<TEMP_RESULT_DIR> \
+   ENGINE001_WORK_DIR=<TEMP_WORK_DIR> \
+   LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+   sh dev/ENGINE001/benchmark/run_engine001_benchmarks.sh
+   status: SUCCESS
+   packed round trip: dense/sparse/hybrid each 1974/1974 PASS
+   matrix cases: all six completed
+
+4. Strengthened full-payload matrix gate
+   For row_major, column_major and tiled_256x256 at both dimensions:
+   Rscript dev/ENGINE001/benchmark/run_engine001_benchmarks.R matrix \
+     <LAYOUT> <ROWS> <COLUMNS> <OUTPUT_CSV> <TEMP_WORK_DIR>
+   monitored by:
+   Rscript dev/ENGINE001/benchmark/rss_monitor.R <PID> <RSS_OUTPUT>
+
+   accepted dimensions:
+     2275 x 1086
+     100000 x 4913
+
+   status: SUCCESS
+   note: every written state/numeric payload cell was scanned; numeric validity
+         bitmap bytes were added as a clearly labelled exact derived quantity;
+         large R materialization remained NOT_ATTEMPTED_PLANNER_LIMIT.
+
+5. Aggregate accepted evidence
+   Rscript dev/ENGINE001/benchmark/run_engine001_benchmarks.R aggregate \
+     <TEMP_RESULT_DIR> <TEMP_RSS_DIR> <TEMP_FINAL_DIR>
+   status: SUCCESS
+
+6. Design gates
+   Rscript dev/ENGINE001/benchmark/validate_engine001_gates.R \
+     <DESIGN_GATE_RESULTS>
+   status: 15/15 PASS
+
+7. Final repository/package validation
+   Recorded after all deliverables are materialized in FILE_SCOPE_AUDIT.txt.

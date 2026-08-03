@@ -1,0 +1,16 @@
+gate	status	detail
+all_candidate_roundtrips	PASS	dense/sparse/hybrid each 1974 of 1974
+selected_hybrid_exact_roundtrip	PASS	selected hybrid authority exact equality
+selected_hybrid_direct_query	PASS	offset-indexed query pool
+matrix_all_six_cases_measured	PASS	three layouts at two dimensions
+matrix_full_cell_counts	PASS	every payload cell scanned
+matrix_full_numeric_checksums	PASS	layout-independent deterministic numeric payload
+small_materialization_all_layouts	PASS	2275 x 1086 ordinary R materialization
+large_materialization_guard	PASS	4.48 GB production-shape payload rejected by 1 GiB gate
+selected_tiled_large_completed	PASS	100000 x 4913 tiled write/read/full scan
+numeric_validity_bytes_accounted	PASS	one-bit numeric validity component included as derived exact bytes
+manifest_incomplete_and_mismatch_rejection	PASS	complete/footer/truncate/authority/schema cases
+ownership_lifecycle	PASS	snapshot/GC/idempotent close/stale pointer
+all_required_design_documents	PASS	11 required design contracts
+terminal_na_topo_contract	PASS	terminal NA_topo is a hard failure in object/query/error contracts
+production_path_boundary	PASS	validated separately by FILE_SCOPE_AUDIT before commit

@@ -1,0 +1,23 @@
+ENGINE001 REPOSITORY STATE BEFORE
+=================================
+
+Branch:
+  engine001-production-kernel-design-freeze
+
+Base commit:
+  8ce0d263f0def588f65be4546268ae6d8b2ab38e
+
+Base tree:
+  5c38e46ba4db4a9757deb3dfcd83a11976a85a3c
+
+Working tree at task start:
+  clean
+
+Authorized write prefix:
+  dev/ENGINE001/
+
+Production paths changed:
+  no
+
+ARCH000 and ARCH000A evidence modified:
+  no

@@ -1,0 +1,4 @@
+candidate	plans_tested	plans_equal	plans_failed	verdict
+dense_fixed_width	1974	1974	0	PASS
+eligible_sparse_records	1974	1974	0	PASS
+hybrid_deduplicated_query_pool	1974	1974	0	PASS

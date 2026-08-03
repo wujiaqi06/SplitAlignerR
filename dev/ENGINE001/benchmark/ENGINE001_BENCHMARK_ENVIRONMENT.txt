@@ -1,0 +1,57 @@
+ENGINE001 BENCHMARK ENVIRONMENT
+===============================
+
+Date:
+  2026-08-03 JST
+
+Repository base:
+  8ce0d263f0def588f65be4546268ae6d8b2ab38e
+
+Operating system:
+  macOS 14.4 (23E214)
+  Darwin 23.4.0
+  arm64
+
+R:
+  R 4.4.2
+  aarch64-apple-darwin20
+
+R packages:
+  SplitAlignerR 0.1.0
+  ape 5.8.1
+  phangorn 2.12.1
+  Rcpp 1.1.0
+  digest 0.6.38
+  ps 1.9.1
+
+Authority input SHA-256:
+  speciesTree302.nwk
+  f975e0c22c7817ff1d785f60c39958a28e0827a93e3a46383cbfe3ca497cc70f
+
+  fix.2275genes.nwk
+  6bfaa5e134a3bedbd77624134c50855f80f536205ca70d5b0ffe055d7f36b0ab
+
+  free.2275genes.nwk
+  cf19a1befac3ffa007f44867e26f1d63e1c732dfe7367f6058dd8a4bff322efb
+
+Packed schema workload:
+  302 taxa
+  601 primitive coordinates
+  1,974 exact authority retained-taxa patterns
+  86.7692307692% unique-pattern fraction relative to 2,275 loci
+
+Matrix layout workloads:
+  2,275 x 1,086 synthetic authority shape
+  100,000 x 4,913 synthetic projected large shape
+
+The matrix cases contain deterministic synthetic states/numerics only. They do
+not execute SplitAligner truth or empirical mapping and are not biological
+performance claims.
+
+Temporary storage:
+  local APFS volume
+  approximately 181 GiB free before the accepted run
+  each case removed its temporary payload after recording metrics
+
+Locale:
+  en_US.UTF-8
