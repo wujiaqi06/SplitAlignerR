@@ -195,6 +195,24 @@ std::uint64_t index_charge(const std::vector<DiskIndexEntry>& index) {
   return charge;
 }
 
+std::vector<std::uint8_t> read_sequential_record(std::ifstream& input,
+                                                 std::uint64_t bytes) {
+  std::vector<std::uint8_t> record(checked_size(bytes, "record read"));
+  std::size_t cursor = 0;
+  while (cursor < record.size()) {
+    const std::size_t chunk = std::min<std::size_t>(
+        record.size() - cursor,
+        static_cast<std::size_t>(std::numeric_limits<std::streamsize>::max()));
+    input.read(reinterpret_cast<char*>(record.data() + cursor),
+               static_cast<std::streamsize>(chunk));
+    if (input.gcount() != static_cast<std::streamsize>(chunk)) {
+      fail(ErrorCode::io_failure, "store record sequential short read");
+    }
+    cursor += chunk;
+  }
+  return record;
+}
+
 }  // namespace
 
 ValidatedDiskStore validate_disk_store(
@@ -290,6 +308,17 @@ ValidatedDiskStore validate_disk_store(
   append_domain(payload_state, "SplitAlignerR/TruthPlanPayloadAggregate/v1");
   update_u64(payload_state, pattern_count);
   std::uint64_t expected_offset = records_start;
+  std::ifstream record_input(component_path, std::ios::binary);
+  if (!record_input) {
+    fail(ErrorCode::io_failure, "cannot open store record stream");
+  }
+  if (records_start > static_cast<std::uint64_t>(
+                          std::numeric_limits<std::streamoff>::max())) {
+    fail(ErrorCode::io_failure, "store records offset exceeds streamoff");
+  }
+  record_input.seekg(static_cast<std::streamoff>(records_start),
+                     std::ios::beg);
+  if (!record_input) fail(ErrorCode::io_failure, "store records seek failed");
   for (std::uint64_t i = 0; i < pattern_count; ++i) {
     const std::uint8_t* entry = index_wire.data() + i * 64U;
     DiskIndexEntry parsed;
@@ -307,8 +336,8 @@ ValidatedDiskStore validate_disk_store(
       fail(ErrorCode::memory_budget,
            "record exceeds validation single-plan scratch budget");
     }
-    const auto record = read_file_range(component_path, parsed.record_offset,
-                                        parsed.record_bytes, scratch_budget);
+    const auto record = read_sequential_record(record_input,
+                                               parsed.record_bytes);
     const DecodedPlan decoded = decode_plan_record(authority, record);
     if (decoded.pattern_id != i ||
         !constant_time_equal(decoded.retained_pattern_sha256,

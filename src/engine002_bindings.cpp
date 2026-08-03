@@ -10,6 +10,7 @@
 #include "engine002_plan_codec.h"
 #include "engine002_species_authority_binding.h"
 #include "engine002_store.h"
+#include "engine002_stress_fixture.h"
 
 #include <array>
 #include <cmath>
@@ -95,6 +96,8 @@ template <typename Function>
 auto translate_engine_errors(Function&& function) -> decltype(function()) {
   try {
     return function();
+  } catch (Rcpp::internal::InterruptedException&) {
+    Rcpp::stop("[ENGINE_INTERRUPTED] R interrupted streaming-store construction");
   } catch (const EngineError& error) {
     Rcpp::stop("[%s] %s",
                splitaligner::engine002::error_code_name(error.code()),
@@ -520,6 +523,123 @@ Rcpp::IntegerVector cpp_engine002_constant_hash_registry_probe() {
         "retained_pattern", "query_pool", "bstar_members", "record_index",
         "memory_lookup", "disk_lookup", "lru_key");
     return counts;
+  });
+}
+
+// [[Rcpp::export]]
+Rcpp::List cpp_engine002_build_authority_scale_store(
+    std::string directory, std::string run_store_id, double pattern_count,
+    double cache_budget, double scratch_budget, double index_budget,
+    double metadata_budget, double combined_runtime_bound) {
+  return translate_engine_errors([&]() {
+    const std::uint64_t count = exact_u64(pattern_count, "pattern_count");
+    auto fixture =
+        splitaligner::engine002::make_authority_scale_fixture(count);
+    auto store = std::make_shared<splitaligner::engine002::PackedDiskStore>(
+        fixture.authority, fixture.registry, std::filesystem::path(directory),
+        run_store_id, exact_u64(cache_budget, "cache_budget"),
+        exact_u64(scratch_budget, "scratch_budget"),
+        exact_u64(index_budget, "index_budget"),
+        exact_u64(metadata_budget, "metadata_budget"),
+        exact_u64(combined_runtime_bound, "combined_runtime_bound"));
+    std::uint64_t total_record_bytes = 0;
+    std::uint64_t minimum_record_bytes =
+        count == 0 ? 0 : std::numeric_limits<std::uint64_t>::max();
+    std::uint64_t maximum_record_bytes = 0;
+    for (std::uint64_t pattern = 0; pattern < count; ++pattern) {
+      if ((pattern & UINT64_C(0xff)) == 0) Rcpp::checkUserInterrupt();
+      const auto& retained =
+          fixture.registry->retained_patterns[
+              splitaligner::engine002::checked_size(
+                  pattern, "authority-scale pattern position")];
+      const auto record =
+          splitaligner::engine002::make_authority_scale_record(
+              *fixture.authority, pattern, retained);
+      const std::uint64_t bytes = record->size();
+      total_record_bytes =
+          splitaligner::engine002::checked_add<std::uint64_t>(
+              total_record_bytes, bytes, "authority-scale record bytes");
+      minimum_record_bytes = std::min(minimum_record_bytes, bytes);
+      maximum_record_bytes = std::max(maximum_record_bytes, bytes);
+      store->insert(record);
+    }
+    const auto manifest = store->finalize_publish(
+        std::filesystem::path(directory), run_store_id);
+    const auto stats = store->stats();
+    store->close();
+    return Rcpp::List::create(
+        Rcpp::_["manifest"] = manifest.string(),
+        Rcpp::_["pattern_count"] = static_cast<double>(count),
+        Rcpp::_["total_record_bytes"] =
+            static_cast<double>(total_record_bytes),
+        Rcpp::_["mean_record_bytes"] =
+            count == 0 ? 0.0
+                       : static_cast<double>(total_record_bytes) /
+                             static_cast<double>(count),
+        Rcpp::_["minimum_record_bytes"] =
+            static_cast<double>(minimum_record_bytes),
+        Rcpp::_["maximum_record_bytes"] =
+            static_cast<double>(maximum_record_bytes),
+        Rcpp::_["final_store_bytes"] =
+            static_cast<double>(stats.file_bytes),
+        Rcpp::_["builder_charged_high_water"] =
+            static_cast<double>(stats.builder_charged_high_water),
+        Rcpp::_["current_record_high_water"] =
+            static_cast<double>(stats.current_record_high_water),
+        Rcpp::_["write_buffer_high_water"] =
+            static_cast<double>(stats.write_buffer_high_water),
+        Rcpp::_["temporary_disk_high_water"] =
+            static_cast<double>(stats.temporary_disk_high_water),
+        Rcpp::_["index_charged_bytes"] =
+            static_cast<double>(stats.index_charged_bytes));
+  });
+}
+
+// [[Rcpp::export]]
+Rcpp::List cpp_engine002_reopen_authority_scale_store(
+    std::string manifest_path, double pattern_count,
+    double cache_budget, double scratch_budget, double index_budget,
+    double metadata_budget, double combined_runtime_bound) {
+  return translate_engine_errors([&]() {
+    const std::uint64_t count = exact_u64(pattern_count, "pattern_count");
+    if (count == 0) {
+      splitaligner::engine002::fail(
+          ErrorCode::invalid_argument,
+          "authority-scale reopen probe requires at least one record");
+    }
+    auto fixture =
+        splitaligner::engine002::make_authority_scale_fixture(count);
+    auto store = splitaligner::engine002::PackedDiskStore::open_existing(
+        fixture.authority, std::filesystem::path(manifest_path),
+        exact_u64(cache_budget, "cache_budget"),
+        exact_u64(scratch_budget, "scratch_budget"),
+        exact_u64(index_budget, "index_budget"),
+        exact_u64(metadata_budget, "metadata_budget"),
+        exact_u64(combined_runtime_bound, "combined_runtime_bound"));
+    const std::array<std::uint64_t, 3> probe_ids{{
+        0, count / 2U, count - 1U}};
+    for (const auto id : probe_ids) {
+      const auto& retained =
+          fixture.registry->retained_patterns[
+              splitaligner::engine002::checked_size(
+                  id, "authority-scale lookup position")];
+      const auto decoded = store->lookup_snapshot(id, retained);
+      if (decoded.pattern_id != id || decoded.retained != retained) {
+        splitaligner::engine002::fail(
+            ErrorCode::store_corrupt,
+            "authority-scale reopened lookup differs from registry");
+      }
+    }
+    const auto stats = store->stats();
+    store->close();
+    return Rcpp::List::create(
+        Rcpp::_["lookup_count"] = static_cast<int>(probe_ids.size()),
+        Rcpp::_["first_pattern_id"] = 0.0,
+        Rcpp::_["middle_pattern_id"] =
+            static_cast<double>(probe_ids[1]),
+        Rcpp::_["last_pattern_id"] =
+            static_cast<double>(probe_ids[2]),
+        Rcpp::_["file_bytes"] = static_cast<double>(stats.file_bytes));
   });
 }
 

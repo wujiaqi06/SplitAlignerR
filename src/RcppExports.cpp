@@ -152,6 +152,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_engine002_build_authority_scale_store
+Rcpp::List cpp_engine002_build_authority_scale_store(std::string directory, std::string run_store_id, double pattern_count, double cache_budget, double scratch_budget, double index_budget, double metadata_budget, double combined_runtime_bound);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_build_authority_scale_store(SEXP directorySEXP, SEXP run_store_idSEXP, SEXP pattern_countSEXP, SEXP cache_budgetSEXP, SEXP scratch_budgetSEXP, SEXP index_budgetSEXP, SEXP metadata_budgetSEXP, SEXP combined_runtime_boundSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type directory(directorySEXP);
+    Rcpp::traits::input_parameter< std::string >::type run_store_id(run_store_idSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count(pattern_countSEXP);
+    Rcpp::traits::input_parameter< double >::type cache_budget(cache_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type scratch_budget(scratch_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type index_budget(index_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type metadata_budget(metadata_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type combined_runtime_bound(combined_runtime_boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_build_authority_scale_store(directory, run_store_id, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_reopen_authority_scale_store
+Rcpp::List cpp_engine002_reopen_authority_scale_store(std::string manifest_path, double pattern_count, double cache_budget, double scratch_budget, double index_budget, double metadata_budget, double combined_runtime_bound);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_reopen_authority_scale_store(SEXP manifest_pathSEXP, SEXP pattern_countSEXP, SEXP cache_budgetSEXP, SEXP scratch_budgetSEXP, SEXP index_budgetSEXP, SEXP metadata_budgetSEXP, SEXP combined_runtime_boundSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type manifest_path(manifest_pathSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count(pattern_countSEXP);
+    Rcpp::traits::input_parameter< double >::type cache_budget(cache_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type scratch_budget(scratch_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type index_budget(index_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type metadata_budget(metadata_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type combined_runtime_bound(combined_runtime_boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_reopen_authority_scale_store(manifest_path, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_engine002_memory_store_create
 SEXP cpp_engine002_memory_store_create(SEXP authority_pointer, double pattern_count);
 RcppExport SEXP _SplitAlignerR_cpp_engine002_memory_store_create(SEXP authority_pointerSEXP, SEXP pattern_countSEXP) {
@@ -366,6 +401,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_sha_invariant_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_sha_invariant_probe, 1},
     {"_SplitAlignerR_cpp_engine002_set_constant_fast_hash", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_constant_fast_hash, 1},
     {"_SplitAlignerR_cpp_engine002_constant_hash_registry_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_constant_hash_registry_probe, 0},
+    {"_SplitAlignerR_cpp_engine002_build_authority_scale_store", (DL_FUNC) &_SplitAlignerR_cpp_engine002_build_authority_scale_store, 8},
+    {"_SplitAlignerR_cpp_engine002_reopen_authority_scale_store", (DL_FUNC) &_SplitAlignerR_cpp_engine002_reopen_authority_scale_store, 7},
     {"_SplitAlignerR_cpp_engine002_memory_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_memory_store_create, 2},
     {"_SplitAlignerR_cpp_engine002_disk_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_create, 9},
     {"_SplitAlignerR_cpp_engine002_disk_store_open", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_open, 7},
