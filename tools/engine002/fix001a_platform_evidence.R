@@ -426,6 +426,27 @@ for (repetition in seq_len(3L)) {
 authority_hashes <- vapply(authority_runs, `[[`, character(1), "hash")
 stopifnot(length(unique(authority_hashes)) == 1L)
 
+# Time the in-memory store separately from record encoding.  This is a
+# diagnostic phase measurement, not a controlled cross-runner comparison.
+memory_build_started <- proc.time()[["elapsed"]]
+authority_memory <- SplitAlignerR:::.engine002_memory_store(
+  full_authority, length(authority_runs[[1L]]$records)
+)
+for (record in authority_runs[[1L]]$records) {
+  SplitAlignerR:::cpp_engine002_store_insert(authority_memory, record)
+}
+memory_build_seconds <- unname(
+  proc.time()[["elapsed"]] - memory_build_started
+)
+memory_finalize_started <- proc.time()[["elapsed"]]
+stopifnot(SplitAlignerR:::cpp_engine002_store_finalize(
+  authority_memory, "", ""
+))
+memory_finalize_seconds <- unname(
+  proc.time()[["elapsed"]] - memory_finalize_started
+)
+stopifnot(SplitAlignerR:::cpp_engine002_store_close(authority_memory))
+
 authority_store_root <- tempfile(
   "fix001a-authority-store-", tmpdir = safe_tempdir
 )
@@ -466,8 +487,12 @@ for (id in random_ids) {
 }
 lookup_seconds <- unname(proc.time()[["elapsed"]] - lookup_started)
 SplitAlignerR:::cpp_engine002_store_close(authority_disk)
+disk_reopen_started <- proc.time()[["elapsed"]]
 authority_reopened <- SplitAlignerR:::cpp_engine002_disk_store_open(
   full_authority, authority_manifest, 64 * MiB, MiB, MiB, MiB, 67 * MiB
+)
+disk_reopen_seconds <- unname(
+  proc.time()[["elapsed"]] - disk_reopen_started
 )
 last <- SplitAlignerR:::cpp_engine002_store_lookup_snapshot(
   authority_reopened, 1973, registry$exact_pattern_bits[[1974L]]
@@ -538,14 +563,15 @@ runtime <- data.frame(
   operation = c(
     paste0("authority_1974_rep", 1:3),
     "authority_reference_precompute", "authority_encode", "authority_decode",
-    "authority_direct_view", "authority_reencode", "disk_store_build",
-    "disk_store_finalize_reopen", "random_lookup"
+    "authority_direct_view", "authority_reencode", "memory_store_build",
+    "memory_store_finalize", "disk_store_build", "disk_store_finalize",
+    "disk_store_reopen", "random_lookup"
   ),
   seconds = c(
     authority_elapsed,
     reference_precompute_seconds, unname(authority_runs[[1L]]$phase),
-    disk_build_seconds,
-    disk_finalize_seconds, lookup_seconds
+    memory_build_seconds, memory_finalize_seconds, disk_build_seconds,
+    disk_finalize_seconds, disk_reopen_seconds, lookup_seconds
   ),
   stringsAsFactors = FALSE
 )
@@ -601,6 +627,20 @@ platform_lines <- c(
   )),
   paste0("authority_record_bytes=", authority_runs[[1L]]$record_bytes),
   paste0("authority_store_bytes=", authority_store_stats$file_bytes),
+  paste0("memory_store_build_seconds=", sprintf(
+    "%.6f", memory_build_seconds
+  )),
+  paste0("memory_store_finalize_seconds=", sprintf(
+    "%.6f", memory_finalize_seconds
+  )),
+  paste0("disk_store_build_seconds=", sprintf("%.6f", disk_build_seconds)),
+  paste0("disk_store_finalize_seconds=", sprintf(
+    "%.6f", disk_finalize_seconds
+  )),
+  paste0("disk_store_reopen_seconds=", sprintf(
+    "%.6f", disk_reopen_seconds
+  )),
+  paste0("random_lookup_seconds=", sprintf("%.6f", lookup_seconds)),
   paste0("peak_RSS_bytes=", if (is.na(rss)) "NOT_MEASURED" else rss),
   paste0("windows_physical_store_status=", windows_physical$status),
   paste0("windows_physical_store_patterns=", windows_physical$count),
