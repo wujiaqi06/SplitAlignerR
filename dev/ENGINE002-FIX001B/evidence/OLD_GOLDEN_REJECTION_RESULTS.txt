@@ -1,0 +1,9 @@
+status=PASS
+fixture=tests/testthat/fixtures/engine002/history/fix1a_bad_aggregate.bin
+file_bytes=906
+record_count=2
+canonical_stream_bytes=189
+standard_sha256=86fc58c3816a0b2424d9bdaf1f1b3f93744e6e3ab6ed31e04b2ab138d617fa73
+stored_defective_sha256=975494a2e4eb726a3111a2e41d48e2fac3271adaa1c0499fc31e29aa8806ccf9
+independent_match=FALSE
+validator_rejection=[ENGINE_STORE_CORRUPT] record region end or payload aggregate SHA-256 mismatch

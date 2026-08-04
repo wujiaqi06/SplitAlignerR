@@ -1,0 +1,3 @@
+builder,pattern_count,repetition,mean_record_bytes,minimum_record_bytes,maximum_record_bytes,total_record_bytes,final_store_bytes,peak_rss_bytes,builder_charged_high_water,current_record_high_water,write_buffer_high_water,index_charged_bytes,temporary_disk_high_water
+streaming,140000,1,15819.3542857143,15617,16025,2214709600,2223669984,203276288,8979889,16025,0,35840000,2223669984
+streaming,275000,1,15831.4922763636,15617,16049,4353660376,4371260760,238829568,17619865,16049,0,70400000,4371260760

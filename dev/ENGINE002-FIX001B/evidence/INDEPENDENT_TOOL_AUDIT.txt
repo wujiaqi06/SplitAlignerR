@@ -1,0 +1,11 @@
+status=PASS
+python_AST_parse=PASS
+standard_SHA_reference=Python hashlib.sha256
+aggregate_checker_imports_package_hashing_code=NO
+partition_expected_digest_imports_package_hashing_code=NO
+partition_production_role=opaque binary probe only
+tamper_checker_imports=maintained independent payload_aggregate_check only
+large_checker_memory_policy=read-only mmap plus bounded one-record payload slice
+benchmark_compile_flags=-std=c++17 -Wall -Wextra -Werror -pedantic
+benchmark_compile=PASS
+external_crypto_dependency_added=NO

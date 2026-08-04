@@ -1,0 +1,6 @@
+branch=engine002-fix001b-incremental-sha256-compliance
+base_commit=b96634c7f43307102714fc2e13dd8780e2126b69
+base_tree=64c7e4ef231e637e264abf5ca19d696979c39c06
+base_parent=086fad1b752d90819183d54ee6e9885439e06dc2
+certified_v0.1.0_peeled_commit=17a0927095c7a067817bf598a2556cbe7348a6d0
+starting_worktree=clean

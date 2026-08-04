@@ -1,0 +1,14 @@
+classification=LOCAL ENVIRONMENT ISSUE
+host=macOS Apple arm64
+source_material_parent=9588400014a65170bc7dbb718817d9f258237f9d
+first_attempt_locale=C.UTF-8 requested but unavailable on host
+first_attempt_result=1 ERROR, 1 WARNING during DESCRIPTION metadata subprocess startup
+first_attempt_package_compile=PASS
+first_attempt_code_or_test_failure=NO
+first_attempt_00check_log_sha256=9f2ab75a80ab8cccb7a0b78aa3762d4d1154ed6b5000d379636340bdfdd79a68
+corrective_action=rerun unchanged source with installed en_US.UTF-8 locale
+second_attempt_result=Status OK
+second_attempt_00check_log_sha256=2ac6b014703c05577ca6c357917b01899f76cd251e8a462d10d4b780b62c235f
+production_patch=NONE
+test_patch=NONE
+eligible_for_final_PASS_evidence=second attempt only

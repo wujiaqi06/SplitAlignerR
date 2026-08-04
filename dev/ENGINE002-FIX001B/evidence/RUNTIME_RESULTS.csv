@@ -1,0 +1,15 @@
+"platform","operation","seconds"
+"macos-local3","authority_1974_rep1",18.0890000000001
+"macos-local3","authority_1974_rep2",17.559
+"macos-local3","authority_1974_rep3",17.76
+"macos-local3","authority_reference_precompute",475.811
+"macos-local3","authority_encode",2.21900000000221
+"macos-local3","authority_decode",0.684999999999263
+"macos-local3","authority_direct_view",1.11900000000071
+"macos-local3","authority_reencode",2.41600000000005
+"macos-local3","memory_store_build",0.486999999999966
+"macos-local3","memory_store_finalize",0.00600000000008549
+"macos-local3","disk_store_build",0.733000000000061
+"macos-local3","disk_store_finalize",2.5
+"macos-local3","disk_store_reopen",1.18299999999999
+"macos-local3","random_lookup",0.0310000000000628

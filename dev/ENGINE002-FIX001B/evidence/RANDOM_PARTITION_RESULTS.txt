@@ -1,0 +1,13 @@
+status=PASS
+independent_reference=Python hashlib.sha256
+seed=0x5a17b001
+cases=10000
+maximum_message_bytes=65536
+mismatches=0
+one_byte_chunks=covered
+long_chunks=covered
+alternating_small_large_chunks=covered
+zero_length_chunks=covered
+padding_boundaries=covered
+compression_boundaries=covered
+digest_repeat_and_continue=covered

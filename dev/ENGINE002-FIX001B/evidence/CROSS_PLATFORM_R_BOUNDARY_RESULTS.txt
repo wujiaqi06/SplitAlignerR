@@ -1,0 +1,10 @@
+status=PASS
+platforms=linux-release,macos-release,windows-release
+R_lifecycle_active_pin_busy=PASS
+R_lifecycle_release_close_double_close=PASS
+R_lifecycle_read_after_close=PASS
+R_lifecycle_GC_XPtr=PASS
+new_R_process_reopen=PASS
+wrong_authority_rejection=PASS
+corruption_rejection=PASS
+missing_or_unvalidated_manifest_rejection=PASS

@@ -1,0 +1,31 @@
+Exact source object:
+  ENGINE002-FIX001A head b96634c7f43307102714fc2e13dd8780e2126b69
+  source tree 64c7e4ef231e637e264abf5ca19d696979c39c06
+
+Minimal incremental SHA-256 reproduction:
+  one_shot=ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+  single_update=ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+  three_updates=8d28b55c75b0b8c76657fb916128317dae8a14f2af2e4d9e59bf88f69a83d134
+  system_sha256_abc=ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+
+Two-update partition differential:
+  message_lengths=1..130
+  two_update_cases=8385
+  mismatches=3907
+
+Actual cross-platform golden store:
+  file_bytes=906
+  record_count=2
+  canonical_stream_bytes=189
+  expected_standard_sha256=86fc58c3816a0b2424d9bdaf1f1b3f93744e6e3ab6ed31e04b2ab138d617fa73
+  stored_payload_aggregate_sha256=975494a2e4eb726a3111a2e41d48e2fac3271adaa1c0499fc31e29aa8806ccf9
+  match=False
+
+Production update sequence over that store:
+  production_incremental=975494a2e4eb726a3111a2e41d48e2fac3271adaa1c0499fc31e29aa8806ccf9
+  stored_footer=975494a2e4eb726a3111a2e41d48e2fac3271adaa1c0499fc31e29aa8806ccf9
+
+Control field in the same store:
+  complete_file_expected=c02397730f53a4151657dc3d313a0d3437cc3b95688995d0fa88b1e3be3a54be
+  complete_file_stored=c02397730f53a4151657dc3d313a0d3437cc3b95688995d0fa88b1e3be3a54be
+  complete_file_match=True

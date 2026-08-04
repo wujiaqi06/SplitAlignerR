@@ -1,0 +1,6 @@
+R_MAKEVARS_USER=/home/runner/work/_temp/fix001b-r-config/Makevars
+ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:abort_on_error=1
+UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
+LD_PRELOAD=/usr/lib/gcc/x86_64-linux-gnu/13/libasan.so:/usr/lib/gcc/x86_64-linux-gnu/13/libubsan.so
+g++
+-O1 -g -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer

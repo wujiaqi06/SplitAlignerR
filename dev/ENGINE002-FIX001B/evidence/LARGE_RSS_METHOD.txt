@@ -1,0 +1,12 @@
+status=PASS
+commit=9588400014a65170bc7dbb718817d9f258237f9d
+host=Apple arm64 designated benchmark host
+sampling_interval=50 ms
+two_gib_method=complete exact-commit rerun outside restricted process sandbox
+two_gib_peak_RSS_bytes=203276288
+four_gib_method=external ps sampling after active builder PID discovery
+four_gib_sampling_start=after record writing had begun; high-water occurred during later finalize/validation
+four_gib_peak_RSS_bytes=238829568
+restricted_initial_script_values=0,0
+restricted_initial_script_values_interpretation=NOT MEASURED; not zero-memory observations
+store_geometry_and_digest_source=complete exact-commit production runs

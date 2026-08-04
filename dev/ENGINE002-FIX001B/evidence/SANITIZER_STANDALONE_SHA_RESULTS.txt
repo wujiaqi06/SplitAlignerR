@@ -1,0 +1,14 @@
+status=PASS
+independent_reference=Python hashlib.sha256
+seed=0x5a17b001
+standard_vector_forms=15
+standard_vector_mismatches=0
+pro_exact_mre=PASS
+two_part_message_lengths=0..260
+two_part_cases=34191
+two_part_mismatches=0
+random_multipart_cases=100
+random_multipart_mismatches=0
+random_max_message_bytes=65536
+zero_length_updates=covered
+digest_repeat_and_continue=covered

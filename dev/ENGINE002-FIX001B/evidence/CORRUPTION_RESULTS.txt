@@ -1,0 +1,9 @@
+status=PASS
+wrong_authority_rejection=PASS
+ordinary_corruption_rejection=PASS
+missing_or_unvalidated_manifest_rejection=PASS
+old_defective_store_rejection=payload aggregate mismatch
+aggregate_only_rejection=payload aggregate mismatch
+payload_mutation_rejection=payload aggregate mismatch
+footer_only_first_integrity_layer=footer checksum mismatch
+constant_fast_hash_collision_coverage=PASS

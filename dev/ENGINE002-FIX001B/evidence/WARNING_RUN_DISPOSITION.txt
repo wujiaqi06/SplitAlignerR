@@ -1,0 +1,27 @@
+run_id=30888818818
+run_url=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30888818818
+head_commit=80c6c24a5abf82150e5fdf1426810208673c4dde
+classification=PRODUCTION DEFENSIVE-PROOF GAP EXPOSED BY GCC 13
+linux_job_id=91927450368
+linux_job_conclusion=SUCCESS at workflow level but R CMD check Status: 1 WARNING
+warning=engine002_hash.cpp:286:24 writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+runtime_context=valid states were already protected by typed buffered-byte invariant
+compiler_context=GCC did not propagate the out-of-line invariant helper into local array-index range analysis
+scientific_or_schema_defect=NO
+digest_mismatch=NO
+release_blocker=YES because R CMD check was not Status OK
+corrective_commit=9588400014a65170bc7dbb718817d9f258237f9d
+corrective_scope=local explicit typed buffered <= 63 proof in Sha256State::digest
+historical_pre_restart_log_sha256=f0d7b0f02baecda3c3636cc280c30027ccaa5d11cdbcfc2601e64e53c625d4e3
+historical_pre_restart_log_status=temporary copy lost during host restart
+current_GitHub_log_sha256=566a2e1cc92d6544c1be74ae83efc7961f2a1bf21cefe51a61c75c9d1bf617b6
+current_GitHub_log_repeat_cmp=IDENTICAL
+official_linux_artifact_id=8884872878
+official_linux_artifact_service_digest=ce06081ee6ef01ef66896cbeb9ee73894d50fb87ff92767c723ea3148ae98364
+macos_release_job=SUCCESS
+linux_release_authority_and_differential=PASS
+linux_sanitizer_job=SUCCESS
+windows_release_job=CANCELLED before completion after blocker classification
+linux_devel_advisory=CANCELLED after blocker classification
+run_final_conclusion=CANCELLED
+eligible_for_final_PASS_evidence=NO

@@ -1,0 +1,11 @@
+status=PASS
+remote_tag=v0.1.0
+remote_tag_object=085fabdc8a712730042c887ea8d8f0b549ed8f97
+remote_peeled_commit=17a0927095c7a067817bf598a2556cbe7348a6d0
+certified_source_tree=8df164a570ff7ee540381ab381535174044f7918
+development_base=b96634c7f43307102714fc2e13dd8780e2126b69
+package_version=0.1.0.9000
+certified_release_tag_created=true
+certified_github_release_published=true
+development_release_authorized=false
+verified_by=git ls-remote plus local object database tree resolution
