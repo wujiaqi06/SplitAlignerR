@@ -160,8 +160,12 @@ void reject_symlink_path(const std::filesystem::path& directory) {
   std::error_code error;
   const auto absolute = std::filesystem::absolute(directory, error);
   if (error) fail(ErrorCode::io_failure, "cannot resolve destination directory");
-  std::filesystem::path current;
-  for (const auto& component : absolute) {
+  // A Windows drive root is represented separately from the relative path.
+  // Building from an empty path would inspect the drive-relative "D:" before
+  // reaching "D:\\", which MinGW's symlink_status can reject.  Seed the walk
+  // with the complete root and inspect only the remaining components.
+  std::filesystem::path current = absolute.root_path();
+  for (const auto& component : absolute.relative_path()) {
     current /= component;
     const auto status = std::filesystem::symlink_status(current, error);
     if (error) {
