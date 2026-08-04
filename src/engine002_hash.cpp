@@ -125,6 +125,23 @@ void sha256_block(const std::uint8_t* block,
   state[7] += h;
 }
 
+void require_sha256_invariants(std::uint64_t total, std::size_t buffered) {
+  constexpr std::uint64_t kMaxShaBytes =
+      std::numeric_limits<std::uint64_t>::max() / 8U;
+  if (buffered > 63U) {
+    fail(ErrorCode::internal_failure,
+         "SHA-256 buffered-byte invariant exceeds 63");
+  }
+  if (total > kMaxShaBytes) {
+    fail(ErrorCode::internal_failure,
+         "SHA-256 bit-length invariant overflow");
+  }
+  if (buffered != static_cast<std::size_t>(total % 64U)) {
+    fail(ErrorCode::internal_failure,
+         "SHA-256 buffered-byte invariant disagrees with total length");
+  }
+}
+
 }  // namespace
 
 Xxh64State::Xxh64State(std::uint64_t seed) noexcept
@@ -217,7 +234,12 @@ Sha256State::Sha256State() noexcept
       buffered_(0) {}
 
 void Sha256State::update(const std::uint8_t* data, std::size_t size) {
+  require_sha256_invariants(total_, buffered_);
   if (size == 0) return;
+  if (data == nullptr) {
+    fail(ErrorCode::invalid_argument,
+         "SHA-256 update data is null for nonzero length");
+  }
   constexpr std::uint64_t kMaxShaBytes =
       std::numeric_limits<std::uint64_t>::max() / 8U;
   if (total_ > kMaxShaBytes ||
@@ -226,35 +248,35 @@ void Sha256State::update(const std::uint8_t* data, std::size_t size) {
   }
   total_ += static_cast<std::uint64_t>(size);
   const std::uint8_t* p = data;
-  const std::uint8_t* const end = data + size;
+  std::size_t remaining = size;
   if (buffered_ != 0) {
-    const std::size_t fill = std::min<std::size_t>(64 - buffered_, size);
+    const std::size_t fill =
+        std::min<std::size_t>(64U - buffered_, remaining);
     std::copy(p, p + fill, buffer_.begin() + buffered_);
     buffered_ += fill;
     p += fill;
-    if (buffered_ == 64) {
-      sha256_block(buffer_.data(), state_);
-      buffered_ = 0;
+    remaining -= fill;
+    if (buffered_ != 64U) {
+      require_sha256_invariants(total_, buffered_);
+      return;
     }
+    sha256_block(buffer_.data(), state_);
+    buffered_ = 0;
   }
-  while (p + 64 <= end) {
+  while (remaining >= 64U) {
     sha256_block(p, state_);
     p += 64;
+    remaining -= 64U;
   }
-  buffered_ = static_cast<std::size_t>(end - p);
-  if (buffered_ != 0) std::copy(p, end, buffer_.begin());
+  buffered_ = remaining;
+  if (buffered_ != 0) {
+    std::copy(p, p + buffered_, buffer_.begin());
+  }
+  require_sha256_invariants(total_, buffered_);
 }
 
 Sha256 Sha256State::digest() const {
-  constexpr std::uint64_t kMaxShaBytes =
-      std::numeric_limits<std::uint64_t>::max() / 8U;
-  if (buffered_ > 63U) {
-    fail(ErrorCode::internal_failure,
-         "SHA-256 buffered-byte invariant exceeds 63");
-  }
-  if (total_ > kMaxShaBytes) {
-    fail(ErrorCode::internal_failure, "SHA-256 bit-length invariant overflow");
-  }
+  require_sha256_invariants(total_, buffered_);
   Sha256State copy = *this;
   std::array<std::uint8_t, 128> tail{};
   if (copy.buffered_ != 0) {
