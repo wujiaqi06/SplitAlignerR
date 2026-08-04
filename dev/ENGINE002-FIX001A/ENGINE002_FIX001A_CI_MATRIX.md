@@ -25,6 +25,10 @@ requires exact equality of plan bytes, store component and manifest bytes,
 the concatenated 1,974 authority records, and the authority-scale store.
 No byte normalization is performed.
 
+The installed-suite runner leaves the optional `scipen=-999` clamp warnings
+visible and accepts only zero warnings or exactly the two frozen clamp
+messages.  Any other warning set fails the platform job.
+
 All timings are labelled:
 
 ```text

@@ -1,0 +1,27 @@
+final_run_id=30875359482
+final_run_head=086fad1b752d90819183d54ee6e9885439e06dc2
+final_run_url=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482
+final_run_conclusion=success
+sanitizer_job=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482/job/91885624402
+windows_job=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482/job/91885624466
+linux_devel_job=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482/job/91885624497
+macos_release_job=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482/job/91885624504
+linux_release_job=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482/job/91885624533
+comparison_job=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875359482/job/91889518395
+
+failed_run_1_id=30872697932
+failed_run_1_head=3b8ade3f202c72fa83595820be1e207bae9d3788
+failed_run_1_url=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30872697932
+failed_run_1_disposition=classified and superseded after narrow portability fixes
+failed_run_2_id=30873020835
+failed_run_2_head=af933a5fe02a295edc24332084afdeedadc2e3ad
+failed_run_2_url=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30873020835
+failed_run_2_disposition=classified and superseded after Windows root-aware path fix
+interim_success_run_id=30873484912
+interim_success_run_head=c1b146a4867f23d3578df739da4490bae50702a2
+interim_success_run_url=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30873484912
+interim_success_disposition=superseded because required phase timings were incomplete
+self_audit_cancelled_run_id=30875077996
+self_audit_cancelled_run_head=98e16d2f0a3f39a3828e22abd09dc7bbe2a54948
+self_audit_cancelled_run_url=https://github.com/wujiaqi06/SplitAlignerR/actions/runs/30875077996
+self_audit_cancelled_disposition=cancelled after arbitrary-warning acceptance was found; superseded by exact allowlist and full replay

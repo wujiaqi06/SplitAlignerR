@@ -1,0 +1,17 @@
+status=PASS
+run_id=30875359482
+head_commit=086fad1b752d90819183d54ee6e9885439e06dc2
+binary_no_crlf_exact_bytes=PASS
+atomic_no_replace_preexisting_rejection=PASS
+atomic_no_replace_original_bytes_preserved=PASS
+copy_fallback_used=no
+overwrite_rename_used=no
+delete_then_rename_used=no
+precheck_only_publication_used=no
+u64_offset_above_4GiB=PASS
+C_long_truncation_runtime_probe=PASS
+physical_store_patterns=10000
+physical_store_bytes=158360976
+physical_last_record_lookup=TRUE
+physical_Windows_store_above_4GiB=NOT_CLAIMED
+physical_FIX001_macOS_store_above_4GiB=SEPARATE_ACCEPTED_EVIDENCE

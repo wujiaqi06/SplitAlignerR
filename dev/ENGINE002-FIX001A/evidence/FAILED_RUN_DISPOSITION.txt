@@ -1,0 +1,36 @@
+run=30872697932
+head=3b8ade3f202c72fa83595820be1e207bae9d3788
+classification=code defect plus test portability defects plus evidence-runner policy defect
+windows_failure=MinGW compile error: _S_IREAD and _S_IWRITE undeclared
+linux_and_sanitizer_failure=tests hard-coded nonexistent /private/tmp
+macos_failure=truthful scipen -999 clamp warnings were incorrectly fatal in the custom evidence runner
+correction_commit=af933a5fe02a295edc24332084afdeedadc2e3ad
+complete_logs=GitHub run plus archived failing artifacts in external handoff
+
+run=30873020835
+head=af933a5fe02a295edc24332084afdeedadc2e3ad
+classification=code defect
+windows_failure=ENGINE_IO_FAILURE cannot inspect destination path components
+root_cause=absolute path walk inspected drive-relative D: before complete D:\ root
+correction_commit=c1b146a4867f23d3578df739da4490bae50702a2
+complete_logs=GitHub run plus archived failing artifacts in external handoff
+
+run=30873484912
+head=c1b146a4867f23d3578df739da4490bae50702a2
+classification=interim complete platform replay, not final evidence object
+conclusion=success
+superseded_reason=required memory build/finalize and disk reopen phase timings absent
+correction_commit=98e16d2f0a3f39a3828e22abd09dc7bbe2a54948
+
+run=30875077996
+head=98e16d2f0a3f39a3828e22abd09dc7bbe2a54948
+classification=self-audit cancellation, evidence-runner policy defect
+disposition=cancelled before completion
+superseded_reason=installed-suite runner accepted arbitrary warnings instead of a frozen exact allowlist
+correction_commit=086fad1b752d90819183d54ee6e9885439e06dc2
+
+final_replay=30875359482
+final_head=086fad1b752d90819183d54ee6e9885439e06dc2
+final_conclusion=PASS
+mandatory_test_disabled_or_weakened=no
+warning_policy=zero warnings or exactly two frozen scipen -999 clamp messages; every other warning fails

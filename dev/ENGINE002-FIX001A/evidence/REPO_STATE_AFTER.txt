@@ -1,0 +1,12 @@
+branch=engine002-fix001a-cross-platform-evidence
+final_code_and_CI_commit=086fad1b752d90819183d54ee6e9885439e06dc2
+final_code_and_CI_tree=72bdcd94fe35e05c0bf4ea8153af396f23ccdd85
+final_evidence_commit=recorded in external handoff manifest because a Git commit cannot contain its own object ID
+final_evidence_tree=recorded in external handoff manifest because the evidence commit changes this tree
+final_branch_pushed=yes
+worktree_after_external_packaging=recorded in external handoff manifest
+certified_release_tag=v0.1.0
+certified_release_tag_object=085fabdc8a712730042c887ea8d8f0b549ed8f97
+certified_release_peeled_commit=17a0927095c7a067817bf598a2556cbe7348a6d0
+certified_release_source_tree=8df164a570ff7ee540381ab381535174044f7918
+certified_release_unchanged=yes

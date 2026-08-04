@@ -1,0 +1,15 @@
+status=PASS
+run_id=30875359482
+head_commit=086fad1b752d90819183d54ee6e9885439e06dc2
+platforms=linux-release,macos-release,windows-release
+installed_package_testthat=PASS
+R_lifecycle_active_pin_busy=PASS
+R_lifecycle_release_close_double_close=PASS
+R_lifecycle_read_after_close=PASS
+R_lifecycle_GC_XPtr=PASS
+new_R_process_reopen=PASS
+wrong_authority_rejection=PASS
+corruption_rejection=PASS
+missing_or_unvalidated_manifest_rejection=PASS
+raw_Cpp_exception_escape=NONE_OBSERVED
+R_session_crash_or_hang=NONE_OBSERVED
