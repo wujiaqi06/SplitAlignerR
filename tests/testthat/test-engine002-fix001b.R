@@ -61,6 +61,25 @@ fix1b_build_store <- function(root) {
   )
 }
 
+fix1b_copy_fixture <- function(stem, root) {
+  component <- file.path(root, paste0(fix1b_run_id, ".truthstore.bin"))
+  manifest <- file.path(root, paste0(fix1b_run_id, ".truthstore.manifest"))
+  expect_true(file.copy(
+    test_path(
+      "fixtures", "engine002", "fix001b", paste0(stem, ".truthstore.bin")
+    ),
+    component
+  ))
+  expect_true(file.copy(
+    test_path(
+      "fixtures", "engine002", "fix001b",
+      paste0(stem, ".truthstore.manifest")
+    ),
+    manifest
+  ))
+  manifest
+}
+
 test_that("FIX001B corrected builder writes the standard payload aggregate", {
   skip_on_cran()
   root <- tempfile(
@@ -139,5 +158,43 @@ test_that("FIX001B footer-only aggregate mutation fails at footer integrity", {
       fix1b_mib, 3 * fix1b_mib
     ),
     "ENGINE_STORE_CORRUPT.*footer checksum mismatch"
+  )
+})
+
+test_that("FIX001B aggregate-only self-consistent tamper reaches target gate", {
+  skip_on_cran()
+  root <- tempfile(
+    "fix001b-aggregate-only-",
+    tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
+  dir.create(root, mode = "0700")
+  on.exit(unlink(root, recursive = TRUE, force = TRUE), add = TRUE)
+  manifest <- fix1b_copy_fixture("aggregate_only_mismatch", root)
+  expect_error(
+    SplitAlignerR:::cpp_engine002_disk_store_open(
+      fix1b_authority(), manifest, 0, fix1b_mib, fix1b_mib,
+      fix1b_mib, 3 * fix1b_mib
+    ),
+    "ENGINE_STORE_CORRUPT.*payload aggregate SHA-256 mismatch"
+  )
+})
+
+test_that("FIX001B payload mutation reaches the aggregate gate", {
+  skip_on_cran()
+  root <- tempfile(
+    "fix001b-payload-mutation-",
+    tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
+  dir.create(root, mode = "0700")
+  on.exit(unlink(root, recursive = TRUE, force = TRUE), add = TRUE)
+  manifest <- fix1b_copy_fixture(
+    "payload_mutation_aggregate_mismatch", root
+  )
+  expect_error(
+    SplitAlignerR:::cpp_engine002_disk_store_open(
+      fix1b_authority(), manifest, 0, fix1b_mib, fix1b_mib,
+      fix1b_mib, 3 * fix1b_mib
+    ),
+    "ENGINE_STORE_CORRUPT.*payload aggregate SHA-256 mismatch"
   )
 })

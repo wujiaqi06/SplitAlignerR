@@ -1,7 +1,9 @@
 #!/usr/bin/env Rscript
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 1L) stop("usage: store_golden.R <installed-library>")
+if (!(length(args) %in% 1:2)) {
+  stop("usage: store_golden.R <installed-library> [artifact-directory]")
+}
 .libPaths(c(args[[1L]], .libPaths()))
 library(SplitAlignerR)
 
@@ -21,7 +23,9 @@ records <- list(
   )
 )
 MiB <- 1024^2
-destination <- tempfile("engine002-golden-", tmpdir = "/private/tmp")
+destination <- tempfile(
+  "engine002-golden-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+)
 dir.create(destination, mode = "0700")
 on.exit(unlink(destination, recursive = TRUE), add = TRUE)
 run_id <- "0123456789abcdef0123456789abcdef"
@@ -32,13 +36,22 @@ store <- SplitAlignerR:::.engine002_disk_store(
   authority, patterns, destination, run_id,
   0, MiB, MiB, MiB, 3 * MiB
 )
-lapply(records, function(record) {
+invisible(lapply(records, function(record) {
   SplitAlignerR:::cpp_engine002_store_insert(store, record)
-})
+}))
 manifest <- SplitAlignerR:::cpp_engine002_store_finalize(
   store, destination, run_id
 )
 component <- sub("[.]manifest$", ".bin", manifest)
+if (length(args) == 2L) {
+  artifact_dir <- normalizePath(args[[2L]], mustWork = TRUE)
+  if (!file.copy(component, file.path(artifact_dir, "golden_store.bin"))) {
+    stop("cannot preserve generated golden store component")
+  }
+  if (!file.copy(manifest, file.path(artifact_dir, "golden_store.manifest"))) {
+    stop("cannot preserve generated golden store manifest")
+  }
+}
 bytes <- readBin(component, raw(), n = file.info(component)$size)
 u64 <- function(at) {
   x <- as.double(as.integer(bytes[(at + 1L):(at + 8L)]))
