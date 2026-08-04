@@ -1,0 +1,246 @@
+name: ENGINE002 FIX001A cross-platform evidence
+
+on:
+  push:
+    branches:
+      - engine002-fix001a-cross-platform-evidence
+  workflow_dispatch:
+    inputs:
+      expected_commit:
+        description: Optional exact commit expected for this replay
+        required: false
+        type: string
+      review_nonce:
+        description: Optional reviewer-defined nonce recorded in evidence
+        required: false
+        type: string
+
+permissions: read-all
+
+concurrency:
+  group: engine002-fix001a-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  platform-evidence:
+    name: ${{ matrix.config.label }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 180
+    continue-on-error: ${{ matrix.config.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - label: Linux R release mandatory
+            key: linux-release
+            os: ubuntu-latest
+            r: release
+            experimental: false
+          - label: macOS R release mandatory
+            key: macos-release
+            os: macos-latest
+            r: release
+            experimental: false
+          - label: Windows R release mandatory
+            key: windows-release
+            os: windows-latest
+            r: release
+            experimental: false
+          - label: Linux R devel advisory
+            key: linux-devel
+            os: ubuntu-latest
+            r: devel
+            experimental: true
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      NOT_CRAN: true
+      SPLITALIGNERR_FIX001A_WINDOWS_PHYSICAL_COUNT: "10000"
+
+    steps:
+      - name: Preserve repository bytes
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out FIX001A source
+        uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 0
+
+      - name: Guard optional expected commit
+        if: inputs.expected_commit != ''
+        shell: bash
+        working-directory: source
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ inputs.expected_commit }}"
+
+      - name: Check out frozen SplitAligner authority
+        uses: actions/checkout@v4
+        with:
+          repository: wujiaqi06/SplitAligner
+          ref: 1aea990946e08d13349bc6a164dc7334d61cae08
+          path: authority-source
+          fetch-depth: 1
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+
+      - name: Install package and evidence dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: source
+          extra-packages: |
+            any::rcmdcheck
+            any::digest
+            any::ps
+          needs: check
+
+      - name: Run package, R-boundary, authority, and byte gates
+        id: platform
+        shell: bash
+        run: |
+          bash "$GITHUB_WORKSPACE/source/tools/engine002/run_fix001a_platform.sh" \
+            "$GITHUB_WORKSPACE/source" \
+            "$GITHUB_WORKSPACE/authority-source/examples" \
+            "$RUNNER_TEMP/engine002-fix001a-${{ matrix.config.key }}" \
+            "${{ matrix.config.key }}"
+
+      - name: Record workflow metadata
+        if: always()
+        shell: bash
+        run: |
+          evidence="$RUNNER_TEMP/engine002-fix001a-${{ matrix.config.key }}"
+          mkdir -p "$evidence"
+          {
+            echo "run_id=${{ github.run_id }}"
+            echo "run_attempt=${{ github.run_attempt }}"
+            echo "run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "commit=${{ github.sha }}"
+            echo "review_nonce=${{ inputs.review_nonce }}"
+            echo "job_status=${{ job.status }}"
+          } > "$evidence/workflow_metadata.txt"
+
+      - name: Upload platform evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine002-fix001a-${{ matrix.config.key }}
+          path: ${{ runner.temp }}/engine002-fix001a-${{ matrix.config.key }}
+          if-no-files-found: error
+          retention-days: 30
+
+  sanitizer-r-boundary:
+    name: Linux Rcpp boundary ASan and UBSan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      NOT_CRAN: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 0
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - name: Install declared dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: source
+          extra-packages: any::testthat
+          needs: check
+
+      - name: Build and run the package R boundary under ASan and UBSan
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/engine002-fix001a-sanitizer"
+          library_dir="$RUNNER_TEMP/fix001a-sanitizer-library"
+          mkdir -p "$evidence" "$library_dir" "$RUNNER_TEMP/fix001a-r-config"
+          makevars="$RUNNER_TEMP/fix001a-r-config/Makevars"
+          {
+            echo 'CXX17 = g++'
+            echo 'CXX17STD = -std=gnu++17'
+            echo 'CXX17FLAGS = -O1 -g -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer'
+            echo 'SHLIB_CXX17LD = g++ -std=gnu++17'
+            echo 'SHLIB_CXX17LDFLAGS = -shared -fsanitize=address,undefined'
+          } > "$makevars"
+          export R_MAKEVARS_USER="$makevars"
+          export ASAN_OPTIONS='detect_leaks=0:halt_on_error=1:abort_on_error=1'
+          export UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1'
+          export LD_PRELOAD="$(gcc -print-file-name=libasan.so):$(gcc -print-file-name=libubsan.so)"
+          {
+            echo "R_MAKEVARS_USER=$R_MAKEVARS_USER"
+            echo "ASAN_OPTIONS=$ASAN_OPTIONS"
+            echo "UBSAN_OPTIONS=$UBSAN_OPTIONS"
+            echo "LD_PRELOAD=$LD_PRELOAD"
+            R CMD config CXX17
+            R CMD config CXX17FLAGS
+          } > "$evidence/sanitizer_environment.txt"
+          R CMD INSTALL --install-tests --library="$library_dir" source \
+            2>&1 | tee "$evidence/sanitizer_install.log"
+          Rscript source/tools/engine002/fix001a_sanitizer.R \
+            "$library_dir" "$evidence/SANITIZER_RESULTS.txt" \
+            2>&1 | tee "$evidence/sanitizer_console.log"
+          python3 source/tools/engine002/fix001a_sha256.py \
+            --root "$evidence" --output "$evidence/SHA256SUMS"
+
+      - name: Upload sanitizer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine002-fix001a-sanitizer
+          path: ${{ runner.temp }}/engine002-fix001a-sanitizer
+          if-no-files-found: error
+          retention-days: 30
+
+  compare-platform-evidence:
+    name: Mandatory three-platform deterministic comparison
+    needs: platform-evidence
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 0
+
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: engine002-fix001a-*-release
+          path: artifacts
+
+      - name: Compare exact hashes and mandatory statuses
+        shell: bash
+        run: |
+          python3 source/tools/engine002/fix001a_compare.py \
+            --artifacts artifacts \
+            --output comparison
+          python3 source/tools/engine002/fix001a_sha256.py \
+            --root comparison --output comparison/SHA256SUMS
+
+      - name: Upload comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine002-fix001a-comparison
+          path: comparison
+          if-no-files-found: error
+          retention-days: 30
