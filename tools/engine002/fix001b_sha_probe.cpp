@@ -3,15 +3,30 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdio>
 #include <cstdint>
 #include <iostream>
 #include <limits>
 #include <stdexcept>
 #include <vector>
 
+#ifdef _WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
+
 namespace {
 
 constexpr std::uint32_t kEnd = UINT32_C(0xffffffff);
+
+void configure_binary_stdio() {
+#ifdef _WIN32
+  if (_setmode(_fileno(stdin), _O_BINARY) == -1 ||
+      _setmode(_fileno(stdout), _O_BINARY) == -1) {
+    throw std::runtime_error("cannot configure FIX001B SHA probe binary I/O");
+  }
+#endif
+}
 
 std::uint32_t read_u32_le(std::istream& input) {
   std::array<std::uint8_t, 4> bytes{};
@@ -75,6 +90,7 @@ int main() {
   using splitaligner::engine002::sha256;
 
   try {
+    configure_binary_stdio();
     verify_edge_contract();
     std::array<char, 8> magic{};
     std::cin.read(magic.data(), magic.size());
