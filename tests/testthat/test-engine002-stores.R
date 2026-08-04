@@ -101,7 +101,9 @@ test_that("ENGINE002 disk store is durable, bounded, and manifest gated", {
     e2_two_taxon_record(authority, 0),
     e2_three_taxon_record(authority, 1)
   )
-  destination <- tempfile("engine002-test-", tmpdir = "/private/tmp")
+  destination <- tempfile(
+    "engine002-test-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(destination, mode = "0700")
   on.exit(unlink(destination, recursive = TRUE), add = TRUE)
   run_id <- "0123456789abcdef0123456789abcdef"
@@ -174,7 +176,10 @@ test_that("ENGINE002 disk store is durable, bounded, and manifest gated", {
 test_that("ENGINE002 atomic failpoints never publish an accepted manifest", {
   skip_on_cran()
   authority <- e2_authority()
-  destination <- tempfile("engine002-failpoints-", tmpdir = "/private/tmp")
+  destination <- tempfile(
+    "engine002-failpoints-",
+    tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(destination, mode = "0700")
   on.exit({
     SplitAlignerR:::cpp_engine002_set_publication_failpoint(0L)
@@ -206,7 +211,9 @@ test_that("ENGINE002 atomic failpoints never publish an accepted manifest", {
 test_that("ENGINE002 disk corruption and no-clobber publication are rejected", {
   skip_on_cran()
   authority <- e2_authority()
-  destination <- tempfile("engine002-corrupt-", tmpdir = "/private/tmp")
+  destination <- tempfile(
+    "engine002-corrupt-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(destination, mode = "0700")
   on.exit(unlink(destination, recursive = TRUE), add = TRUE)
   run_id <- "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
@@ -307,7 +314,9 @@ test_that("ENGINE002 constant fast-hash buckets preserve exact patterns", {
 test_that("ENGINE002 LRU and scratch budgets are hard at boundary values", {
   skip_on_cran()
   authority <- e2_authority()
-  destination <- tempfile("engine002-lru-", tmpdir = "/private/tmp")
+  destination <- tempfile(
+    "engine002-lru-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(destination, mode = "0700")
   on.exit(unlink(destination, recursive = TRUE), add = TRUE)
   records <- list(

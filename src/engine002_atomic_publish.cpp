@@ -13,6 +13,7 @@
 #ifdef _WIN32
 #include <fcntl.h>
 #include <io.h>
+#include <sys/stat.h>
 #include <windows.h>
 #else
 #include <fcntl.h>

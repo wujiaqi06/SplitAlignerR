@@ -44,7 +44,9 @@ test_that("FIX001 streaming insertion contract is exact and monotone", {
     fix1_record_ab(authority, 0),
     fix1_record_abc(authority, 1)
   )
-  root <- tempfile("fix001-order-", tmpdir = "/private/tmp")
+  root <- tempfile(
+    "fix001-order-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(root, mode = "0700")
   on.exit(unlink(root, recursive = TRUE), add = TRUE)
   make <- function(id) {
@@ -127,7 +129,9 @@ test_that("FIX001 deterministic I/O faults cannot publish a store", {
   skip_on_cran()
   authority <- fix1_authority()
   record <- fix1_record_ab(authority, 0)
-  root <- tempfile("fix001-io-fault-", tmpdir = "/private/tmp")
+  root <- tempfile(
+    "fix001-io-fault-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(root, mode = "0700")
   on.exit({
     SplitAlignerR:::cpp_engine002_set_io_faultpoint(0L)
@@ -199,7 +203,9 @@ test_that("FIX001 constant fast hash preserves all exact domains", {
   )
   SplitAlignerR:::cpp_engine002_store_close(memory)
 
-  root <- tempfile("fix001-collision-", tmpdir = "/private/tmp")
+  root <- tempfile(
+    "fix001-collision-", tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(root, mode = "0700")
   on.exit(unlink(root, recursive = TRUE), add = TRUE)
   run_id <- "ffffffffffffffffffffffffffffffff"
@@ -243,7 +249,10 @@ test_that("FIX001 returned snapshots are owned copies across close", {
 
 test_that("FIX001 authority-scale fixture is valid and fresh-process ready", {
   skip_on_cran()
-  root <- tempfile("fix001-authority-scale-", tmpdir = "/private/tmp")
+  root <- tempfile(
+    "fix001-authority-scale-",
+    tmpdir = normalizePath(tempdir(), mustWork = TRUE)
+  )
   dir.create(root, mode = "0700")
   on.exit(unlink(root, recursive = TRUE), add = TRUE)
   count <- 16

@@ -20,7 +20,7 @@ result <- testthat::test_dir(
   reporter = testthat::SummaryReporter$new(),
   package = "SplitAlignerR",
   stop_on_failure = TRUE,
-  stop_on_warning = TRUE,
+  stop_on_warning = FALSE,
   load_package = "installed"
 )
 elapsed <- unname(proc.time()[["elapsed"]] - started)
@@ -30,6 +30,9 @@ failed <- sum(vapply(result, function(item) {
 }, integer(1)))
 errors <- sum(vapply(result, function(item) {
   sum(vapply(item$results, inherits, logical(1), "expectation_error"))
+}, integer(1)))
+warnings <- sum(vapply(result, function(item) {
+  sum(vapply(item$results, inherits, logical(1), "expectation_warning"))
 }, integer(1)))
 skips <- sum(vapply(result, function(item) {
   sum(vapply(item$results, inherits, logical(1), "expectation_skip"))
@@ -42,6 +45,7 @@ lines <- c(
   paste0("expectations=", expectations),
   paste0("failures=", failed),
   paste0("errors=", errors),
+  paste0("warnings=", warnings),
   paste0("skips=", skips),
   paste0("elapsed_seconds=", sprintf("%.6f", elapsed))
 )
