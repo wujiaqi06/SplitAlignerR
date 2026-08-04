@@ -278,13 +278,18 @@ void Sha256State::update(const std::uint8_t* data, std::size_t size) {
 Sha256 Sha256State::digest() const {
   require_sha256_invariants(total_, buffered_);
   Sha256State copy = *this;
+  const std::size_t buffered = copy.buffered_;
+  if (buffered > 63U) {
+    fail(ErrorCode::internal_failure,
+         "SHA-256 buffered-byte invariant exceeds 63");
+  }
   std::array<std::uint8_t, 128> tail{};
-  if (copy.buffered_ != 0) {
-    std::copy(copy.buffer_.begin(), copy.buffer_.begin() + copy.buffered_,
+  if (buffered != 0) {
+    std::copy(copy.buffer_.begin(), copy.buffer_.begin() + buffered,
               tail.begin());
   }
-  tail[copy.buffered_] = 0x80U;
-  const std::size_t blocks = copy.buffered_ < 56 ? 1 : 2;
+  tail[buffered] = 0x80U;
+  const std::size_t blocks = buffered < 56 ? 1 : 2;
   const std::uint64_t bit_length = copy.total_ * 8U;
   const std::size_t length_offset = blocks * 64 - 8;
   for (unsigned i = 0; i < 8; ++i) {
