@@ -66,14 +66,14 @@ fix1b_copy_fixture <- function(stem, root) {
   manifest <- file.path(root, paste0(fix1b_run_id, ".truthstore.manifest"))
   expect_true(file.copy(
     test_path(
-      "fixtures", "engine002", "fix001b", paste0(stem, ".truthstore.bin")
+      "fixtures", "engine002", "fix001b", paste0(stem, ".bin")
     ),
     component
   ))
   expect_true(file.copy(
     test_path(
       "fixtures", "engine002", "fix001b",
-      paste0(stem, ".truthstore.manifest")
+      paste0(stem, ".manifest")
     ),
     manifest
   ))
@@ -114,14 +114,14 @@ test_that("FIX001B rejects the preserved FIX001A nonstandard golden store", {
   expect_true(file.copy(
     test_path(
       "fixtures", "engine002", "history",
-      "fix001a_nonconforming_payload_aggregate.truthstore.bin"
+      "fix1a_bad_aggregate.bin"
     ),
     component
   ))
   expect_true(file.copy(
     test_path(
       "fixtures", "engine002", "history",
-      "fix001a_nonconforming_payload_aggregate.truthstore.manifest"
+      "fix1a_bad_aggregate.manifest"
     ),
     manifest
   ))
@@ -169,7 +169,7 @@ test_that("FIX001B aggregate-only self-consistent tamper reaches target gate", {
   )
   dir.create(root, mode = "0700")
   on.exit(unlink(root, recursive = TRUE, force = TRUE), add = TRUE)
-  manifest <- fix1b_copy_fixture("aggregate_only_mismatch", root)
+  manifest <- fix1b_copy_fixture("aggregate_tamper", root)
   expect_error(
     SplitAlignerR:::cpp_engine002_disk_store_open(
       fix1b_authority(), manifest, 0, fix1b_mib, fix1b_mib,
@@ -188,7 +188,7 @@ test_that("FIX001B payload mutation reaches the aggregate gate", {
   dir.create(root, mode = "0700")
   on.exit(unlink(root, recursive = TRUE, force = TRUE), add = TRUE)
   manifest <- fix1b_copy_fixture(
-    "payload_mutation_aggregate_mismatch", root
+    "payload_tamper", root
   )
   expect_error(
     SplitAlignerR:::cpp_engine002_disk_store_open(

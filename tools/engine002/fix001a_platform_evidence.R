@@ -63,6 +63,11 @@ hex_to_raw <- function(value) {
 raw_to_hex <- function(value) {
   paste(sprintf("%02x", as.integer(value)), collapse = "")
 }
+footer_aggregate <- function(path) {
+  value <- read_all_raw(path)
+  at <- u64(value, 64L)
+  raw_to_hex(value[(at + 48L + 1L):(at + 80L)])
+}
 
 small_authority <- function(labels = c("A", "B", "C", "D")) {
   SplitAlignerR:::.engine002_authority(
@@ -470,6 +475,14 @@ disk_finalize_seconds <- unname(
   proc.time()[["elapsed"]] - disk_finalize_started
 )
 authority_component <- sub("[.]manifest$", ".bin", authority_manifest)
+file.copy(
+  authority_component, file.path(output_dir, "authority_store.bin"),
+  overwrite = TRUE
+)
+file.copy(
+  authority_manifest, file.path(output_dir, "authority_store.manifest"),
+  overwrite = TRUE
+)
 authority_store_stats <- SplitAlignerR:::cpp_engine002_store_stats(authority_disk)
 set.seed(2002L)
 random_ids <- unique(c(0L, 1L, 986L, 1973L, sample.int(1974L, 25L) - 1L))
@@ -499,6 +512,37 @@ last <- SplitAlignerR:::cpp_engine002_store_lookup_snapshot(
 )
 stopifnot(identical(last$pattern_id, 1973))
 SplitAlignerR:::cpp_engine002_store_close(authority_reopened)
+
+# A bounded synthetic streaming store is preserved for independent aggregate
+# reconstruction. It is evidence-scale and is not a performance benchmark.
+stress_root <- tempfile("fix001b-stress-store-", tmpdir = safe_tempdir)
+dir.create(stress_root, mode = "0700")
+on.exit(unlink(stress_root, recursive = TRUE, force = TRUE), add = TRUE)
+stress_count <- as.double(Sys.getenv(
+  "SPLITALIGNERR_FIX001B_STRESS_COUNT", "1000"
+))
+stress_index_budget <- max(64 * MiB, stress_count * 320)
+stress <- SplitAlignerR:::cpp_engine002_build_authority_scale_store(
+  stress_root, "f1b0f1b0f1b0f1b0f1b0f1b0f1b0f1b0", stress_count,
+  0, MiB, stress_index_budget, MiB, stress_index_budget + 2 * MiB
+)
+stress_reopened <- SplitAlignerR:::cpp_engine002_reopen_authority_scale_store(
+  stress$manifest, stress_count,
+  0, MiB, stress_index_budget, MiB, stress_index_budget + 2 * MiB
+)
+stopifnot(
+  identical(stress_reopened$last_pattern_id, stress_count - 1),
+  identical(stress_reopened$file_bytes, stress$final_store_bytes)
+)
+stress_component <- sub("[.]manifest$", ".bin", stress$manifest)
+file.copy(
+  stress_component, file.path(output_dir, "stress_store.bin"),
+  overwrite = TRUE
+)
+file.copy(
+  stress$manifest, file.path(output_dir, "stress_store.manifest"),
+  overwrite = TRUE
+)
 
 # Windows executes a real, bounded authority-shaped store plus no-truncation probe.
 windows_physical <- list(status = "NOT_APPLICABLE", count = 0,
@@ -547,9 +591,20 @@ deterministic <- c(
   paste0("golden_store_manifest_sha256=", hash_file(file.path(
     output_dir, "golden_store.manifest"
   ))),
+  paste0("golden_payload_aggregate_sha256=", footer_aggregate(
+    file.path(output_dir, "golden_store.bin")
+  )),
   paste0("authority_records_sha256=", authority_hashes[[1L]]),
   paste0("authority_store_component_sha256=", hash_file(authority_component)),
-  paste0("authority_store_manifest_sha256=", hash_file(authority_manifest))
+  paste0("authority_store_manifest_sha256=", hash_file(authority_manifest)),
+  paste0("authority_payload_aggregate_sha256=", footer_aggregate(
+    authority_component
+  )),
+  paste0("stress_store_component_sha256=", hash_file(stress_component)),
+  paste0("stress_store_manifest_sha256=", hash_file(stress$manifest)),
+  paste0("stress_payload_aggregate_sha256=", footer_aggregate(
+    stress_component
+  ))
 )
 writeLines(
   deterministic,
@@ -613,6 +668,9 @@ platform_lines <- c(
   "authority_encode_decode_reencode=1974/1974",
   "authority_direct_view=1974/1974",
   "authority_terminal_invariant=1974/1974",
+  paste0("streaming_stress_store_patterns=", stress_count),
+  paste0("streaming_stress_store_bytes=", stress$final_store_bytes),
+  "streaming_stress_store_reopen_last_lookup=PASS",
   paste0("authority_runtime_seconds=", paste(
     sprintf("%.6f", authority_elapsed), collapse = ","
   )),

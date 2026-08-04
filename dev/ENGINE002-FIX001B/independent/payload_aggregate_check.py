@@ -65,10 +65,12 @@ def xxh64(data: bytes, seed: int = 0) -> int:
         offset += 8
     if offset + 4 <= size:
         result ^= struct.unpack_from("<I", data, offset)[0] * PRIME1
+        result &= MASK64
         result = (rotl64(result, 23) * PRIME2 + PRIME3) & MASK64
         offset += 4
     while offset < size:
         result ^= data[offset] * PRIME5
+        result &= MASK64
         result = (rotl64(result, 11) * PRIME1) & MASK64
         offset += 1
     result ^= result >> 33

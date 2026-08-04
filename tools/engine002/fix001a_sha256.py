@@ -28,7 +28,8 @@ def main() -> None:
         key=lambda path: path.relative_to(root).as_posix(),
     )
     lines = [f"{digest(path)}  {path.relative_to(root).as_posix()}" for path in files]
-    output.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    with output.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

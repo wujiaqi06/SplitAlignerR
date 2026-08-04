@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare mandatory FIX001A artifacts without normalizing scientific bytes."""
+"""Compare mandatory FIX001B artifacts without normalizing durable bytes."""
 
 from __future__ import annotations
 
@@ -12,9 +12,14 @@ HASH_KEYS = (
     "golden_plan_sha256",
     "golden_store_component_sha256",
     "golden_store_manifest_sha256",
+    "golden_payload_aggregate_sha256",
     "authority_records_sha256",
     "authority_store_component_sha256",
     "authority_store_manifest_sha256",
+    "authority_payload_aggregate_sha256",
+    "stress_store_component_sha256",
+    "stress_store_manifest_sha256",
+    "stress_payload_aggregate_sha256",
 )
 
 
@@ -82,6 +87,7 @@ def main() -> None:
         f"golden_plan_sha256={comparisons['golden_plan_sha256']}",
         f"golden_store_component_sha256={comparisons['golden_store_component_sha256']}",
         f"golden_store_manifest_sha256={comparisons['golden_store_manifest_sha256']}",
+        f"golden_payload_aggregate_sha256={comparisons['golden_payload_aggregate_sha256']}",
         "byte_normalization=NONE",
     ])
     write(output / "AUTHORITY_1974_COMPARISON.txt", [
@@ -91,6 +97,10 @@ def main() -> None:
         f"authority_records_sha256={comparisons['authority_records_sha256']}",
         f"authority_store_component_sha256={comparisons['authority_store_component_sha256']}",
         f"authority_store_manifest_sha256={comparisons['authority_store_manifest_sha256']}",
+        f"authority_payload_aggregate_sha256={comparisons['authority_payload_aggregate_sha256']}",
+        f"stress_store_component_sha256={comparisons['stress_store_component_sha256']}",
+        f"stress_store_manifest_sha256={comparisons['stress_store_manifest_sha256']}",
+        f"stress_payload_aggregate_sha256={comparisons['stress_payload_aggregate_sha256']}",
     ])
 
     lifecycle_fields = (
@@ -140,7 +150,7 @@ def main() -> None:
         *[f"{platform}=PASS" for platform in REQUIRED_PLATFORMS],
         "comparison=PASS",
     ])
-    print("ENGINE002_FIX001A_COMPARISON_PASS")
+    print("ENGINE002_FIX001B_COMPARISON_PASS")
 
 
 if __name__ == "__main__":

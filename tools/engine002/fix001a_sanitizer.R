@@ -14,7 +14,8 @@ files <- file.path(test_root, c(
   "test-engine002-codec.R",
   "test-engine002-stores.R",
   "test-engine002-fix001.R",
-  "test-engine002-fix001a.R"
+  "test-engine002-fix001a.R",
+  "test-engine002-fix001b.R"
 ))
 if (any(!file.exists(files))) {
   stop("installed ENGINE002 sanitizer tests are incomplete", call. = FALSE)
@@ -67,6 +68,7 @@ lines <- c(
   "disk_reopen=PASS",
   "LRU_and_oversized_scratch=PASS",
   "fault_cleanup=PASS",
+  "incremental_sha_and_targeted_aggregate=PASS",
   "constant_hash=PASS",
   "XPtr_finalizer_GC=PASS",
   "close_and_read_after_close=PASS",
