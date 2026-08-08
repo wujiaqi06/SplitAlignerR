@@ -1,49 +1,182 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Standard R CMD check on the three major platforms.
+name: ENGINE003 frozen Windows xplat runner - temporary, never merge
+
 on:
-  push:
-    branches: [main, master]
   pull_request:
+    branches: [main]
 
-name: R-CMD-check.yaml
+permissions:
+  contents: read
 
-permissions: read-all
+concurrency:
+  group: engine003-windows-xplat-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
-  R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'release'}
-
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
+  windows-xplat-frozen-replay:
+    name: Windows frozen replay (runner-only)
+    runs-on: windows-latest
+    timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout runner-only branch
+        uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - name: Verify and extract exact frozen replay input
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $expected = "240f6309463f081c41c368fd652a516160584c104623a62bbb61638d92b682da"
+          $zip = Join-Path $env:GITHUB_WORKSPACE ".github\runner-inputs\SplitAlignerR_ENGINE003_VALIDATION_XPLAT_REPLAY_2781929_20260807_JST.zip"
+          $actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) {
+            throw "Frozen replay ZIP SHA-256 mismatch: $actual"
+          }
 
-      - uses: r-lib/actions/setup-r@v2
+          $extract = Join-Path $env:RUNNER_TEMP "engine003-frozen-replay"
+          New-Item -ItemType Directory -Path $extract -ErrorAction Stop | Out-Null
+          Expand-Archive -LiteralPath $zip -DestinationPath $extract
+          $root = Join-Path $extract "SplitAlignerR_ENGINE003_XPLAT_REPLAY_2781929"
+          if (-not (Test-Path -LiteralPath $root -PathType Container)) {
+            throw "Frozen replay root was not found"
+          }
+
+          $manifest = Join-Path $root "SHA256SUMS"
+          $verified = 0
+          foreach ($line in Get-Content -LiteralPath $manifest) {
+            if ($line -notmatch '^([0-9a-f]{64})  (.+)$') {
+              throw "Malformed frozen package SHA256SUMS line"
+            }
+            $digest = $Matches[1]
+            $relative = $Matches[2].Replace('/', [IO.Path]::DirectorySeparatorChar)
+            $path = Join-Path $root $relative
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "Missing frozen package member: $relative"
+            }
+            $observed = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($observed -ne $digest) {
+              throw "Frozen package member hash mismatch: $relative"
+            }
+            $verified += 1
+          }
+          if ($verified -ne 93) {
+            throw "Frozen package manifest count mismatch: $verified"
+          }
+
+          "FROZEN_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FROZEN_ZIP_SHA256=$actual" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FROZEN_MANIFEST_VERIFIED=$verified" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Record exact Windows runner and command identity
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $pythonVersion = (& py -3 --version 2>&1 | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) {
+            throw "CPython 3 launcher is unavailable"
+          }
+          $outputName = "XPLAT_EVIDENCE_WINDOWS_RUN_$env:GITHUB_RUN_ID`_ATTEMPT_$env:GITHUB_RUN_ATTEMPT"
+          $command = "py -3 -B dev/ENGINE003-PREFLIGHT/xplat/run_xplat_replay.py --output-dir $outputName"
+          $context = Join-Path $env:GITHUB_WORKSPACE "WINDOWS_RUN_CONTEXT.txt"
+          @(
+            "evidence_class=PORTABLE_TRUSTED_BYTE_REPLAY_ONLY"
+            "workflow_repository=$env:GITHUB_REPOSITORY"
+            "workflow_run_id=$env:GITHUB_RUN_ID"
+            "workflow_run_attempt=$env:GITHUB_RUN_ATTEMPT"
+            "workflow_run_url=https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            "runner_name=$env:RUNNER_NAME"
+            "runner_os=$env:RUNNER_OS"
+            "runner_arch=$env:RUNNER_ARCH"
+            "runner_environment=$env:RUNNER_ENVIRONMENT"
+            "image_os=$env:ImageOS"
+            "image_version=$env:ImageVersion"
+            "python_version=$pythonVersion"
+            "exact_command=$command"
+            "frozen_zip_sha256=$env:FROZEN_ZIP_SHA256"
+            "frozen_package_manifest_verified=$env:FROZEN_MANIFEST_VERIFIED/93"
+            "candidate_commit_not_executed=TRUE"
+            "frozen_replay_commit=278192993c6bf2ae4d93b46bf9e8195aaf39f1a3"
+            "windows_durability_conclusion=NOT_ESTABLISHED"
+          ) | Set-Content -LiteralPath $context -Encoding utf8NoBOM
+          "OUTPUT_NAME=$outputName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "EXACT_COMMAND=$command" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Execute exact frozen replay unchanged
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $console = Join-Path $env:GITHUB_WORKSPACE "WINDOWS_CONSOLE_LOG.txt"
+          Push-Location $env:FROZEN_ROOT
+          try {
+            & py -3 -B dev/ENGINE003-PREFLIGHT/xplat/run_xplat_replay.py --output-dir $env:OUTPUT_NAME 2>&1 |
+              Tee-Object -FilePath $console
+            $exitCode = $LASTEXITCODE
+          }
+          finally {
+            Pop-Location
+          }
+          $raw = Join-Path $env:FROZEN_ROOT $env:OUTPUT_NAME
+          "RAW_DIR=$raw" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "REPLAY_EXIT_CODE=$exitCode" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          if ($exitCode -ne 0) {
+            throw "Frozen Windows replay failed with exit code $exitCode"
+          }
+
+      - name: Verify five raw Windows outputs without editing them
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $required = @(
+            "RUN_METADATA.json",
+            "WIRE_REPLAY_RESULTS.tsv",
+            "DESCRIPTOR_BYTE_CASE_RESULTS.tsv",
+            "AUTHORITY_VECTOR_RESULTS.tsv",
+            "SHA256SUMS"
+          )
+          $observed = @(Get-ChildItem -LiteralPath $env:RAW_DIR -File | ForEach-Object { $_.Name } | Sort-Object)
+          $expected = @($required | Sort-Object)
+          if (Compare-Object -ReferenceObject $expected -DifferenceObject $observed) {
+            throw "Raw Windows output file set mismatch"
+          }
+
+          $verified = 0
+          foreach ($line in Get-Content -LiteralPath (Join-Path $env:RAW_DIR "SHA256SUMS")) {
+            if ($line -notmatch '^([0-9a-f]{64})  (.+)$') {
+              throw "Malformed raw output SHA256SUMS line"
+            }
+            $path = Join-Path $env:RAW_DIR $Matches[2]
+            $digest = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($digest -ne $Matches[1]) {
+              throw "Raw output hash mismatch: $($Matches[2])"
+            }
+            $verified += 1
+          }
+          if ($verified -ne 4) {
+            throw "Raw output manifest count mismatch: $verified"
+          }
+
+          $metadata = Get-Content -LiteralPath (Join-Path $env:RAW_DIR "RUN_METADATA.json") -Raw | ConvertFrom-Json
+          if ($metadata.status -ne "XPLAT_BYTE_PARSER_REPLAY_PASS") {
+            throw "Windows replay status is not PASS: $($metadata.status)"
+          }
+          if ($metadata.system -ne "Windows") {
+            throw "RUN_METADATA system is not Windows: $($metadata.system)"
+          }
+          if ($metadata.timing_executed -ne $false) {
+            throw "Unexpected timing flag in Windows replay"
+          }
+          "WINDOWS_RAW_OUTPUT_SHA256_PASS=$verified/4" |
+            Add-Content -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "WINDOWS_RUN_CONTEXT.txt") -Encoding utf8NoBOM
+          "WINDOWS_REPLAY_STATUS=$($metadata.status)" |
+            Add-Content -LiteralPath (Join-Path $env:GITHUB_WORKSPACE "WINDOWS_RUN_CONTEXT.txt") -Encoding utf8NoBOM
+
+      - name: Upload immutable Windows replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
-
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          name: engine003-windows-xplat-run-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: |
+            ${{ env.RAW_DIR }}
+            ${{ github.workspace }}/WINDOWS_RUN_CONTEXT.txt
+            ${{ github.workspace }}/WINDOWS_CONSOLE_LOG.txt
+          if-no-files-found: warn
+          retention-days: 30
