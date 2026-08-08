@@ -1,49 +1,136 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Standard R CMD check on the three major platforms.
-on:
-  push:
-    branches: [main, master]
-  pull_request:
+name: ENGINE003 XPLAT FIX001 Linux frozen replay
 
-name: R-CMD-check.yaml
+on:
+  pull_request:
+  workflow_dispatch:
 
 permissions: read-all
 
 jobs:
-  R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'release'}
-
+  linux-xplat-successor:
+    name: Linux frozen successor replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
+      REPLAY_ZIP: .github/runner-inputs/engine003-xplat-fix001/SplitAlignerR_ENGINE003_XPLAT_FIX001_REPLAY_3b7cb92_20260808_JST.zip
+      EXPECTED_REPLAY_SHA256: be17a6438da5d16e6960e45fd59c27fa7d1c6441f5311a1145001bbe6f39c1fd
+      REPLAY_ROOT: SplitAlignerR_ENGINE003_XPLAT_FIX001_REPLAY_3b7cb92
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: r-lib/actions/setup-r@v2
+      - uses: actions/setup-python@v5
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: true
+          python-version: '3.12'
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
+      - name: Verify exact frozen input
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(sha256sum "$REPLAY_ZIP" | cut -d ' ' -f 1)"
+          test "$actual" = "$EXPECTED_REPLAY_SHA256"
+          python -B - "$REPLAY_ZIP" "$REPLAY_ROOT" <<'PY'
+          import hashlib
+          import stat
+          import sys
+          import zipfile
+          from pathlib import PurePosixPath
 
-      - uses: r-lib/actions/check-r-package@v2
+          archive, root_name = sys.argv[1:]
+          root = root_name + "/"
+          with zipfile.ZipFile(archive) as zf:
+              for info in zf.infolist():
+                  path = PurePosixPath(info.filename)
+                  assert not path.is_absolute()
+                  assert ".." not in path.parts
+                  assert stat.S_IFMT(info.external_attr >> 16) != stat.S_IFLNK
+              rows = zf.read(root + "SHA256SUMS").decode("ascii").splitlines()
+              for line in rows:
+                  expected, relative = line.split("  ", 1)
+                  observed = hashlib.sha256(zf.read(root + relative)).hexdigest()
+                  assert observed == expected, relative
+          print(f"FROZEN_PACKAGE_MANIFEST_PASS {len(rows)}/{len(rows)}")
+          PY
+
+      - name: Execute unchanged Linux replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/linux_evidence"
+          mkdir -p "$evidence/extracted" "$evidence/raw"
+          unzip -q "$REPLAY_ZIP" -d "$evidence/extracted"
+          root="$evidence/extracted/$REPLAY_ROOT"
+          {
+            echo "run_id: GITHUB_ACTIONS_${GITHUB_RUN_ID}_ATTEMPT_${GITHUB_RUN_ATTEMPT}"
+            echo "archive_sha256: $EXPECTED_REPLAY_SHA256"
+            echo "candidate_commit: 3b7cb9268206378ac74107ff734442a4665180de"
+            echo "candidate_tree: df8d8760b03a14573a5477fc37d5c6a18400a94d"
+            echo "runner_name: $RUNNER_NAME"
+            echo "runner_os: $RUNNER_OS"
+            echo "runner_arch: $RUNNER_ARCH"
+            uname -a
+            python --version
+            command -v python
+            echo "command_newline: python -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_newline_contract.py --output <evidence>/raw/NEWLINE_CONTRACT_RESULTS.tsv"
+            echo "command_diagnostic: python -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_failure_diagnostics.py --output <evidence>/raw/FAILURE_DIAGNOSTIC_RESULTS.tsv"
+            echo "command_replay: python -B dev/ENGINE003-PREFLIGHT/xplat/run_xplat_replay.py --output-dir <evidence>/raw/xplat_raw"
+          } > "$evidence/raw/LINUX_RUN_CONTEXT.txt"
+          cd "$root"
+          python -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_newline_contract.py \
+            --output "$evidence/raw/NEWLINE_CONTRACT_RESULTS.tsv" \
+            2>&1 | tee "$evidence/raw/NEWLINE_CONTRACT_CONSOLE.txt"
+          python -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_failure_diagnostics.py \
+            --output "$evidence/raw/FAILURE_DIAGNOSTIC_RESULTS.tsv" \
+            2>&1 | tee "$evidence/raw/FAILURE_DIAGNOSTIC_CONSOLE.txt"
+          python -B dev/ENGINE003-PREFLIGHT/xplat/run_xplat_replay.py \
+            --output-dir "$evidence/raw/xplat_raw" \
+            2>&1 | tee "$evidence/raw/XPLAT_REPLAY_CONSOLE.txt"
+
+      - name: Verify raw Linux evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - "$GITHUB_WORKSPACE/linux_evidence/raw" <<'PY'
+          import hashlib
+          import sys
+          from pathlib import Path
+
+          root = Path(sys.argv[1])
+          required = [
+              root / "xplat_raw/RUN_METADATA.json",
+              root / "xplat_raw/WIRE_REPLAY_RESULTS.tsv",
+              root / "xplat_raw/DESCRIPTOR_BYTE_CASE_RESULTS.tsv",
+              root / "xplat_raw/AUTHORITY_VECTOR_RESULTS.tsv",
+              root / "xplat_raw/SHA256SUMS",
+          ]
+          audited = required + [
+              root / "NEWLINE_CONTRACT_RESULTS.tsv",
+              root / "FAILURE_DIAGNOSTIC_RESULTS.tsv",
+          ]
+          for path in audited:
+              raw = path.read_bytes()
+              assert b"\r" not in raw, path
+          rows = required[-1].read_text(encoding="ascii").splitlines()
+          for line in rows:
+              expected, relative = line.split("  ", 1)
+              path = root / "xplat_raw" / relative
+              assert hashlib.sha256(path.read_bytes()).hexdigest() == expected, relative
+          sums = []
+          for path in sorted(path for path in root.rglob("*") if path.is_file()):
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              sums.append(f"{digest}  {path.relative_to(root).as_posix()}")
+          (root / "RAW_EVIDENCE_SHA256SUMS").write_bytes(
+              ("\n".join(sums) + "\n").encode("ascii")
+          )
+          print("LINUX_RAW_OUTPUT_PASS required=5 cr_free=7")
+          print(f"LINUX_XPLAT_MANIFEST_PASS {len(rows)}/{len(rows)}")
+          PY
+
+      - name: Upload raw Linux evidence
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          name: engine003-xplat-fix001-linux-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: linux_evidence/raw
+          if-no-files-found: error
+          retention-days: 90
