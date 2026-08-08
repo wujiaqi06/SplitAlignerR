@@ -1,49 +1,278 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Standard R CMD check on the three major platforms.
-on:
-  push:
-    branches: [main, master]
-  pull_request:
+name: ENGINE003 XPLAT FIX001 Windows frozen successor replay
 
-name: R-CMD-check.yaml
+on:
+  pull_request:
+    branches: [main]
 
 permissions: read-all
 
+concurrency:
+  group: engine003-xplat-fix001-windows-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
-  R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'release'}
-
+  windows-xplat-successor:
+    name: Windows frozen successor replay - one authorized run
+    runs-on: windows-latest
+    timeout-minutes: 30
     env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
+      REPLAY_ZIP: .github/runner-inputs/engine003-xplat-fix001/SplitAlignerR_ENGINE003_XPLAT_FIX001_REPLAY_3b7cb92_20260808_JST.zip
+      EXPECTED_REPLAY_SHA256: be17a6438da5d16e6960e45fd59c27fa7d1c6441f5311a1145001bbe6f39c1fd
+      REPLAY_ROOT_NAME: SplitAlignerR_ENGINE003_XPLAT_FIX001_REPLAY_3b7cb92
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout runner-only branch
+        uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - name: Verify and extract exact frozen successor
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:GITHUB_WORKSPACE $env:REPLAY_ZIP
+          $actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $env:EXPECTED_REPLAY_SHA256) {
+            throw "Frozen successor ZIP SHA-256 mismatch: $actual"
+          }
 
-      - uses: r-lib/actions/setup-r@v2
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $opened = [IO.Compression.ZipFile]::OpenRead($zip)
+          try {
+            foreach ($entry in $opened.Entries) {
+              $name = $entry.FullName.Replace('\', '/')
+              $parts = @($name.Split('/') | Where-Object { $_ -ne '' })
+              if ([IO.Path]::IsPathRooted($name) -or $parts -contains '..') {
+                throw "Unsafe frozen ZIP member: $name"
+              }
+              $mode = (($entry.ExternalAttributes -shr 16) -band 0xffff)
+              if (($mode -band 0xf000) -eq 0xa000) {
+                throw "Symlink frozen ZIP member is forbidden: $name"
+              }
+            }
+          }
+          finally {
+            $opened.Dispose()
+          }
+
+          $extract = Join-Path $env:RUNNER_TEMP "engine003-xplat-fix001-successor"
+          if (Test-Path -LiteralPath $extract) {
+            throw "Fresh extraction directory unexpectedly exists: $extract"
+          }
+          New-Item -ItemType Directory -Path $extract | Out-Null
+          [IO.Compression.ZipFile]::ExtractToDirectory($zip, $extract)
+          $root = Join-Path $extract $env:REPLAY_ROOT_NAME
+          if (-not (Test-Path -LiteralPath $root -PathType Container)) {
+            throw "Frozen successor root was not found: $root"
+          }
+
+          $manifest = Join-Path $root "SHA256SUMS"
+          $verified = 0
+          foreach ($line in [IO.File]::ReadAllLines($manifest, [Text.Encoding]::ASCII)) {
+            if ($line -notmatch '^([0-9a-f]{64})  (.+)$') {
+              throw "Malformed frozen successor SHA256SUMS line"
+            }
+            $relative = $Matches[2].Replace('/', [IO.Path]::DirectorySeparatorChar)
+            $path = Join-Path $root $relative
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "Missing frozen successor member: $relative"
+            }
+            $observed = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($observed -ne $Matches[1]) {
+              throw "Frozen successor member hash mismatch: $relative"
+            }
+            $verified += 1
+          }
+          if ($verified -ne 100) {
+            throw "Frozen successor manifest count mismatch: $verified"
+          }
+
+          $evidence = Join-Path $env:GITHUB_WORKSPACE "windows_evidence"
+          $raw = Join-Path $evidence "raw"
+          $logs = Join-Path $evidence "logs"
+          New-Item -ItemType Directory -Path $raw, $logs | Out-Null
+          "FROZEN_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "EVIDENCE_ROOT=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RAW_EVIDENCE_ROOT=$raw" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "LOG_ROOT=$logs" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "FROZEN_MANIFEST_VERIFIED=$verified" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Record exact Windows runner and command identity
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $pythonVersion = (& py -3 --version 2>&1 | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0) {
+            throw "CPython 3 launcher is unavailable"
+          }
+          $pythonPaths = (& py -0p 2>&1 | Out-String).Trim()
+          $context = Join-Path $env:RAW_EVIDENCE_ROOT "WINDOWS_RUN_CONTEXT.txt"
+          $lines = @(
+            "evidence_class=PORTABLE_TRUSTED_BYTE_REPLAY_ONLY"
+            "single_authorized_run=TRUE"
+            "workflow_repository=$env:GITHUB_REPOSITORY"
+            "workflow_ref=$env:GITHUB_REF"
+            "workflow_sha=$env:GITHUB_SHA"
+            "workflow_run_id=$env:GITHUB_RUN_ID"
+            "workflow_run_attempt=$env:GITHUB_RUN_ATTEMPT"
+            "workflow_run_url=https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            "runner_name=$env:RUNNER_NAME"
+            "runner_os=$env:RUNNER_OS"
+            "runner_arch=$env:RUNNER_ARCH"
+            "runner_environment=$env:RUNNER_ENVIRONMENT"
+            "image_os=$env:ImageOS"
+            "image_version=$env:ImageVersion"
+            "python_version=$pythonVersion"
+            "python_launcher_paths=$pythonPaths"
+            "frozen_zip_sha256=$env:EXPECTED_REPLAY_SHA256"
+            "frozen_package_manifest_verified=$env:FROZEN_MANIFEST_VERIFIED/100"
+            "candidate_commit=3b7cb9268206378ac74107ff734442a4665180de"
+            "candidate_tree=df8d8760b03a14573a5477fc37d5c6a18400a94d"
+            "candidate_parent=f2a9adf8ff5f2a5a15bd7af1a1db1cd1a612b440"
+            "command_newline=py -3 -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_newline_contract.py --output NEWLINE_CONTRACT_RESULTS.tsv"
+            "command_diagnostic=py -3 -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_failure_diagnostics.py --output FAILURE_DIAGNOSTIC_RESULTS.tsv"
+            "command_replay=py -3 -B dev/ENGINE003-PREFLIGHT/xplat/run_xplat_replay.py --output-dir xplat_raw"
+            "candidate_repository_code_executed=FALSE"
+            "stage_a_timing_executed=FALSE"
+            "windows_durability_conclusion=NOT_ESTABLISHED"
+          )
+          [IO.File]::WriteAllText($context, (($lines -join "`n") + "`n"), [Text.UTF8Encoding]::new($false))
+          $stage = Join-Path $env:RAW_EVIDENCE_ROOT "WINDOWS_STAGE_STATUS.tsv"
+          [IO.File]::WriteAllText($stage, "stage`tstatus`texit_code`narchive_verify`tPASS`t0`n", [Text.UTF8Encoding]::new($false))
+
+      - name: Execute exact frozen successor once
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $stage = Join-Path $env:RAW_EVIDENCE_ROOT "WINDOWS_STAGE_STATUS.tsv"
+          Push-Location $env:FROZEN_ROOT
+          try {
+            & py -3 -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_newline_contract.py --output NEWLINE_CONTRACT_RESULTS.tsv 2>&1 |
+              Tee-Object -FilePath (Join-Path $env:LOG_ROOT "NEWLINE_CONTRACT_CONSOLE.txt")
+            $newlineExit = $LASTEXITCODE
+            [IO.File]::AppendAllText($stage, "newline_contract`t$(if ($newlineExit -eq 0) {'PASS'} else {'FAIL'})`t$newlineExit`n", [Text.UTF8Encoding]::new($false))
+            if ($newlineExit -ne 0) {
+              throw "Frozen Windows newline-contract check failed with exit code $newlineExit"
+            }
+
+            & py -3 -B dev/ENGINE003-PREFLIGHT/independent/check_xplat_failure_diagnostics.py --output FAILURE_DIAGNOSTIC_RESULTS.tsv 2>&1 |
+              Tee-Object -FilePath (Join-Path $env:LOG_ROOT "FAILURE_DIAGNOSTIC_CONSOLE.txt")
+            $diagnosticExit = $LASTEXITCODE
+            [IO.File]::AppendAllText($stage, "failure_diagnostics`t$(if ($diagnosticExit -eq 0) {'PASS'} else {'FAIL'})`t$diagnosticExit`n", [Text.UTF8Encoding]::new($false))
+            if ($diagnosticExit -ne 0) {
+              throw "Frozen Windows failure-diagnostic check failed with exit code $diagnosticExit"
+            }
+
+            & py -3 -B dev/ENGINE003-PREFLIGHT/xplat/run_xplat_replay.py --output-dir xplat_raw 2>&1 |
+              Tee-Object -FilePath (Join-Path $env:LOG_ROOT "XPLAT_REPLAY_CONSOLE.txt")
+            $replayExit = $LASTEXITCODE
+            [IO.File]::AppendAllText($stage, "xplat_replay`t$(if ($replayExit -eq 0) {'PASS'} else {'FAIL'})`t$replayExit`n", [Text.UTF8Encoding]::new($false))
+            if ($replayExit -ne 0) {
+              throw "Frozen Windows xplat replay failed with exit code $replayExit"
+            }
+          }
+          finally {
+            Pop-Location
+          }
+
+      - name: Collect all available raw outputs unchanged
+        if: always()
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          foreach ($name in @("NEWLINE_CONTRACT_RESULTS.tsv", "FAILURE_DIAGNOSTIC_RESULTS.tsv")) {
+            $source = Join-Path $env:FROZEN_ROOT $name
+            if (Test-Path -LiteralPath $source -PathType Leaf) {
+              Copy-Item -LiteralPath $source -Destination (Join-Path $env:RAW_EVIDENCE_ROOT $name)
+            }
+          }
+          $xplat = Join-Path $env:FROZEN_ROOT "xplat_raw"
+          if (Test-Path -LiteralPath $xplat -PathType Container) {
+            Copy-Item -LiteralPath $xplat -Destination $env:RAW_EVIDENCE_ROOT -Recurse
+          }
+
+      - name: Verify complete raw Windows evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $required = @(
+            "NEWLINE_CONTRACT_RESULTS.tsv",
+            "FAILURE_DIAGNOSTIC_RESULTS.tsv",
+            "xplat_raw/RUN_METADATA.json",
+            "xplat_raw/WIRE_REPLAY_RESULTS.tsv",
+            "xplat_raw/DESCRIPTOR_BYTE_CASE_RESULTS.tsv",
+            "xplat_raw/AUTHORITY_VECTOR_RESULTS.tsv",
+            "xplat_raw/SHA256SUMS"
+          )
+          foreach ($relative in $required) {
+            $path = Join-Path $env:RAW_EVIDENCE_ROOT ($relative.Replace('/', [IO.Path]::DirectorySeparatorChar))
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+              throw "Missing required raw Windows output: $relative"
+            }
+            if ([IO.File]::ReadAllBytes($path) -contains 13) {
+              throw "Unexpected CR byte in raw Windows output: $relative"
+            }
+          }
+
+          $manifest = Join-Path $env:RAW_EVIDENCE_ROOT "xplat_raw/SHA256SUMS"
+          $verified = 0
+          foreach ($line in [IO.File]::ReadAllLines($manifest, [Text.Encoding]::ASCII)) {
+            if ($line -notmatch '^([0-9a-f]{64})  (.+)$') {
+              throw "Malformed xplat raw SHA256SUMS line"
+            }
+            $path = Join-Path (Split-Path -Parent $manifest) $Matches[2]
+            $observed = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($observed -ne $Matches[1]) {
+              throw "Xplat raw output hash mismatch: $($Matches[2])"
+            }
+            $verified += 1
+          }
+          if ($verified -ne 4) {
+            throw "Xplat raw manifest count mismatch: $verified"
+          }
+
+          $expected = @{
+            "NEWLINE_CONTRACT_RESULTS.tsv" = "fc6caf27478893dc8f736fd33f8e901080f5cd8e94898f427032487cf7822f41"
+            "FAILURE_DIAGNOSTIC_RESULTS.tsv" = "6f0a89fe686b450829ad5309791946ae4923cb73166c8a6a3bf02e5a155ea839"
+            "xplat_raw/WIRE_REPLAY_RESULTS.tsv" = "a4f134bcde0d00ad3caa4d8e3c9a092f0140c4865c6510de42867335cac97e8f"
+            "xplat_raw/AUTHORITY_VECTOR_RESULTS.tsv" = "e40323d0b4a783da80b6df50d79e8d7bb4ee06ff4a8d69eb4b1ab626fa565987"
+          }
+          foreach ($relative in $expected.Keys) {
+            $path = Join-Path $env:RAW_EVIDENCE_ROOT ($relative.Replace('/', [IO.Path]::DirectorySeparatorChar))
+            $observed = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($observed -ne $expected[$relative]) {
+              throw "Deterministic raw output differs for ${relative}: $observed"
+            }
+          }
+
+          $metadataPath = Join-Path $env:RAW_EVIDENCE_ROOT "xplat_raw/RUN_METADATA.json"
+          $metadata = Get-Content -LiteralPath $metadataPath -Raw | ConvertFrom-Json
+          if ($metadata.status -ne "XPLAT_BYTE_PARSER_REPLAY_PASS") {
+            throw "Windows replay status is not PASS: $($metadata.status)"
+          }
+          if ($metadata.system -ne "Windows") {
+            throw "RUN_METADATA system is not Windows: $($metadata.system)"
+          }
+          if ($metadata.timing_executed -ne $false) {
+            throw "Unexpected timing execution in Windows replay"
+          }
+
+          $sumRows = @()
+          Get-ChildItem -LiteralPath $env:EVIDENCE_ROOT -Recurse -File |
+            Sort-Object FullName |
+            ForEach-Object {
+              $relative = [IO.Path]::GetRelativePath($env:EVIDENCE_ROOT, $_.FullName).Replace('\', '/')
+              $digest = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              $sumRows += "$digest  $relative"
+            }
+          $sumPath = Join-Path $env:EVIDENCE_ROOT "RAW_EVIDENCE_SHA256SUMS"
+          [IO.File]::WriteAllText($sumPath, (($sumRows -join "`n") + "`n"), [Text.Encoding]::ASCII)
+          $context = Join-Path $env:RAW_EVIDENCE_ROOT "WINDOWS_RUN_CONTEXT.txt"
+          [IO.File]::AppendAllText($context, "windows_raw_output_pass=7/7`nxplat_manifest_pass=$verified/4`nwindows_replay_status=$($metadata.status)`n", [Text.UTF8Encoding]::new($false))
+
+      - name: Upload immutable Windows successor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
-
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          name: engine003-xplat-fix001-windows-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: windows_evidence
+          if-no-files-found: warn
+          retention-days: 90
