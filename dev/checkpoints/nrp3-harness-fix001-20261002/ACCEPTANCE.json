@@ -1,0 +1,121 @@
+{
+  "milestone": "NRP3_HARNESS_IMPL001_FIX001",
+  "date_jst": "2026-10-02",
+  "verdict": "SCOPED_PASS",
+  "scope": "exact disabled five-file snapshot; authorized R1/R2/R6 source and guarded fake-model repair milestone only",
+  "closed": [
+    "R1",
+    "R2",
+    "R6"
+  ],
+  "snapshot_type": "archival source checkpoint, not a runnable stage or integration branch",
+  "selected_file_count": 120,
+  "prior_source_file_count": 113,
+  "final_candidate_count": 5,
+  "frozen_guard_runner_count": 2,
+  "linux_base_commit_abbrev": "7a90d33",
+  "github_branch_base_commit": "e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771",
+  "input_archive": {
+    "name": "SplitAlignerR_ProReview_NRP3_HARNESS_IMPL001_FIX001_20261002.zip",
+    "bytes": 13923273,
+    "sha256": "a58bcde0c6ce4353c9eb4c116ddfd6c7bfcb58494af4217ff917ea606e9b255f"
+  },
+  "pro_review_zip": {
+    "name": "SAR_PRO_NRP3_HARNESS_IMPL001_FIX001_STATIC_REVIEW_20261002.zip",
+    "sha256": "41be6aabbb44907219112c0499a31de4dda18b37d7918b1f5b7992d9ba39a40d",
+    "bytes": 387720
+  },
+  "original_evidence_summary": {
+    "final_ids_per_interpreter": 52,
+    "interpreters": [
+      "3.10.16",
+      "3.8.10"
+    ],
+    "final_OK": 104,
+    "HW01_rerun": false,
+    "new_wrapped_calls": 64,
+    "original_failed_checks_retained": true,
+    "executed_in_git_checkpoint_preparation": false
+  },
+  "budget": {
+    "cumulative_wrapped_calls": 96,
+    "limit": 128,
+    "remaining": 32,
+    "repair_iterations_used": 2,
+    "limit_repairs": 3,
+    "remaining_repairs": 1,
+    "remaining_use_authorized_by_this_review": false
+  },
+  "limits": [
+    {
+      "id": "AF3_CURRENT",
+      "status": "RETAINED_PROVENANCE_LIMIT",
+      "conclusion": "Current full FAIL and two PASS records exist. One environment substring predicate hit unchanged prose; AST names and precise shell-variable checks are reasonable for exact source. Not general protection equivalence and not a 164-check formal proof. I1 source is a hash-matching reconstruction, not a contemporaneously saved source original.",
+      "future_obligation": null
+    },
+    {
+      "id": "AF3_OLD_R3",
+      "status": "PERMANENT_HISTORICAL_GAP",
+      "conclusion": "raw_fail_json_preserved=false remains for the old stage. Current preserved full failure does not restore the lost historical original.",
+      "future_obligation": null
+    },
+    {
+      "id": "AF4",
+      "status": "EVIDENCE_CEILING",
+      "conclusion": "Final I2 has52 explicit method IDs on each of Python3.10.16/3.8.10,104 OK. HW01 not rerun; earlier execution cannot qualify its final dependencies. No final53-ID-per-interpreter claim. Guard zero is self-reported instrument output; RUNS are worker-hosted. No candidate tests executed by Pro.",
+      "future_obligation": null
+    },
+    {
+      "id": "AF5_SINK",
+      "status": "NONBLOCKING_CURRENT_CONTRACT__ENABLE_OBLIGATION",
+      "conclusion": "_StdSink catches stream BaseException and returns an error. If an injected emit_stderr_line method itself raises, outer except ends reporting and returns STOP without stdout fallback. Does not yield PASS or extra cleanup, but diagnostic coverage is not universal.",
+      "future_obligation": "Before enabling or admitting arbitrary sink implementations, enforce/document a no-throw return-error sink interface or separately handle each emission failure. Never promise complete evidence when both channels fail."
+    },
+    {
+      "id": "AF5_CONTEXT",
+      "status": "NONBLOCKING_CURRENT_MODEL__ENABLE_OBLIGATION",
+      "conclusion": "Context custody is marked NEW_CONTEXT_CALLED_OUTCOME_UNKNOWN before call, but the ownership row is registered only after returned handle. Post-create-raise would leave unknown without recovered handle/close. R1 repair is not generalized to this factory.",
+      "future_obligation": "Before effectful use, require no-effect-on-throw/operation-bound acquisition evidence, or independent pre-call ownership tracking. No guessed close or invented recovered identity."
+    },
+    {
+      "id": "AF5_RETURNCODE",
+      "status": "MODEL_PRECONDITION__ENABLE_PROOF_REQUIRED",
+      "conclusion": "cleanup1232-1235 accepts an already non-None proc.returncode and releases the child row, not exclusively a newly returned wait value. Current fake process fields have the modeled completed-child meaning. This is not native reaper/identity evidence and does not accept arbitrary corrupted process fields.",
+      "future_obligation": "Before native acceptance bind the field/outcome to correct owned child, observation and reaper contract. Clarify the narrow implementation/doc wording when producing an enabling artifact; never fabricate returncode or reap facts."
+    },
+    {
+      "id": "AF5_SNAPSHOT",
+      "status": "BEST_EFFORT_NOT_ATOMIC",
+      "conclusion": "Outer snapshot copies already captured plain data and can be partial/stale or fail. No live report/proc/host query is introduced. No claim of atomic ownership capture between arbitrary statements.",
+      "future_obligation": "Any broader enabled contract needs explicit operation/ownership handoff and snapshot-limits review; do not reacquire resources or perform extra cleanup to manufacture evidence."
+    },
+    {
+      "id": "R4",
+      "status": "UNCHANGED_LIMIT",
+      "conclusion": "Only entry subset <= executed <= served17. Hash-pinning17 files does not prove every module body executed.",
+      "future_obligation": null
+    },
+    {
+      "id": "R7",
+      "status": "UNCHANGED_NONBLOCKING_DIAGNOSTIC",
+      "conclusion": "Refusal still returns exit3 before constructing dependencies. It can lack stderr fallback if stdout fails; no new execution permission.",
+      "future_obligation": null
+    },
+    {
+      "id": "R8",
+      "status": "UNCHANGED_NONBLOCKING_LABEL",
+      "conclusion": "Marker boundary receipt is conservative/spent and no retry. INCOMPLETE wording is not evidence that completed marker bytes were incomplete.",
+      "future_obligation": null
+    },
+    {
+      "id": "R9",
+      "status": "UNCHANGED_TRUST_LIMIT",
+      "conclusion": "Hash consistency does not prove host isolation or OS process/pipe/signal/storage behavior. No p18 or NativeSyscalls execution qualification.",
+      "future_obligation": null
+    }
+  ],
+  "native_activation": "HOLD",
+  "NATIVE_STORAGE_QUALIFIED": false,
+  "subsequent_stage_authority": false,
+  "historical_seals": "Unchanged; this checkpoint does not recertify earlier milestones."
+}

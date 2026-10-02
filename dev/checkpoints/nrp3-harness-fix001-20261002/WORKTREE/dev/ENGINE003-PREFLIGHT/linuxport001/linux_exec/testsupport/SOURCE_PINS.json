@@ -1,0 +1,87 @@
+[
+  {
+    "path": "README.md",
+    "bytes": 5274,
+    "sha256": "bf20c629c0cfbe1d87cddfc0fe72d5452b4fa94cf947a46b011df9d7ca5195e3"
+  },
+  {
+    "path": "SOURCE_ISOLATION_MANIFEST.json",
+    "bytes": 24081,
+    "sha256": "4c2d6a04ab1b4bb4ccb49d5565a6f72ad684217a3d2bbee9c5ade4c027a583cb"
+  },
+  {
+    "path": "STATIC_CHECKLIST.json",
+    "bytes": 9147,
+    "sha256": "65c6369fd6dd03fcb349a40793f64acfbf72321f567a0aca11bf11e9766317b0"
+  },
+  {
+    "path": "SUPPLIED_FIXTURES.json",
+    "bytes": 89839,
+    "sha256": "370875d1950c18bfe928a0774f41e7a164fcce5e983d5f83ce481cd958ec599d"
+  },
+  {
+    "path": "common.py",
+    "bytes": 1323,
+    "sha256": "2ca5343731b26fb148245262b1cd425abfb79e2dab3ac14ecf761d61dea57c90"
+  },
+  {
+    "path": "development_guard.py",
+    "bytes": 9604,
+    "sha256": "94e407624105e96cf43ea92678d72407e04aea3ce73213fb23382bb11c3d5d56"
+  },
+  {
+    "path": "direct_child_pidfd.py",
+    "bytes": 11610,
+    "sha256": "400cf4616ad1a24c00ade4ffc7fa78dcc76ea1e0550505c4c5353a5eb8751c8f"
+  },
+  {
+    "path": "integrated_native_adapter.py",
+    "bytes": 9972,
+    "sha256": "1ddd4a31d16e7f1cf95e737f6cc981fb15194512c379fd7d9129ac40dacfef10"
+  },
+  {
+    "path": "integrated_native_effects.py",
+    "bytes": 10451,
+    "sha256": "3715b671b35961cf43c7b440233ec0f544dcae3dd8937bd88edb61b0d5fe002f"
+  },
+  {
+    "path": "ledger.py",
+    "bytes": 9248,
+    "sha256": "109a079b39b4a4e7ff0ae6dbde696709a6c1f8395d11023e69e7481321bf12f8"
+  },
+  {
+    "path": "native_owner_controller.py",
+    "bytes": 51732,
+    "sha256": "61466402509bd2fcf0af84883aaabeac2ba914009af3ae4d57bd6a079d4c2ce9"
+  },
+  {
+    "path": "native_syscalls_factory.py",
+    "bytes": 3490,
+    "sha256": "d51843d5ba8dd0e9838709b5a7ece1beaf7d70d1b29c6fa9bb58c24f51b22cb2"
+  },
+  {
+    "path": "parsers.py",
+    "bytes": 10424,
+    "sha256": "4e5c4287676e0446dc0fc30a3d5aafcc51fc1e4aabb3029fbf03868e8f64c471"
+  },
+  {
+    "path": "pidfd_primitives.py",
+    "bytes": 10249,
+    "sha256": "6426fdd496ae1b24074361b207b5296e146d77d6c68495b5a427053419dda809"
+  },
+  {
+    "path": "pure_candidate_runner.py",
+    "bytes": 39413,
+    "sha256": "37003532b8cc5d1bb537211c0c5f1ca08fa2995f5d84661907cc9f2e975d0a62"
+  },
+  {
+    "path": "recorded_native.py",
+    "bytes": 3498,
+    "sha256": "0d14bb18909b78620b34ead1df949097a6823d6a3cb0d9c3a6b13edd5794e271"
+  },
+  {
+    "path": "runtime_bindings.py",
+    "bytes": 8849,
+    "sha256": "46d75e7489fb1464bc45ba37b89edac025e84a66e536881daaf4c5c559addf79"
+  }
+]

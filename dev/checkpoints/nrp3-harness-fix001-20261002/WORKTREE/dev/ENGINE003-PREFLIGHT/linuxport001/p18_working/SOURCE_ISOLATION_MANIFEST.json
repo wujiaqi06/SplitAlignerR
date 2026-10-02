@@ -1,0 +1,613 @@
+{
+  "changed_files_vs_original_p17_fix001": [
+    "README.md",
+    "SOURCE_ISOLATION_MANIFEST.json",
+    "STATIC_CHECKLIST.json",
+    "native_owner_controller.py",
+    "pure_candidate_runner.py"
+  ],
+  "changed_files_vs_predecessor": [
+    "README.md",
+    "SOURCE_ISOLATION_MANIFEST.json"
+  ],
+  "closeout_scope": "P17-FIX002 closeout documentation and manifest metadata only. Relative to the predecessor p17_fix002 exactly these two files changed; every Python file, SUPPLIED_FIXTURES.json and STATIC_CHECKLIST.json are byte-identical. Relative to the original p17_fix001 baseline, 5 of the 17 files changed and 12 are byte-identical. Both changed-file lists count this manifest itself, which the p17_fix002 list omitted. No extraction definition, AST authority pin, dependency pin, execution rule, forbidden-import rule or native contract was altered by the closeout. Nothing in this source root was imported, compiled or executed.",
+  "complete_source_file_count_including_self": 17,
+  "dependency_order": [
+    "ledger.py",
+    "common.py",
+    "direct_child_pidfd.py",
+    "integrated_native_effects.py",
+    "integrated_native_adapter.py",
+    "native_owner_controller.py"
+  ],
+  "exact_dependency_pins": {
+    "common.py": {
+      "bytes": 1323,
+      "sha256": "2ca5343731b26fb148245262b1cd425abfb79e2dab3ac14ecf761d61dea57c90"
+    },
+    "ledger.py": {
+      "bytes": 9248,
+      "sha256": "109a079b39b4a4e7ff0ae6dbde696709a6c1f8395d11023e69e7481321bf12f8"
+    },
+    "native_syscalls_factory.py": {
+      "bytes": 3490,
+      "sha256": "d51843d5ba8dd0e9838709b5a7ece1beaf7d70d1b29c6fa9bb58c24f51b22cb2"
+    },
+    "parsers.py": {
+      "bytes": 10424,
+      "sha256": "4e5c4287676e0446dc0fc30a3d5aafcc51fc1e4aabb3029fbf03868e8f64c471"
+    },
+    "pidfd_primitives.py": {
+      "bytes": 10249,
+      "sha256": "6426fdd496ae1b24074361b207b5296e146d77d6c68495b5a427053419dda809"
+    }
+  },
+  "execution_rule": "compile only listed exact top-level AST nodes in order; execute no import node and no complete module",
+  "extraction": {
+    "common.py": {
+      "bytes": 1323,
+      "definitions": [
+        {
+          "ast_sha256": "fb4ed7aeeb8bc9bc3121bb4da42ce5bc8a909f33b6ed7324de2bba2a40cc99e2",
+          "kind": "FunctionDef",
+          "line_end": 10,
+          "line_start": 4,
+          "qualified_name": "immutable",
+          "source_bytes": 319,
+          "source_sha256": "4ad028b0ec0ae45dcf725a7b2e049cda4892bd2471930ec6161fc8c1e6e81047"
+        },
+        {
+          "ast_sha256": "1d18cf0520253f517569391e198f0bac0954d4614a752b2b6e5d3acff1e1c17e",
+          "kind": "FunctionDef",
+          "line_end": 18,
+          "line_start": 12,
+          "qualified_name": "materialize",
+          "source_bytes": 198,
+          "source_sha256": "2abcf5d1f1fbe5d86af15c21c926886e1bb1acc5af2017db4923640c44c43d0e"
+        },
+        {
+          "ast_sha256": "47a04437523ac88d075fe6ef485c8ac46660996ba665804578c10cf4ade8aae8",
+          "kind": "FunctionDef",
+          "line_end": 21,
+          "line_start": 20,
+          "qualified_name": "detached",
+          "source_bytes": 62,
+          "source_sha256": "25a4df1637af4e28471a1aff8c70930c3b7ce57b99e6286a263b2a3ab78092aa"
+        },
+        {
+          "ast_sha256": "bde90e113ea2f88a75494b5b4a110920356203edcba42fe141e4e2e95a60b25e",
+          "kind": "FunctionDef",
+          "line_end": 25,
+          "line_start": 23,
+          "qualified_name": "raw_return",
+          "source_bytes": 156,
+          "source_sha256": "581431be21b41c97603350cf38b78812c212fe2acdb29ce787235040e3d664aa"
+        },
+        {
+          "ast_sha256": "d01216ba1caf92f4d01cfc9c039e460c01e86d81554d42b461c3a215152a75bc",
+          "kind": "FunctionDef",
+          "line_end": 33,
+          "line_start": 27,
+          "qualified_name": "raw_exception",
+          "source_bytes": 468,
+          "source_sha256": "16a65e246f575ebe9cff3c3451128f9f9ac73c983b6f5f7d6ce5ae8d80d581a7"
+        }
+      ],
+      "file": "common.py",
+      "sha256": "2ca5343731b26fb148245262b1cd425abfb79e2dab3ac14ecf761d61dea57c90"
+    },
+    "direct_child_pidfd.py": {
+      "bytes": 11610,
+      "definitions": [
+        {
+          "ast_sha256": "c4dbd9db55ec7fee6d44aa1c5eaee20d19f5d16f64932314a628467bb5653f40",
+          "kind": "Assign",
+          "line_end": 19,
+          "line_start": 16,
+          "qualified_name": "ACQUISITION_PRECONDITIONS",
+          "source_bytes": 176,
+          "source_sha256": "628b05122cea9d820776bfce2175b953ea0db94d552bad5c6a9360a0b5b538bd"
+        },
+        {
+          "ast_sha256": "e40a507315b515b4f264b1a2917e159965f7dcc2d595ffc96db16217fd4122c6",
+          "kind": "Assign",
+          "line_end": 20,
+          "line_start": 20,
+          "qualified_name": "DIRECT_CHILD_SCOPE",
+          "source_bytes": 76,
+          "source_sha256": "13681179fb49f8f84ced19f1f4887c915d671cbb6b0e59f8d7f808d420fa1872"
+        },
+        {
+          "ast_sha256": "109a7e5aff757159f91aa5bef2d5c75129792253dff2e10cb8d61d012aa5ee88",
+          "kind": "ClassDef",
+          "line_end": 36,
+          "line_start": 23,
+          "qualified_name": "CapabilityAuthority",
+          "source_bytes": 441,
+          "source_sha256": "e2226932d666134e30ecd2a48ca185d767afdd7fa98681ce022a9eb38778a7a8"
+        },
+        {
+          "ast_sha256": "d119af6384d9f3cd3a8c7c4ff3384840feefe97c9ed092d94820ce3fee178dfb",
+          "kind": "ClassDef",
+          "line_end": 94,
+          "line_start": 39,
+          "qualified_name": "_OpaqueOneUseCapability",
+          "source_bytes": 2068,
+          "source_sha256": "48fe2a2713af75ae90403a2882af48c71d05e6609fb96db1faf33dcb32078e10"
+        },
+        {
+          "ast_sha256": "46945d234c8389752fe7bda9a24169774337d359bf773611d12d9cc901269a96",
+          "kind": "ClassDef",
+          "line_end": 98,
+          "line_start": 97,
+          "qualified_name": "PreOpenPrepareCapability",
+          "source_bytes": 66,
+          "source_sha256": "60f2043354ef9fbf5f62f2511cfe8aedb6b2a3b502f36b620eb31965d9acb399"
+        },
+        {
+          "ast_sha256": "364ea00a38e8592d6af3fd0053179ed84f5893b304e0304c7935eeae3ae122b0",
+          "kind": "ClassDef",
+          "line_end": 102,
+          "line_start": 101,
+          "qualified_name": "RawCaptureCapability",
+          "source_bytes": 62,
+          "source_sha256": "b14b20540c8e757d29c24cf5317f46692b2d943be397bf047436eb99a697ed6d"
+        },
+        {
+          "ast_sha256": "eabbcfc15dd391cd742725de7ef163033065c3f8f12e0ea7be4e91da627f19f6",
+          "kind": "ClassDef",
+          "line_end": 106,
+          "line_start": 105,
+          "qualified_name": "PostRegisterProofCapability",
+          "source_bytes": 69,
+          "source_sha256": "92f180881dd85170be943d2a83175211becc1f2293643bc0b2e916d73b1326b2"
+        },
+        {
+          "ast_sha256": "b228d43031cf06ac7c79c2d85ae2b4f05d046cd4350bde8dc20b5afd04b73066",
+          "kind": "ClassDef",
+          "line_end": 110,
+          "line_start": 109,
+          "qualified_name": "NonOwningViewCapability",
+          "source_bytes": 65,
+          "source_sha256": "f26c23f97213a925b2aa22c8c2ede5f83ac93ac04d96faa63a6d4fb3e0c9d5ae"
+        },
+        {
+          "ast_sha256": "7d4c8aaad587a1f842016a2ec269dc4d01e9ff4bbfc223b43bde24271190bc6b",
+          "kind": "ClassDef",
+          "line_end": 133,
+          "line_start": 113,
+          "qualified_name": "PreparedDirectChild",
+          "source_bytes": 918,
+          "source_sha256": "e0b8ebc83d1ae3e8e95f3a57046a3dce15e90368ddf2d29821fe11093c04a296"
+        },
+        {
+          "ast_sha256": "e355546a56598075c2261fff558df70fe68174a530efabfb054629c7d2ffac94",
+          "kind": "ClassDef",
+          "line_end": 158,
+          "line_start": 136,
+          "qualified_name": "DirectChildProof",
+          "source_bytes": 968,
+          "source_sha256": "42d2961d682d5df1d45c7bd5bce15ebcb57536daf1344aa55451defdb6ce67e6"
+        },
+        {
+          "ast_sha256": "d5950923ff3065505a8143984622ee8fe127d7bad0bfeae13cc38549b892ed08",
+          "kind": "ClassDef",
+          "line_end": 184,
+          "line_start": 161,
+          "qualified_name": "DirectChildPidfdView",
+          "source_bytes": 930,
+          "source_sha256": "a951a738823a4462287034d198b6df35b07a4b4665567c6a543d9286fa08aedb"
+        }
+      ],
+      "file": "direct_child_pidfd.py",
+      "sha256": "400cf4616ad1a24c00ade4ffc7fa78dcc76ea1e0550505c4c5353a5eb8751c8f"
+    },
+    "integrated_native_adapter.py": {
+      "bytes": 9972,
+      "definitions": [
+        {
+          "ast_sha256": "4b70085071f1443641d606f443296dfb4f86e3e63b22a0a12341470440763501",
+          "kind": "Assign",
+          "line_end": 7,
+          "line_start": 7,
+          "qualified_name": "DIRECT_CHILD_POLICY",
+          "source_bytes": 43,
+          "source_sha256": "696d4c8e1c5c568d175eb8e79d543878c59e293993f6d64af13a6abf6e718ca5"
+        },
+        {
+          "ast_sha256": "b8042995bd767f86682eef9e810ddbf17465884b4049aabdef74bbf175c9f215",
+          "kind": "FunctionDef",
+          "line_end": 62,
+          "line_start": 10,
+          "qualified_name": "normalize_native",
+          "source_bytes": 2654,
+          "source_sha256": "c49d14faf96b7eeb20f205168235d2969e577a93363a87d0d860af295804bb40"
+        },
+        {
+          "ast_sha256": "43550af633f6de3b507d17abf091bac82089f082ab5b510820d9cb4eaaa73a41",
+          "kind": "ClassDef",
+          "line_end": 170,
+          "line_start": 65,
+          "qualified_name": "PureRollbackAdapter",
+          "source_bytes": 5022,
+          "source_sha256": "7486b7401ff4206fe93c18a98f94f3cc9a3e4ca78584fe1014612c9d69e62b4d"
+        }
+      ],
+      "file": "integrated_native_adapter.py",
+      "sha256": "1ddd4a31d16e7f1cf95e737f6cc981fb15194512c379fd7d9129ac40dacfef10"
+    },
+    "integrated_native_effects.py": {
+      "bytes": 10451,
+      "definitions": [
+        {
+          "ast_sha256": "6ace748e4132b1f35e2d7d49f2b6d3a85e1b3bc88d6c7a237aeaf9c52730cf35",
+          "kind": "ClassDef",
+          "line_end": 56,
+          "line_start": 7,
+          "qualified_name": "RawDirectChildCustody",
+          "source_bytes": 2303,
+          "source_sha256": "326562e552df995ac77795ea9d48493d539dfd0b155352c7ab51e99896caa686"
+        },
+        {
+          "ast_sha256": "94a3b2866bf051edf2024a2b1b90fed18448c28ad7ebf0e64a7596f5ab6835d2",
+          "kind": "ClassDef",
+          "line_end": 62,
+          "line_start": 59,
+          "qualified_name": "RegisteredDirectChildCustody",
+          "source_bytes": 149,
+          "source_sha256": "4a05996d237cdc899e200238f6203aa807262bf061fa5a9d2da468033a43b27d"
+        },
+        {
+          "ast_sha256": "33d47315a5ab486c03a6ecfafa05d5d8e04d11d89b13c0fe1586dc4c08ecae67",
+          "kind": "ClassDef",
+          "line_end": 113,
+          "line_start": 65,
+          "qualified_name": "PureCustodyTransitions",
+          "source_bytes": 2628,
+          "source_sha256": "53ddca2e3be8791e44ca2347667cc99adb46ffb10cca2900595bd47de4b5c4e4"
+        }
+      ],
+      "file": "integrated_native_effects.py",
+      "sha256": "3715b671b35961cf43c7b440233ec0f544dcae3dd8937bd88edb61b0d5fe002f"
+    },
+    "ledger.py": {
+      "bytes": 9248,
+      "definitions": [
+        {
+          "ast_sha256": "de53eaca8e51c2f4947e256394a33238a36e1fc4e9d2e7b37675b353ec0ba2c6",
+          "kind": "Assign",
+          "line_end": 2,
+          "line_start": 2,
+          "qualified_name": "MAX_RESOURCES",
+          "source_bytes": 18,
+          "source_sha256": "32ea5c8c1946fe8258e40406a35b9e7a50b6e04a40c3280c9dba747521859696"
+        },
+        {
+          "ast_sha256": "ff95b0177fe7732f879d86404019cd9c00dbf77c501927317bd866a8616dc300",
+          "kind": "Assign",
+          "line_end": 3,
+          "line_start": 3,
+          "qualified_name": "MAX_EVENTS",
+          "source_bytes": 16,
+          "source_sha256": "a4fda80d1aebd14682147eb3c7d7cda1671fdfbf1da8f9add79f71298860d96f"
+        },
+        {
+          "ast_sha256": "8d03e63f72d20a2d2dbb9fabd8d0353f4a79aeb1714a7b3113ed31518589fb19",
+          "kind": "Assign",
+          "line_end": 4,
+          "line_start": 4,
+          "qualified_name": "LABEL_CHARS",
+          "source_bytes": 83,
+          "source_sha256": "1a0f8cae7c6c69461d6b655f8d4542d2cc67a71a668e8f21cc2ce558594a1ea1"
+        },
+        {
+          "ast_sha256": "f3e2033ee65c45a22fea9276d5d262e1a5cfcb47719471baf954da3c98499657",
+          "kind": "Assign",
+          "line_end": 6,
+          "line_start": 5,
+          "qualified_name": "TOKEN_FIELDS",
+          "source_bytes": 147,
+          "source_sha256": "ce96b44c86f71e4184f963dc86f7dfe64571618b96424ad1c19abc3ffe080d8c"
+        },
+        {
+          "ast_sha256": "c51cc81653dcc8b8142fda91c491b5bd12eebfec922a0ce7ead1b68fa82b2afb",
+          "kind": "Assign",
+          "line_end": 8,
+          "line_start": 7,
+          "qualified_name": "STATES",
+          "source_bytes": 110,
+          "source_sha256": "38f11cabced3144638afa1f2bfd2813ef7bdb23dcb7edc54577daa2b5198e11a"
+        },
+        {
+          "ast_sha256": "e0e0bd4145bbe36a8012805af20c897e5af78028fdfde4bc924f5cf5ce08eba5",
+          "kind": "ClassDef",
+          "line_end": 13,
+          "line_start": 10,
+          "qualified_name": "LedgerError",
+          "source_bytes": 117,
+          "source_sha256": "b8276cdb38e6f57e2cdd45cf64dd342f71f3da8f9016910cc309db02fde153e4"
+        },
+        {
+          "ast_sha256": "802df01a6fc38674699a764693a0fb123d305f80a49169be4365a6d1caea039e",
+          "kind": "FunctionDef",
+          "line_end": 17,
+          "line_start": 15,
+          "qualified_name": "require",
+          "source_bytes": 70,
+          "source_sha256": "4e257b59c83d3146b11b4d5dfff30581a101e207c51a4e9af1513c5c76a3bac4"
+        },
+        {
+          "ast_sha256": "382a115ed0f5ffbb2714af45ebfeb36308466fb80f1a32bd4a13c510c3830140",
+          "kind": "FunctionDef",
+          "line_end": 20,
+          "line_start": 19,
+          "qualified_name": "fields",
+          "source_bytes": 106,
+          "source_sha256": "42f72643c0e0b0a0688b97cddc2b3def29109fb0146acceb15da087d885e188e"
+        },
+        {
+          "ast_sha256": "bd6f298fa0cb4c1a33be5df6fb82dc165edd9c68223761747c942f2115671785",
+          "kind": "FunctionDef",
+          "line_end": 24,
+          "line_start": 22,
+          "qualified_name": "label",
+          "source_bytes": 169,
+          "source_sha256": "189c87afb2904b89f21005181611cd761dbba25b39c6fee3f8c0b5c0961ac9b7"
+        },
+        {
+          "ast_sha256": "a5a842afee0a7680b1bd931c6faed2e778626fd9263eed8c71eda7b3326d34d4",
+          "kind": "FunctionDef",
+          "line_end": 28,
+          "line_start": 26,
+          "qualified_name": "integer",
+          "source_bytes": 139,
+          "source_sha256": "d01c3b8367bd9cccd3d54664845ab622a198ece322141e75dcda1108dac0aadb"
+        },
+        {
+          "ast_sha256": "d5380db101df57b582892564d4d7c9abf03da5c33cbe01f4adff3c5dfb30f772",
+          "kind": "FunctionDef",
+          "line_end": 32,
+          "line_start": 30,
+          "qualified_name": "digest",
+          "source_bytes": 149,
+          "source_sha256": "742ad5db027b62e518f84d95a34995facb779b4d824d7db6bad331af6872f0c5"
+        },
+        {
+          "ast_sha256": "bf025fa90949f9fdd6b839c8d138d73d5bc09aa8f8634b5ba98ba3d623ebc7ce",
+          "kind": "FunctionDef",
+          "line_end": 36,
+          "line_start": 34,
+          "qualified_name": "freeze",
+          "source_bytes": 193,
+          "source_sha256": "d63ae0bc3eb72a4fdc1c6188de1fb1b084836d815966ca46172c2ca5d6b06f2c"
+        },
+        {
+          "ast_sha256": "619cef502c217e64bf6a3c58446253f86530365300e58dee1447c79847a6d98a",
+          "kind": "FunctionDef",
+          "line_end": 39,
+          "line_start": 38,
+          "qualified_name": "thaw",
+          "source_bytes": 86,
+          "source_sha256": "1e9fe113fc974c75240d6771efa7808191607eaeb28704cff46ded9278569bbc"
+        },
+        {
+          "ast_sha256": "50f7283bf9f6591e6a602da609281d2ce8313a3ec52db73f8d6ef148f9d0d4c9",
+          "kind": "FunctionDef",
+          "line_end": 46,
+          "line_start": 41,
+          "qualified_name": "token_types",
+          "source_bytes": 289,
+          "source_sha256": "1ddcad91ca2fe9e5b1de121cdcadb35f279080dca01adf51b8aa268a6b491657"
+        },
+        {
+          "ast_sha256": "257c40e6065267ca8c0dd1977b9fd37700b44994b3ee479edc3af69b74042c4b",
+          "kind": "FunctionDef",
+          "line_end": 58,
+          "line_start": 48,
+          "qualified_name": "outcome_types",
+          "source_bytes": 712,
+          "source_sha256": "0f46391c7ecd3a6b0d094081614d843e0844e7349f75787aec434a3d97f169a6"
+        },
+        {
+          "ast_sha256": "5991e963f621d7c17f48494aa91e9063862a7a0c6ca3a598ad3c0a20d436c126",
+          "kind": "FunctionDef",
+          "line_end": 73,
+          "line_start": 60,
+          "qualified_name": "event_types",
+          "source_bytes": 668,
+          "source_sha256": "740efd944bf82734ee2b1647242f809d6340dfe740d1faf3ed3eee43ee01658b"
+        },
+        {
+          "ast_sha256": "b2e028b2754743650e1dec7191586ec67dbe4771d56ccc21b69a3f97d76f9cc7",
+          "kind": "ClassDef",
+          "line_end": 176,
+          "line_start": 76,
+          "qualified_name": "Ledger",
+          "source_bytes": 5999,
+          "source_sha256": "c92ce6b6b898b124d2693b208b5f065818ad03fda41672cd22a1a70fe7e7542e"
+        }
+      ],
+      "file": "ledger.py",
+      "sha256": "109a079b39b4a4e7ff0ae6dbde696709a6c1f8395d11023e69e7481321bf12f8"
+    },
+    "native_owner_controller.py": {
+      "bytes": 48214,
+      "definitions": [
+        {
+          "ast_sha256": "95fcd746209560faf3dd8d398109f15b4e3782d05a4acd917f62af6c2568a4c8",
+          "kind": "Assign",
+          "line_end": 28,
+          "line_start": 28,
+          "qualified_name": "AUTHENTIC_CAUGHT_EXCEPTION",
+          "source_bytes": 58,
+          "source_sha256": "74ec2e2f1697de7d30b243772e1ab9b8840f93db6464404cd4663f8dfdc02c42"
+        },
+        {
+          "ast_sha256": "00eb5f0b8b9db505b0a0f8908eee24d1eaff1d303a58ebcc86574d2a2e8196c1",
+          "kind": "Assign",
+          "line_end": 29,
+          "line_start": 29,
+          "qualified_name": "SUPPLIED_STATIC_REJECTION",
+          "source_bytes": 56,
+          "source_sha256": "dad5f1cba3122ec6fa7df8dd3d8b7741f795323e75dbec2340cb3272a96175c5"
+        },
+        {
+          "ast_sha256": "3e716278b698b5ad08af6b5178071dd7e3d40a3053e1abd58a493a281ec5c1ef",
+          "kind": "ClassDef",
+          "line_end": 98,
+          "line_start": 32,
+          "qualified_name": "PrimaryFailureRecord",
+          "source_bytes": 3366,
+          "source_sha256": "7dd79cfd8e266ea16fadc30d21402d4aeb02c90166ba606257fc7f45fb8a6113"
+        },
+        {
+          "ast_sha256": "ac9f6384af9e07bccd3f7b66fcfbac6697142c7d6429c738e02ee6d4799c6933",
+          "kind": "ClassDef",
+          "line_end": 817,
+          "line_start": 101,
+          "qualified_name": "PureDirectChildController",
+          "source_bytes": 35519,
+          "source_sha256": "4abf1130a8d206982ac63b63fe60b566a67dbdb0a0d8d64df3ca760d7564dd7e"
+        }
+      ],
+      "file": "native_owner_controller.py",
+      "sha256": "414eff97d2779ce0a41bc4772e44cf1bcbc0e98453f2fd27df28c527f357484c"
+    }
+  },
+  "forbidden_imports_or_constructions": [
+    "all complete P17-FIX001 modules",
+    "pidfd_primitives",
+    "parsers",
+    "native_syscalls_factory",
+    "NativeSyscalls",
+    "RuntimeBindings",
+    "IntegratedNativeEffects",
+    "DevelopmentGuard",
+    "PidfdHandle",
+    "test child or native resource"
+  ],
+  "native_identity_validity": "declared supplied premise only",
+  "original_baseline_manifest_sha256": "fe348e930736b04e2cfaf8a336e08accc5712fe0f5b1bf27eba69ee6e8a86719",
+  "original_baseline_source_root": "/home/jiaqi/Documents/work/SplitAligner/SplitAlignerR/ENGINE003_LINUXPORT001_development_20260908_JST/source/dev/ENGINE003-PREFLIGHT/linuxport001/p17_fix001",
+  "predecessor_manifest_sha256": "e1b270e6bdb4268ab9fb83006efb116ccd672bcd4844a0b4db2f026cda2a0da4",
+  "predecessor_source_root": "/home/jiaqi/Documents/work/SplitAligner/SplitAlignerR/ENGINE003_LINUXPORT001_development_20260908_JST/source/dev/ENGINE003-PREFLIGHT/linuxport001/p17_fix002",
+  "recorded_utc": "2026-09-11T03:07:06.625677+00:00",
+  "schema": "ENGINE003_LINUXPORT001_P17_FIX002_CLOSEOUT001_SOURCE_ISOLATION_MANIFEST_V1",
+  "self_pin_rule": "each attempt PRELOAD_FREEZE pins this manifest before invocation",
+  "source_file_count_excluding_self": 16,
+  "source_files": [
+    {
+      "bytes": 5274,
+      "path": "README.md",
+      "sha256": "bf20c629c0cfbe1d87cddfc0fe72d5452b4fa94cf947a46b011df9d7ca5195e3"
+    },
+    {
+      "bytes": 9147,
+      "path": "STATIC_CHECKLIST.json",
+      "sha256": "65c6369fd6dd03fcb349a40793f64acfbf72321f567a0aca11bf11e9766317b0"
+    },
+    {
+      "bytes": 89839,
+      "path": "SUPPLIED_FIXTURES.json",
+      "sha256": "370875d1950c18bfe928a0774f41e7a164fcce5e983d5f83ce481cd958ec599d"
+    },
+    {
+      "bytes": 1323,
+      "path": "common.py",
+      "sha256": "2ca5343731b26fb148245262b1cd425abfb79e2dab3ac14ecf761d61dea57c90"
+    },
+    {
+      "bytes": 9398,
+      "path": "development_guard.py",
+      "sha256": "a287c9cebc7ced7dd301f33cf3e2f595690c0859aa4315163a56026eb1e5992e"
+    },
+    {
+      "bytes": 11610,
+      "path": "direct_child_pidfd.py",
+      "sha256": "400cf4616ad1a24c00ade4ffc7fa78dcc76ea1e0550505c4c5353a5eb8751c8f"
+    },
+    {
+      "bytes": 9972,
+      "path": "integrated_native_adapter.py",
+      "sha256": "1ddd4a31d16e7f1cf95e737f6cc981fb15194512c379fd7d9129ac40dacfef10"
+    },
+    {
+      "bytes": 10451,
+      "path": "integrated_native_effects.py",
+      "sha256": "3715b671b35961cf43c7b440233ec0f544dcae3dd8937bd88edb61b0d5fe002f"
+    },
+    {
+      "bytes": 9248,
+      "path": "ledger.py",
+      "sha256": "109a079b39b4a4e7ff0ae6dbde696709a6c1f8395d11023e69e7481321bf12f8"
+    },
+    {
+      "bytes": 48214,
+      "path": "native_owner_controller.py",
+      "sha256": "414eff97d2779ce0a41bc4772e44cf1bcbc0e98453f2fd27df28c527f357484c"
+    },
+    {
+      "bytes": 3490,
+      "path": "native_syscalls_factory.py",
+      "sha256": "d51843d5ba8dd0e9838709b5a7ece1beaf7d70d1b29c6fa9bb58c24f51b22cb2"
+    },
+    {
+      "bytes": 10424,
+      "path": "parsers.py",
+      "sha256": "4e5c4287676e0446dc0fc30a3d5aafcc51fc1e4aabb3029fbf03868e8f64c471"
+    },
+    {
+      "bytes": 10249,
+      "path": "pidfd_primitives.py",
+      "sha256": "6426fdd496ae1b24074361b207b5296e146d77d6c68495b5a427053419dda809"
+    },
+    {
+      "bytes": 39413,
+      "path": "pure_candidate_runner.py",
+      "sha256": "37003532b8cc5d1bb537211c0c5f1ca08fa2995f5d84661907cc9f2e975d0a62"
+    },
+    {
+      "bytes": 3498,
+      "path": "recorded_native.py",
+      "sha256": "0d14bb18909b78620b34ead1df949097a6823d6a3cb0d9c3a6b13edd5794e271"
+    },
+    {
+      "bytes": 8849,
+      "path": "runtime_bindings.py",
+      "sha256": "46d75e7489fb1464bc45ba37b89edac025e84a66e536881daaf4c5c559addf79"
+    }
+  ],
+  "source_root": "/home/jiaqi/Documents/work/SplitAligner/SplitAlignerR/ENGINE003_LINUXPORT001_development_20260908_JST/source/dev/ENGINE003-PREFLIGHT/linuxport001/p17_fix002_closeout001",
+  "status": "FROZEN_AFTER_F01_SOURCE_REPAIR_AND_CLOSEOUT_DOCUMENTATION_CORRECTION_BEFORE_ANY_EXECUTION",
+  "unchanged_files_vs_original_p17_fix001": [
+    "SUPPLIED_FIXTURES.json",
+    "common.py",
+    "development_guard.py",
+    "direct_child_pidfd.py",
+    "integrated_native_adapter.py",
+    "integrated_native_effects.py",
+    "ledger.py",
+    "native_syscalls_factory.py",
+    "parsers.py",
+    "pidfd_primitives.py",
+    "recorded_native.py",
+    "runtime_bindings.py"
+  ],
+  "unchanged_files_vs_predecessor": [
+    "STATIC_CHECKLIST.json",
+    "SUPPLIED_FIXTURES.json",
+    "common.py",
+    "development_guard.py",
+    "direct_child_pidfd.py",
+    "integrated_native_adapter.py",
+    "integrated_native_effects.py",
+    "ledger.py",
+    "native_owner_controller.py",
+    "native_syscalls_factory.py",
+    "parsers.py",
+    "pidfd_primitives.py",
+    "pure_candidate_runner.py",
+    "recorded_native.py",
+    "runtime_bindings.py"
+  ]
+}

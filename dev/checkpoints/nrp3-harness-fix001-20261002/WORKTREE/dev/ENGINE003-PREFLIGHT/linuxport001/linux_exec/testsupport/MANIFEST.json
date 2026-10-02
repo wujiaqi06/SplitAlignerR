@@ -1,0 +1,37 @@
+{
+  "files": {
+    "SOURCE_PINS.json": {
+      "bytes": 2475,
+      "copied_from": "DEV_BUILD001_OPUS55_20260924/INPUTS/SOURCE_PINS.json",
+      "sha256": "4bda4bea6b6efeb5c615a7675f7cc65cdab0228f2b95440d946e95a43f9499ad"
+    },
+    "baseline_7a90d33/stage_b_controller.py": {
+      "bytes": 89688,
+      "repo_path": "dev/ENGINE003-PREFLIGHT/exec_preflight/stage_b_controller.py",
+      "sha256": "841343124265a3934abee19856cf9218190968a6e309b5d6e28d5d9ccc844c51"
+    },
+    "dev005/linux_proc_backend.py": {
+      "bytes": 26691,
+      "copied_from": "DEV_REPAIR006 stage INPUTS (DEV005 deliverable as reviewed by Pro)",
+      "sha256": "e326397673065baf78669a38c429816cac760a5f2896ff471c1e0ab0ac034b45"
+    },
+    "dev005/stage_b_controller.py": {
+      "bytes": 92612,
+      "copied_from": "DEV_REPAIR006 stage INPUTS (DEV005 deliverable as reviewed by Pro)",
+      "sha256": "a9b31681041ed3fc2cf89e670c04ce42c1cd06e4d6964abe4c10bcd3906aa3d5"
+    },
+    "dev005/termination.py": {
+      "bytes": 4396,
+      "copied_from": "DEV_REPAIR006 stage INPUTS (DEV005 deliverable as reviewed by Pro)",
+      "sha256": "fa4fc042e41ffc8bad8449db472ccf5bc5b904da0f3e2c5c6f54c3772fc05b5f"
+    },
+    "dev006/termination.py": {
+      "bytes": 17284,
+      "copied_from": "DEV_REPAIR006 delivered worktree bytes (reviewed by Astra; BEFORE_SOURCE_PINS of DEV_REPAIR007)",
+      "sha256": "99df683e50b06035faf53e12efaf1737210633d5496e7709117e01dc8431b9bd"
+    }
+  },
+  "schema": "DEV006/PortableBaselineManifest/v1",
+  "source_commit": "7a90d33675f0001df93bc6a8acbcdc25e17fdea1",
+  "source_tree": "2452d287edd2db419f3362d6f5347439a29a2464"
+}

@@ -1,0 +1,2696 @@
+{
+  "declared_totals": {
+    "accepted": 22,
+    "cases": 12,
+    "inert_callbacks": 7,
+    "ledgers": 12,
+    "public_submissions": 29,
+    "rejected": 7,
+    "rejection_reasons": {
+      "DUPLICATE_EVENT_ID": 2,
+      "FD_RANGE": 5
+    },
+    "submissions": {
+      "BEGIN": 9,
+      "COMPLETE": 4,
+      "REGISTER": 16
+    }
+  },
+  "hold_cases": [
+    {
+      "blocked_phase": "PROOF_AND_VIEW",
+      "case_id": "H01_EXTERNAL_BEFORE_PROOF",
+      "config": {
+        "owner_id": "owner.H01",
+        "run_id": "P17FIX001.H01",
+        "sources": [
+          {
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source_id": "future.direct_child.provider"
+          }
+        ]
+      },
+      "expected": {
+        "controller_confirmed": false,
+        "inert_callbacks": 0,
+        "public_submissions": 2,
+        "sticky_holds": [
+          "EXTERNAL_PUBLIC_SUBMISSION",
+          "STOP_FURTHER_EFFECTS"
+        ],
+        "stop": true
+      },
+      "external": {
+        "reply": {
+          "accepted": false,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 62,
+            "submission_limit": 64,
+            "submission_slots": 2
+          },
+          "reason": "FD_RANGE",
+          "submission_slot": 2
+        },
+        "request": {
+          "event_id": "H01.external.invalid",
+          "fd": -1,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H01",
+            "generation": 1,
+            "owner_id": "owner.H01",
+            "resource_id": "pidfd.H01",
+            "run_id": "P17FIX001.H01",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "fixture_metadata": {
+        "all_identities_supplied": true,
+        "captured_fd": 41,
+        "pid": 42001
+      },
+      "register": {
+        "reply": {
+          "accepted": true,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 63,
+            "submission_limit": 64,
+            "submission_slots": 1
+          },
+          "reason": null,
+          "submission_slot": 1
+        },
+        "request": {
+          "event_id": "H01.register.1",
+          "fd": 41,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H01",
+            "generation": 1,
+            "owner_id": "owner.H01",
+            "resource_id": "pidfd.H01",
+            "run_id": "P17FIX001.H01",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "token": {
+        "acquisition_id": "acq.H01",
+        "generation": 1,
+        "owner_id": "owner.H01",
+        "resource_id": "pidfd.H01",
+        "run_id": "P17FIX001.H01",
+        "source_id": "future.direct_child.provider",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "blocked_phase": "BEGIN",
+      "case_id": "H02_EXTERNAL_BEFORE_BEGIN",
+      "config": {
+        "owner_id": "owner.H02",
+        "run_id": "P17FIX001.H02",
+        "sources": [
+          {
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source_id": "future.direct_child.provider"
+          }
+        ]
+      },
+      "expected": {
+        "controller_confirmed": false,
+        "inert_callbacks": 0,
+        "public_submissions": 2,
+        "sticky_holds": [
+          "EXTERNAL_PUBLIC_SUBMISSION",
+          "STOP_FURTHER_EFFECTS"
+        ],
+        "stop": true
+      },
+      "external": {
+        "reply": {
+          "accepted": false,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 62,
+            "submission_limit": 64,
+            "submission_slots": 2
+          },
+          "reason": "FD_RANGE",
+          "submission_slot": 2
+        },
+        "request": {
+          "event_id": "H02.external.invalid",
+          "fd": -1,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H02",
+            "generation": 1,
+            "owner_id": "owner.H02",
+            "resource_id": "pidfd.H02",
+            "run_id": "P17FIX001.H02",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "fixture_metadata": {
+        "all_identities_supplied": true,
+        "captured_fd": 41,
+        "pid": 42002
+      },
+      "register": {
+        "reply": {
+          "accepted": true,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 63,
+            "submission_limit": 64,
+            "submission_slots": 1
+          },
+          "reason": null,
+          "submission_slot": 1
+        },
+        "request": {
+          "event_id": "H02.register.1",
+          "fd": 41,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H02",
+            "generation": 1,
+            "owner_id": "owner.H02",
+            "resource_id": "pidfd.H02",
+            "run_id": "P17FIX001.H02",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "token": {
+        "acquisition_id": "acq.H02",
+        "generation": 1,
+        "owner_id": "owner.H02",
+        "resource_id": "pidfd.H02",
+        "run_id": "P17FIX001.H02",
+        "source_id": "future.direct_child.provider",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "begin": {
+        "reply": {
+          "accepted": true,
+          "action": {
+            "attempt_id": "H03.attempt.1",
+            "fd": 41,
+            "kind": "SIMULATED_CLOSE_ONCE",
+            "source_event_id": "H03.begin.1",
+            "token": {
+              "acquisition_id": "acq.H03",
+              "generation": 1,
+              "owner_id": "owner.H03",
+              "resource_id": "pidfd.H03",
+              "run_id": "P17FIX001.H03",
+              "source_id": "future.direct_child.provider",
+              "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          },
+          "admission": {
+            "remaining_submission_slots": 62,
+            "submission_limit": 64,
+            "submission_slots": 2
+          },
+          "reason": null,
+          "submission_slot": 2
+        },
+        "request": {
+          "attempt_id": "H03.attempt.1",
+          "event_id": "H03.begin.1",
+          "kind": "BEGIN",
+          "token": {
+            "acquisition_id": "acq.H03",
+            "generation": 1,
+            "owner_id": "owner.H03",
+            "resource_id": "pidfd.H03",
+            "run_id": "P17FIX001.H03",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "blocked_phase": "CALLBACK",
+      "case_id": "H03_EXTERNAL_BEFORE_CALLBACK",
+      "config": {
+        "owner_id": "owner.H03",
+        "run_id": "P17FIX001.H03",
+        "sources": [
+          {
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source_id": "future.direct_child.provider"
+          }
+        ]
+      },
+      "expected": {
+        "controller_confirmed": false,
+        "inert_callbacks": 0,
+        "public_submissions": 3,
+        "sticky_holds": [
+          "EXTERNAL_PUBLIC_SUBMISSION",
+          "STOP_FURTHER_EFFECTS"
+        ],
+        "stop": true
+      },
+      "external": {
+        "reply": {
+          "accepted": false,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 61,
+            "submission_limit": 64,
+            "submission_slots": 3
+          },
+          "reason": "FD_RANGE",
+          "submission_slot": 3
+        },
+        "request": {
+          "event_id": "H03.external.invalid",
+          "fd": -1,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H03",
+            "generation": 1,
+            "owner_id": "owner.H03",
+            "resource_id": "pidfd.H03",
+            "run_id": "P17FIX001.H03",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "fixture_metadata": {
+        "all_identities_supplied": true,
+        "captured_fd": 41,
+        "pid": 42003
+      },
+      "register": {
+        "reply": {
+          "accepted": true,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 63,
+            "submission_limit": 64,
+            "submission_slots": 1
+          },
+          "reason": null,
+          "submission_slot": 1
+        },
+        "request": {
+          "event_id": "H03.register.1",
+          "fd": 41,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H03",
+            "generation": 1,
+            "owner_id": "owner.H03",
+            "resource_id": "pidfd.H03",
+            "run_id": "P17FIX001.H03",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "token": {
+        "acquisition_id": "acq.H03",
+        "generation": 1,
+        "owner_id": "owner.H03",
+        "resource_id": "pidfd.H03",
+        "run_id": "P17FIX001.H03",
+        "source_id": "future.direct_child.provider",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "begin": {
+        "reply": {
+          "accepted": true,
+          "action": {
+            "attempt_id": "H04.attempt.1",
+            "fd": 41,
+            "kind": "SIMULATED_CLOSE_ONCE",
+            "source_event_id": "H04.begin.1",
+            "token": {
+              "acquisition_id": "acq.H04",
+              "generation": 1,
+              "owner_id": "owner.H04",
+              "resource_id": "pidfd.H04",
+              "run_id": "P17FIX001.H04",
+              "source_id": "future.direct_child.provider",
+              "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          },
+          "admission": {
+            "remaining_submission_slots": 62,
+            "submission_limit": 64,
+            "submission_slots": 2
+          },
+          "reason": null,
+          "submission_slot": 2
+        },
+        "request": {
+          "attempt_id": "H04.attempt.1",
+          "event_id": "H04.begin.1",
+          "kind": "BEGIN",
+          "token": {
+            "acquisition_id": "acq.H04",
+            "generation": 1,
+            "owner_id": "owner.H04",
+            "resource_id": "pidfd.H04",
+            "run_id": "P17FIX001.H04",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "blocked_phase": "COMPLETE",
+      "case_id": "H04_EXTERNAL_BEFORE_COMPLETE",
+      "config": {
+        "owner_id": "owner.H04",
+        "run_id": "P17FIX001.H04",
+        "sources": [
+          {
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source_id": "future.direct_child.provider"
+          }
+        ]
+      },
+      "expected": {
+        "controller_confirmed": false,
+        "inert_callbacks": 1,
+        "public_submissions": 3,
+        "sticky_holds": [
+          "EXTERNAL_PUBLIC_SUBMISSION",
+          "STOP_FURTHER_EFFECTS"
+        ],
+        "stop": true
+      },
+      "external": {
+        "reply": {
+          "accepted": false,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 61,
+            "submission_limit": 64,
+            "submission_slots": 3
+          },
+          "reason": "FD_RANGE",
+          "submission_slot": 3
+        },
+        "request": {
+          "event_id": "H04.external.invalid",
+          "fd": -1,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H04",
+            "generation": 1,
+            "owner_id": "owner.H04",
+            "resource_id": "pidfd.H04",
+            "run_id": "P17FIX001.H04",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "fixture_metadata": {
+        "all_identities_supplied": true,
+        "captured_fd": 41,
+        "pid": 42004
+      },
+      "register": {
+        "reply": {
+          "accepted": true,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 63,
+            "submission_limit": 64,
+            "submission_slots": 1
+          },
+          "reason": null,
+          "submission_slot": 1
+        },
+        "request": {
+          "event_id": "H04.register.1",
+          "fd": 41,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.H04",
+            "generation": 1,
+            "owner_id": "owner.H04",
+            "resource_id": "pidfd.H04",
+            "run_id": "P17FIX001.H04",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "token": {
+        "acquisition_id": "acq.H04",
+        "generation": 1,
+        "owner_id": "owner.H04",
+        "resource_id": "pidfd.H04",
+        "run_id": "P17FIX001.H04",
+        "source_id": "future.direct_child.provider",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "normalization_cases": [
+    {
+      "begin": {
+        "reply": {
+          "accepted": true,
+          "action": {
+            "attempt_id": "N01.attempt.1",
+            "fd": 41,
+            "kind": "SIMULATED_CLOSE_ONCE",
+            "source_event_id": "N01.begin.1",
+            "token": {
+              "acquisition_id": "acq.N01",
+              "generation": 1,
+              "owner_id": "owner.N01",
+              "resource_id": "pidfd.N01",
+              "run_id": "P17FIX001.N01",
+              "source_id": "future.direct_child.provider",
+              "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          },
+          "admission": {
+            "remaining_submission_slots": 62,
+            "submission_limit": 64,
+            "submission_slots": 2
+          },
+          "reason": null,
+          "submission_slot": 2
+        },
+        "request": {
+          "attempt_id": "N01.attempt.1",
+          "event_id": "N01.begin.1",
+          "kind": "BEGIN",
+          "token": {
+            "acquisition_id": "acq.N01",
+            "generation": 1,
+            "owner_id": "owner.N01",
+            "resource_id": "pidfd.N01",
+            "run_id": "P17FIX001.N01",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "callback_mode": "RETURN_INTEGER_ZERO",
+      "case_id": "N01_INVALID_ROLLBACK_RETURN",
+      "config": {
+        "owner_id": "owner.N01",
+        "run_id": "P17FIX001.N01",
+        "sources": [
+          {
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source_id": "future.direct_child.provider"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": 2,
+        "complete_submitted": false,
+        "inert_callbacks": 1,
+        "ledger_state": "ATTEMPTED_WITHOUT_COMPLETION",
+        "model_outcome": null,
+        "normalization_valid": false,
+        "primary_preserved": true,
+        "public_submissions": 2,
+        "rejected": 0,
+        "rollback": "INVALID_NORMALIZATION_NO_COMPLETE_NO_RETRY",
+        "stop": true
+      },
+      "fixture_metadata": {
+        "all_identities_supplied": true,
+        "captured_fd": 41,
+        "pid": 43001,
+        "primary_failure": {
+          "code": "CHILD_IDENTITY_CHANGED",
+          "diagnostic": "supplied start-time change",
+          "kind": "PROOF_REJECTION",
+          "origin": "SUPPLIED_STATIC_REJECTION",
+          "phase": "POST_REGISTER_PROOF",
+          "runtime_failure_observed": false,
+          "static_fixture_only": true
+        }
+      },
+      "register": {
+        "reply": {
+          "accepted": true,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 63,
+            "submission_limit": 64,
+            "submission_slots": 1
+          },
+          "reason": null,
+          "submission_slot": 1
+        },
+        "request": {
+          "event_id": "N01.register.1",
+          "fd": 41,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.N01",
+            "generation": 1,
+            "owner_id": "owner.N01",
+            "resource_id": "pidfd.N01",
+            "run_id": "P17FIX001.N01",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "rollback_ids": {
+        "attempt": "N01.attempt.1",
+        "begin": "N01.begin.1",
+        "complete": "N01.complete.1"
+      },
+      "token": {
+        "acquisition_id": "acq.N01",
+        "generation": 1,
+        "owner_id": "owner.N01",
+        "resource_id": "pidfd.N01",
+        "run_id": "P17FIX001.N01",
+        "source_id": "future.direct_child.provider",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "begin": {
+        "reply": {
+          "accepted": true,
+          "action": {
+            "attempt_id": "N02.attempt.1",
+            "fd": 41,
+            "kind": "SIMULATED_CLOSE_ONCE",
+            "source_event_id": "N02.begin.1",
+            "token": {
+              "acquisition_id": "acq.N02",
+              "generation": 1,
+              "owner_id": "owner.N02",
+              "resource_id": "pidfd.N02",
+              "run_id": "P17FIX001.N02",
+              "source_id": "future.direct_child.provider",
+              "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          },
+          "admission": {
+            "remaining_submission_slots": 62,
+            "submission_limit": 64,
+            "submission_slots": 2
+          },
+          "reason": null,
+          "submission_slot": 2
+        },
+        "request": {
+          "attempt_id": "N02.attempt.1",
+          "event_id": "N02.begin.1",
+          "kind": "BEGIN",
+          "token": {
+            "acquisition_id": "acq.N02",
+            "generation": 1,
+            "owner_id": "owner.N02",
+            "resource_id": "pidfd.N02",
+            "run_id": "P17FIX001.N02",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "callback_mode": "RAISE_VALUE_ERROR",
+      "case_id": "N02_INVALID_ROLLBACK_EXCEPTION",
+      "config": {
+        "owner_id": "owner.N02",
+        "run_id": "P17FIX001.N02",
+        "sources": [
+          {
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source_id": "future.direct_child.provider"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": 2,
+        "complete_submitted": false,
+        "inert_callbacks": 1,
+        "ledger_state": "ATTEMPTED_WITHOUT_COMPLETION",
+        "model_outcome": null,
+        "normalization_valid": false,
+        "primary_preserved": true,
+        "public_submissions": 2,
+        "rejected": 0,
+        "rollback": "INVALID_NORMALIZATION_NO_COMPLETE_NO_RETRY",
+        "stop": true
+      },
+      "fixture_metadata": {
+        "all_identities_supplied": true,
+        "captured_fd": 41,
+        "pid": 43002,
+        "primary_failure": {
+          "code": "CHILD_IDENTITY_CHANGED",
+          "diagnostic": "supplied start-time change",
+          "kind": "PROOF_REJECTION",
+          "origin": "SUPPLIED_STATIC_REJECTION",
+          "phase": "POST_REGISTER_PROOF",
+          "runtime_failure_observed": false,
+          "static_fixture_only": true
+        }
+      },
+      "register": {
+        "reply": {
+          "accepted": true,
+          "action": null,
+          "admission": {
+            "remaining_submission_slots": 63,
+            "submission_limit": 64,
+            "submission_slots": 1
+          },
+          "reason": null,
+          "submission_slot": 1
+        },
+        "request": {
+          "event_id": "N02.register.1",
+          "fd": 41,
+          "kind": "REGISTER",
+          "token": {
+            "acquisition_id": "acq.N02",
+            "generation": 1,
+            "owner_id": "owner.N02",
+            "resource_id": "pidfd.N02",
+            "run_id": "P17FIX001.N02",
+            "source_id": "future.direct_child.provider",
+            "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "rollback_ids": {
+        "attempt": "N02.attempt.1",
+        "begin": "N02.begin.1",
+        "complete": "N02.complete.1"
+      },
+      "token": {
+        "acquisition_id": "acq.N02",
+        "generation": 1,
+        "owner_id": "owner.N02",
+        "resource_id": "pidfd.N02",
+        "run_id": "P17FIX001.N02",
+        "source_id": "future.direct_child.provider",
+        "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "p17_regression_provenance": {
+    "bytes": 43835,
+    "representation": "lossless nested JSON object",
+    "sha256": "78ba822025a6ccfbca37dfd06cddaef97c8fc3dff98c03046f0518bae78afc1c"
+  },
+  "regression_D01_D06": {
+    "declared_totals": {
+      "accepted": 12,
+      "actual_effects": 0,
+      "hypothetical_callbacks": 4,
+      "public_submissions": 15,
+      "rejected": 3,
+      "rejection_reasons": {
+        "DUPLICATE_EVENT_ID": 2,
+        "FD_RANGE": 1
+      },
+      "runtime_observations": 0,
+      "step_after_states": 32,
+      "traces": 6
+    },
+    "execution": false,
+    "limits": {
+      "resources": 8,
+      "submissions": 64
+    },
+    "public_contract_rule": "Each public_request is the complete dictionary proposed for unchanged Ledger.submit. Fixture/custody explanations are outside public_request. Each proposed_public_reply contains every Ledger.submit reply field: accepted, reason, action, submission_slot, admission.",
+    "schema": "P16_FIX001_STATIC_TRACES_V1",
+    "scope": "SUPPLIED_DATA_STATIC_MODEL_ONLY_NO_LEDGER_EXECUTION",
+    "source_placeholder": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_id": "future.direct_child.provider",
+      "status": "supplied non-current placeholder; not a native or runtime observation"
+    },
+    "state_reference_rule": "Every trace defines full named states. Each step's before_state_ref and after_state_ref point losslessly to those exact objects; there are 32 step after-states.",
+    "traces": [
+      {
+        "config": {
+          "owner_id": "owner.D01",
+          "run_id": "P16FIX.D01",
+          "sources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "source_id": "future.direct_child.provider"
+            }
+          ]
+        },
+        "fixture_metadata": {
+          "all_values_supplied": true,
+          "captured_fd": 41,
+          "pid": 41001,
+          "runtime_observation": false
+        },
+        "separate_responsibilities": {
+          "child_reap": "NOT_SIMULATED",
+          "peer_cleanup": "NOT_SIMULATED"
+        },
+        "states": {
+          "S0": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 64,
+            "unresolved": 0
+          },
+          "S1": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "PRE_OPEN_ACCEPTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S2": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "RAW_PROVIDER_FD_41",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "POST_OPEN_NOT_ELIGIBLE",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S3": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D01.register.1"
+            ],
+            "holds": [],
+            "pending": 1,
+            "primary": "NONE",
+            "proof": "CAPABILITY_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S4": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41_NONOWNING_VIEW",
+            "history_event_ids": [
+              "D01.register.1"
+            ],
+            "holds": [],
+            "pending": 1,
+            "primary": "NONE",
+            "proof": "ACCEPTED_RETURN_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S5": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_FD_41",
+            "history_event_ids": [
+              "D01.register.1",
+              "D01.begin.1"
+            ],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "ACCEPTED_RETURN_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S6": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_RAW_NONE_RETAINED",
+            "history_event_ids": [
+              "D01.register.1",
+              "D01.begin.1"
+            ],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "ACCEPTED_RETURN_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S7": {
+            "accepted_event_count": 3,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 1,
+            "controller_confirmed": true,
+            "custody": "CONFIRMED_CLOSE",
+            "history_event_ids": [
+              "D01.register.1",
+              "D01.begin.1",
+              "D01.complete.1"
+            ],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "ACCEPTED_RETURN_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 61,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": true,
+            "submission_slots": 3,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          }
+        },
+        "steps": [
+          {
+            "after_state_ref": "S1",
+            "before_state_ref": "S0",
+            "step": "RESERVE",
+            "supplied_result": {
+              "admitted": true,
+              "credits": 3,
+              "resources": 1
+            }
+          },
+          {
+            "after_state_ref": "S2",
+            "before_state_ref": "S1",
+            "hypothetical": true,
+            "step": "RAW_OPEN_CAPTURE",
+            "supplied_native_return": 41
+          },
+          {
+            "after_state_ref": "S3",
+            "before_state_ref": "S2",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 63,
+                "submission_limit": 64,
+                "submission_slots": 1
+              },
+              "reason": null,
+              "submission_slot": 1
+            },
+            "public_request": {
+              "event_id": "D01.register.1",
+              "fd": 41,
+              "kind": "REGISTER",
+              "token": {
+                "acquisition_id": "acq.D01",
+                "generation": 1,
+                "owner_id": "owner.D01",
+                "resource_id": "pidfd.D01",
+                "run_id": "P16FIX.D01",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "REGISTER"
+          },
+          {
+            "after_state_ref": "S4",
+            "before_state_ref": "S3",
+            "hypothetical": true,
+            "step": "POST_OPEN_PROOF_AND_VIEW",
+            "successful_return_diagnostic_eligible": true,
+            "supplied_result": "ACCEPTED"
+          },
+          {
+            "after_state_ref": "S5",
+            "before_state_ref": "S4",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": {
+                "attempt_id": "D01.attempt.1",
+                "fd": 41,
+                "kind": "SIMULATED_CLOSE_ONCE",
+                "source_event_id": "D01.begin.1",
+                "token": {
+                  "acquisition_id": "acq.D01",
+                  "generation": 1,
+                  "owner_id": "owner.D01",
+                  "resource_id": "pidfd.D01",
+                  "run_id": "P16FIX.D01",
+                  "source_id": "future.direct_child.provider",
+                  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              },
+              "admission": {
+                "remaining_submission_slots": 62,
+                "submission_limit": 64,
+                "submission_slots": 2
+              },
+              "reason": null,
+              "submission_slot": 2
+            },
+            "public_request": {
+              "attempt_id": "D01.attempt.1",
+              "event_id": "D01.begin.1",
+              "kind": "BEGIN",
+              "token": {
+                "acquisition_id": "acq.D01",
+                "generation": 1,
+                "owner_id": "owner.D01",
+                "resource_id": "pidfd.D01",
+                "run_id": "P16FIX.D01",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "BEGIN_LATER_CLOSE"
+          },
+          {
+            "after_state_ref": "S6",
+            "before_state_ref": "S5",
+            "hypothetical": true,
+            "normalization": {
+              "outcome": {
+                "diagnostic": "close returned None",
+                "errno": null,
+                "result": "SUCCESS",
+                "return_value": 0
+              },
+              "valid": true
+            },
+            "step": "PROVIDER_CALLBACK_AND_NORMALIZE",
+            "supplied_raw_return": null
+          },
+          {
+            "after_state_ref": "S7",
+            "before_state_ref": "S6",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 61,
+                "submission_limit": 64,
+                "submission_slots": 3
+              },
+              "reason": null,
+              "submission_slot": 3
+            },
+            "public_request": {
+              "attempt_id": "D01.attempt.1",
+              "event_id": "D01.complete.1",
+              "kind": "COMPLETE",
+              "outcome": {
+                "diagnostic": "close returned None",
+                "errno": null,
+                "result": "SUCCESS",
+                "return_value": 0
+              },
+              "token": {
+                "acquisition_id": "acq.D01",
+                "generation": 1,
+                "owner_id": "owner.D01",
+                "resource_id": "pidfd.D01",
+                "run_id": "P16FIX.D01",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "COMPLETE"
+          }
+        ],
+        "token": {
+          "acquisition_id": "acq.D01",
+          "generation": 1,
+          "owner_id": "owner.D01",
+          "resource_id": "pidfd.D01",
+          "run_id": "P16FIX.D01",
+          "source_id": "future.direct_child.provider",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "trace_id": "D01_NORMAL_REGISTER_PROVE_CLOSE"
+      },
+      {
+        "config": {
+          "owner_id": "owner.D02",
+          "run_id": "P16FIX.D02",
+          "sources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "source_id": "future.direct_child.provider"
+            }
+          ]
+        },
+        "fixture_metadata": {
+          "all_values_supplied": true,
+          "captured_fd": 41,
+          "pid": 41002,
+          "primary_failure": {
+            "code": "CHILD_IDENTITY_CHANGED",
+            "diagnostic": "supplied start-time change",
+            "kind": "PROOF_REJECTION",
+            "origin": "SUPPLIED_STATIC_REJECTION",
+            "phase": "POST_REGISTER_PROOF",
+            "runtime_failure_observed": false,
+            "static_fixture_only": true
+          },
+          "runtime_observation": false
+        },
+        "separate_responsibilities": {
+          "child_reap": "NOT_SIMULATED",
+          "peer_cleanup": "NOT_SIMULATED"
+        },
+        "states": {
+          "S0": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 64,
+            "unresolved": 0
+          },
+          "S1": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "RAW_PROVIDER_FD_41",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "PRE_OPEN_ACCEPTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S2": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D02.register.1"
+            ],
+            "holds": [],
+            "pending": 1,
+            "primary": "NONE",
+            "proof": "CAPABILITY_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S3": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D02.register.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 1,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "REQUIRED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S4": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_FD_41",
+            "history_event_ids": [
+              "D02.register.1",
+              "D02.begin.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "BEGIN_ACCEPTED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S5": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_RAW_NONE_RETAINED",
+            "history_event_ids": [
+              "D02.register.1",
+              "D02.begin.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "RAW_SUCCESS_RETAINED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S6": {
+            "accepted_event_count": 3,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 1,
+            "controller_confirmed": false,
+            "custody": "CONFIRMED_CLOSE",
+            "history_event_ids": [
+              "D02.register.1",
+              "D02.begin.1",
+              "D02.complete.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 61,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "CONFIRMED_PRIMARY_PRESERVED",
+            "stop": true,
+            "submission_slots": 3,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          }
+        },
+        "steps": [
+          {
+            "after_state_ref": "S1",
+            "before_state_ref": "S0",
+            "hypothetical": true,
+            "step": "RESERVE_AND_RAW_CAPTURE",
+            "supplied_native_return": 41
+          },
+          {
+            "after_state_ref": "S2",
+            "before_state_ref": "S1",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 63,
+                "submission_limit": 64,
+                "submission_slots": 1
+              },
+              "reason": null,
+              "submission_slot": 1
+            },
+            "public_request": {
+              "event_id": "D02.register.1",
+              "fd": 41,
+              "kind": "REGISTER",
+              "token": {
+                "acquisition_id": "acq.D02",
+                "generation": 1,
+                "owner_id": "owner.D02",
+                "resource_id": "pidfd.D02",
+                "run_id": "P16FIX.D02",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "REGISTER"
+          },
+          {
+            "after_state_ref": "S3",
+            "before_state_ref": "S2",
+            "hypothetical": true,
+            "step": "POST_OPEN_PROOF",
+            "successful_return_diagnostic_eligible": false,
+            "supplied_result": "REJECTED_CHILD_IDENTITY_CHANGED"
+          },
+          {
+            "after_state_ref": "S4",
+            "before_state_ref": "S3",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": {
+                "attempt_id": "D02.attempt.1",
+                "fd": 41,
+                "kind": "SIMULATED_CLOSE_ONCE",
+                "source_event_id": "D02.begin.1",
+                "token": {
+                  "acquisition_id": "acq.D02",
+                  "generation": 1,
+                  "owner_id": "owner.D02",
+                  "resource_id": "pidfd.D02",
+                  "run_id": "P16FIX.D02",
+                  "source_id": "future.direct_child.provider",
+                  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              },
+              "admission": {
+                "remaining_submission_slots": 62,
+                "submission_limit": 64,
+                "submission_slots": 2
+              },
+              "reason": null,
+              "submission_slot": 2
+            },
+            "public_request": {
+              "attempt_id": "D02.attempt.1",
+              "event_id": "D02.begin.1",
+              "kind": "BEGIN",
+              "token": {
+                "acquisition_id": "acq.D02",
+                "generation": 1,
+                "owner_id": "owner.D02",
+                "resource_id": "pidfd.D02",
+                "run_id": "P16FIX.D02",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_BEGIN"
+          },
+          {
+            "after_state_ref": "S5",
+            "before_state_ref": "S4",
+            "hypothetical": true,
+            "normalization": {
+              "outcome": {
+                "diagnostic": "close returned None",
+                "errno": null,
+                "result": "SUCCESS",
+                "return_value": 0
+              },
+              "valid": true
+            },
+            "step": "ROLLBACK_CALLBACK_AND_NORMALIZE",
+            "supplied_raw_return": null
+          },
+          {
+            "after_state_ref": "S6",
+            "before_state_ref": "S5",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 61,
+                "submission_limit": 64,
+                "submission_slots": 3
+              },
+              "reason": null,
+              "submission_slot": 3
+            },
+            "public_request": {
+              "attempt_id": "D02.attempt.1",
+              "event_id": "D02.complete.1",
+              "kind": "COMPLETE",
+              "outcome": {
+                "diagnostic": "close returned None",
+                "errno": null,
+                "result": "SUCCESS",
+                "return_value": 0
+              },
+              "token": {
+                "acquisition_id": "acq.D02",
+                "generation": 1,
+                "owner_id": "owner.D02",
+                "resource_id": "pidfd.D02",
+                "run_id": "P16FIX.D02",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_COMPLETE"
+          }
+        ],
+        "token": {
+          "acquisition_id": "acq.D02",
+          "generation": 1,
+          "owner_id": "owner.D02",
+          "resource_id": "pidfd.D02",
+          "run_id": "P16FIX.D02",
+          "source_id": "future.direct_child.provider",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "trace_id": "D02_PROOF_REJECT_ROLLBACK_SUCCESS"
+      },
+      {
+        "config": {
+          "owner_id": "owner.D03",
+          "run_id": "P16FIX.D03",
+          "sources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "source_id": "future.direct_child.provider"
+            }
+          ]
+        },
+        "fixture_metadata": {
+          "all_values_supplied": true,
+          "captured_fd": 41,
+          "pid": 41003,
+          "primary_failure": {
+            "code": "NOT_DIRECT_OWN_CHILD",
+            "diagnostic": "supplied identity change",
+            "kind": "PROOF_REJECTION",
+            "origin": "SUPPLIED_STATIC_REJECTION",
+            "phase": "POST_REGISTER_PROOF",
+            "runtime_failure_observed": false,
+            "static_fixture_only": true
+          },
+          "rollback_exception": {
+            "errno": 5,
+            "observed_native_EIO": false,
+            "text": "supplied error",
+            "type": "OSError"
+          },
+          "runtime_observation": false
+        },
+        "separate_responsibilities": {
+          "child_reap": "NOT_SIMULATED",
+          "peer_cleanup": "NOT_SIMULATED"
+        },
+        "states": {
+          "S0": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 64,
+            "unresolved": 0
+          },
+          "S1": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "RAW_PROVIDER_FD_41",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "PRE_OPEN_ACCEPTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S2": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D03.register.1"
+            ],
+            "holds": [],
+            "pending": 1,
+            "primary": "NONE",
+            "proof": "CAPABILITY_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S3": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D03.register.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 1,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "REQUIRED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S4": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_FD_41",
+            "history_event_ids": [
+              "D03.register.1",
+              "D03.begin.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "BEGIN_ACCEPTED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S5": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_RAW_OSERROR_5_RETAINED",
+            "history_event_ids": [
+              "D03.register.1",
+              "D03.begin.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "RAW_ERROR_RETAINED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S6": {
+            "accepted_event_count": 3,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_UNRESOLVED_ERROR",
+            "history_event_ids": [
+              "D03.register.1",
+              "D03.begin.1",
+              "D03.complete.1"
+            ],
+            "holds": [
+              "CLOSE_UNCONFIRMED",
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "STOP_FURTHER_EFFECTS",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 61,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "UNRESOLVED_ERROR_NO_RETRY",
+            "stop": true,
+            "submission_slots": 3,
+            "unreserved_submission_slots": 61,
+            "unresolved": 1
+          }
+        },
+        "steps": [
+          {
+            "after_state_ref": "S1",
+            "before_state_ref": "S0",
+            "hypothetical": true,
+            "step": "RESERVE_AND_RAW_CAPTURE",
+            "supplied_native_return": 41
+          },
+          {
+            "after_state_ref": "S2",
+            "before_state_ref": "S1",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 63,
+                "submission_limit": 64,
+                "submission_slots": 1
+              },
+              "reason": null,
+              "submission_slot": 1
+            },
+            "public_request": {
+              "event_id": "D03.register.1",
+              "fd": 41,
+              "kind": "REGISTER",
+              "token": {
+                "acquisition_id": "acq.D03",
+                "generation": 1,
+                "owner_id": "owner.D03",
+                "resource_id": "pidfd.D03",
+                "run_id": "P16FIX.D03",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "REGISTER"
+          },
+          {
+            "after_state_ref": "S3",
+            "before_state_ref": "S2",
+            "hypothetical": true,
+            "step": "POST_OPEN_PROOF",
+            "successful_return_diagnostic_eligible": false,
+            "supplied_result": "REJECTED_NOT_DIRECT_OWN_CHILD"
+          },
+          {
+            "after_state_ref": "S4",
+            "before_state_ref": "S3",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": {
+                "attempt_id": "D03.attempt.1",
+                "fd": 41,
+                "kind": "SIMULATED_CLOSE_ONCE",
+                "source_event_id": "D03.begin.1",
+                "token": {
+                  "acquisition_id": "acq.D03",
+                  "generation": 1,
+                  "owner_id": "owner.D03",
+                  "resource_id": "pidfd.D03",
+                  "run_id": "P16FIX.D03",
+                  "source_id": "future.direct_child.provider",
+                  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              },
+              "admission": {
+                "remaining_submission_slots": 62,
+                "submission_limit": 64,
+                "submission_slots": 2
+              },
+              "reason": null,
+              "submission_slot": 2
+            },
+            "public_request": {
+              "attempt_id": "D03.attempt.1",
+              "event_id": "D03.begin.1",
+              "kind": "BEGIN",
+              "token": {
+                "acquisition_id": "acq.D03",
+                "generation": 1,
+                "owner_id": "owner.D03",
+                "resource_id": "pidfd.D03",
+                "run_id": "P16FIX.D03",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_BEGIN"
+          },
+          {
+            "after_state_ref": "S5",
+            "before_state_ref": "S4",
+            "hypothetical": true,
+            "normalization": {
+              "outcome": {
+                "diagnostic": "OSError errno 5",
+                "errno": 5,
+                "result": "ERROR",
+                "return_value": -1
+              },
+              "valid": true
+            },
+            "step": "ROLLBACK_CALLBACK_AND_NORMALIZE",
+            "supplied_raw_exception": {
+              "errno": 5,
+              "text": "supplied error",
+              "type": "OSError"
+            }
+          },
+          {
+            "after_state_ref": "S6",
+            "before_state_ref": "S5",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 61,
+                "submission_limit": 64,
+                "submission_slots": 3
+              },
+              "reason": null,
+              "submission_slot": 3
+            },
+            "public_request": {
+              "attempt_id": "D03.attempt.1",
+              "event_id": "D03.complete.1",
+              "kind": "COMPLETE",
+              "outcome": {
+                "diagnostic": "OSError errno 5",
+                "errno": 5,
+                "result": "ERROR",
+                "return_value": -1
+              },
+              "token": {
+                "acquisition_id": "acq.D03",
+                "generation": 1,
+                "owner_id": "owner.D03",
+                "resource_id": "pidfd.D03",
+                "run_id": "P16FIX.D03",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_COMPLETE"
+          }
+        ],
+        "token": {
+          "acquisition_id": "acq.D03",
+          "generation": 1,
+          "owner_id": "owner.D03",
+          "resource_id": "pidfd.D03",
+          "run_id": "P16FIX.D03",
+          "source_id": "future.direct_child.provider",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "trace_id": "D03_PROOF_REJECT_ROLLBACK_ERROR"
+      },
+      {
+        "config": {
+          "owner_id": "owner.D04",
+          "run_id": "P16FIX.D04",
+          "sources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "source_id": "future.direct_child.provider"
+            }
+          ]
+        },
+        "fixture_metadata": {
+          "all_values_supplied": true,
+          "captured_fd": 41,
+          "pid": 41004,
+          "primary_failure": {
+            "code": "CHILD_ALREADY_REAPED_OR_NOT_OWNED",
+            "diagnostic": "supplied wait rejection",
+            "kind": "PROOF_REJECTION",
+            "origin": "SUPPLIED_STATIC_REJECTION",
+            "phase": "POST_REGISTER_PROOF",
+            "runtime_failure_observed": false,
+            "static_fixture_only": true
+          },
+          "runtime_observation": false
+        },
+        "separate_responsibilities": {
+          "child_reap": "NOT_SIMULATED",
+          "peer_cleanup": "NOT_SIMULATED"
+        },
+        "states": {
+          "S0": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 64,
+            "unresolved": 0
+          },
+          "S1": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "RAW_PROVIDER_FD_41",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "PRE_OPEN_ACCEPTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S2": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D04.register.1"
+            ],
+            "holds": [],
+            "pending": 1,
+            "primary": "NONE",
+            "proof": "CAPABILITY_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S3": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D04.register.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 1,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "REQUIRED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S4": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D04.register.1"
+            ],
+            "holds": [
+              "CLOSE_UNCONFIRMED",
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "ROLLBACK_BEGIN_REJECTED",
+              "STOP_FURTHER_EFFECTS",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 1,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "BEGIN_REJECTED_NO_CALLBACK",
+            "stop": true,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 60,
+            "unresolved": 0
+          }
+        },
+        "steps": [
+          {
+            "after_state_ref": "S1",
+            "before_state_ref": "S0",
+            "hypothetical": true,
+            "step": "RESERVE_AND_RAW_CAPTURE",
+            "supplied_native_return": 41
+          },
+          {
+            "after_state_ref": "S2",
+            "before_state_ref": "S1",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 63,
+                "submission_limit": 64,
+                "submission_slots": 1
+              },
+              "reason": null,
+              "submission_slot": 1
+            },
+            "public_request": {
+              "event_id": "D04.register.1",
+              "fd": 41,
+              "kind": "REGISTER",
+              "token": {
+                "acquisition_id": "acq.D04",
+                "generation": 1,
+                "owner_id": "owner.D04",
+                "resource_id": "pidfd.D04",
+                "run_id": "P16FIX.D04",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "REGISTER"
+          },
+          {
+            "after_state_ref": "S3",
+            "before_state_ref": "S2",
+            "hypothetical": true,
+            "step": "POST_OPEN_PROOF",
+            "successful_return_diagnostic_eligible": false,
+            "supplied_result": "REJECTED_CHILD_ALREADY_REAPED_OR_NOT_OWNED"
+          },
+          {
+            "after_state_ref": "S4",
+            "before_state_ref": "S3",
+            "proposed_public_reply": {
+              "accepted": false,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 62,
+                "submission_limit": 64,
+                "submission_slots": 2
+              },
+              "reason": "DUPLICATE_EVENT_ID",
+              "submission_slot": 2
+            },
+            "public_request": {
+              "attempt_id": "D04.attempt.1",
+              "event_id": "D04.register.1",
+              "kind": "BEGIN",
+              "token": {
+                "acquisition_id": "acq.D04",
+                "generation": 1,
+                "owner_id": "owner.D04",
+                "resource_id": "pidfd.D04",
+                "run_id": "P16FIX.D04",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_BEGIN_REJECTED"
+          }
+        ],
+        "token": {
+          "acquisition_id": "acq.D04",
+          "generation": 1,
+          "owner_id": "owner.D04",
+          "resource_id": "pidfd.D04",
+          "run_id": "P16FIX.D04",
+          "source_id": "future.direct_child.provider",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "trace_id": "D04_PROOF_REJECT_BEGIN_DUPLICATE"
+      },
+      {
+        "config": {
+          "owner_id": "owner.D05",
+          "run_id": "P16FIX.D05",
+          "sources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "source_id": "future.direct_child.provider"
+            }
+          ]
+        },
+        "fixture_metadata": {
+          "all_values_supplied": true,
+          "captured_fd": 41,
+          "pid": 41005,
+          "primary_failure": {
+            "code": "CHILD_IDENTITY_CHANGED",
+            "diagnostic": "supplied start-time change",
+            "kind": "PROOF_REJECTION",
+            "origin": "SUPPLIED_STATIC_REJECTION",
+            "phase": "POST_REGISTER_PROOF",
+            "runtime_failure_observed": false,
+            "static_fixture_only": true
+          },
+          "runtime_observation": false
+        },
+        "separate_responsibilities": {
+          "child_reap": "NOT_SIMULATED",
+          "peer_cleanup": "NOT_SIMULATED"
+        },
+        "states": {
+          "S0": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 64,
+            "unresolved": 0
+          },
+          "S1": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "RAW_PROVIDER_FD_41",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "PRE_OPEN_ACCEPTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S2": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D05.register.1"
+            ],
+            "holds": [],
+            "pending": 1,
+            "primary": "NONE",
+            "proof": "CAPABILITY_ELIGIBLE",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S3": {
+            "accepted_event_count": 1,
+            "attempted": 0,
+            "cleanup_debt": 2,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_PENDING_FD_41",
+            "history_event_ids": [
+              "D05.register.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 1,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "REQUIRED",
+            "stop": false,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S4": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_FD_41",
+            "history_event_ids": [
+              "D05.register.1",
+              "D05.begin.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "BEGIN_ACCEPTED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S5": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_RAW_NONE_RETAINED",
+            "history_event_ids": [
+              "D05.register.1",
+              "D05.begin.1"
+            ],
+            "holds": [
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 62,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "RAW_SUCCESS_RETAINED",
+            "stop": false,
+            "submission_slots": 2,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S6": {
+            "accepted_event_count": 2,
+            "attempted": 1,
+            "cleanup_debt": 1,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTERED_ATTEMPTED_RAW_NONE_NOT_LEDGER_CONFIRMED",
+            "history_event_ids": [
+              "D05.register.1",
+              "D05.begin.1"
+            ],
+            "holds": [
+              "CLOSE_UNCONFIRMED",
+              "PRIMARY_ERROR_RETAINED",
+              "PRIMARY_PROOF_REJECTION",
+              "ROLLBACK_COMPLETE_REJECTED",
+              "STOP_FURTHER_EFFECTS",
+              "SUPPLIED_POST_OPEN_PROOF_REJECTION"
+            ],
+            "pending": 0,
+            "primary": "SUPPLIED_STATIC_REJECTION_RETAINED",
+            "proof": "REJECTED_NO_RETURN",
+            "registered_lifetime": 1,
+            "remaining_submission_slots": 61,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "COMPLETE_REJECTED_NO_RETRY",
+            "stop": true,
+            "submission_slots": 3,
+            "unreserved_submission_slots": 60,
+            "unresolved": 0
+          }
+        },
+        "steps": [
+          {
+            "after_state_ref": "S1",
+            "before_state_ref": "S0",
+            "hypothetical": true,
+            "step": "RESERVE_AND_RAW_CAPTURE",
+            "supplied_native_return": 41
+          },
+          {
+            "after_state_ref": "S2",
+            "before_state_ref": "S1",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 63,
+                "submission_limit": 64,
+                "submission_slots": 1
+              },
+              "reason": null,
+              "submission_slot": 1
+            },
+            "public_request": {
+              "event_id": "D05.register.1",
+              "fd": 41,
+              "kind": "REGISTER",
+              "token": {
+                "acquisition_id": "acq.D05",
+                "generation": 1,
+                "owner_id": "owner.D05",
+                "resource_id": "pidfd.D05",
+                "run_id": "P16FIX.D05",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "REGISTER"
+          },
+          {
+            "after_state_ref": "S3",
+            "before_state_ref": "S2",
+            "hypothetical": true,
+            "step": "POST_OPEN_PROOF",
+            "successful_return_diagnostic_eligible": false,
+            "supplied_result": "REJECTED_CHILD_IDENTITY_CHANGED"
+          },
+          {
+            "after_state_ref": "S4",
+            "before_state_ref": "S3",
+            "proposed_public_reply": {
+              "accepted": true,
+              "action": {
+                "attempt_id": "D05.attempt.1",
+                "fd": 41,
+                "kind": "SIMULATED_CLOSE_ONCE",
+                "source_event_id": "D05.begin.1",
+                "token": {
+                  "acquisition_id": "acq.D05",
+                  "generation": 1,
+                  "owner_id": "owner.D05",
+                  "resource_id": "pidfd.D05",
+                  "run_id": "P16FIX.D05",
+                  "source_id": "future.direct_child.provider",
+                  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              },
+              "admission": {
+                "remaining_submission_slots": 62,
+                "submission_limit": 64,
+                "submission_slots": 2
+              },
+              "reason": null,
+              "submission_slot": 2
+            },
+            "public_request": {
+              "attempt_id": "D05.attempt.1",
+              "event_id": "D05.begin.1",
+              "kind": "BEGIN",
+              "token": {
+                "acquisition_id": "acq.D05",
+                "generation": 1,
+                "owner_id": "owner.D05",
+                "resource_id": "pidfd.D05",
+                "run_id": "P16FIX.D05",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_BEGIN"
+          },
+          {
+            "after_state_ref": "S5",
+            "before_state_ref": "S4",
+            "hypothetical": true,
+            "normalization": {
+              "outcome": {
+                "diagnostic": "close returned None",
+                "errno": null,
+                "result": "SUCCESS",
+                "return_value": 0
+              },
+              "valid": true
+            },
+            "step": "ROLLBACK_CALLBACK_AND_NORMALIZE",
+            "supplied_raw_return": null
+          },
+          {
+            "after_state_ref": "S6",
+            "before_state_ref": "S5",
+            "proposed_public_reply": {
+              "accepted": false,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 61,
+                "submission_limit": 64,
+                "submission_slots": 3
+              },
+              "reason": "DUPLICATE_EVENT_ID",
+              "submission_slot": 3
+            },
+            "public_request": {
+              "attempt_id": "D05.attempt.1",
+              "event_id": "D05.begin.1",
+              "kind": "COMPLETE",
+              "outcome": {
+                "diagnostic": "close returned None",
+                "errno": null,
+                "result": "SUCCESS",
+                "return_value": 0
+              },
+              "token": {
+                "acquisition_id": "acq.D05",
+                "generation": 1,
+                "owner_id": "owner.D05",
+                "resource_id": "pidfd.D05",
+                "run_id": "P16FIX.D05",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "ROLLBACK_COMPLETE_REJECTED"
+          }
+        ],
+        "token": {
+          "acquisition_id": "acq.D05",
+          "generation": 1,
+          "owner_id": "owner.D05",
+          "resource_id": "pidfd.D05",
+          "run_id": "P16FIX.D05",
+          "source_id": "future.direct_child.provider",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "trace_id": "D05_PROOF_REJECT_COMPLETE_DUPLICATE"
+      },
+      {
+        "config": {
+          "owner_id": "owner.D06",
+          "run_id": "P16FIX.D06",
+          "sources": [
+            {
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "source_id": "future.direct_child.provider"
+            }
+          ]
+        },
+        "fixture_metadata": {
+          "all_values_supplied": true,
+          "captured_fd": 41,
+          "captured_fd_is_not_a_public_request_field": true,
+          "deliberately_submitted_invalid_fd": -1,
+          "pid": 41006,
+          "runtime_observation": false
+        },
+        "separate_responsibilities": {
+          "child_reap": "NOT_SIMULATED",
+          "peer_cleanup": "NOT_SIMULATED"
+        },
+        "states": {
+          "S0": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 0,
+            "reserved_credits": 0,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 64,
+            "unresolved": 0
+          },
+          "S1": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "NONE",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "PRE_OPEN_ACCEPTED",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S2": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "RAW_PROVIDER_FD_41",
+            "history_event_ids": [],
+            "holds": [],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "POST_OPEN_NOT_ELIGIBLE",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 64,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_REQUESTED",
+            "stop": false,
+            "submission_slots": 0,
+            "unreserved_submission_slots": 61,
+            "unresolved": 0
+          },
+          "S3": {
+            "accepted_event_count": 0,
+            "attempted": 0,
+            "cleanup_debt": 0,
+            "confirmed": 0,
+            "controller_confirmed": false,
+            "custody": "REGISTER_REJECTED_UNREGISTERED_FD_41",
+            "history_event_ids": [],
+            "holds": [
+              "REGISTRATION_REJECTED",
+              "STOP_FURTHER_EFFECTS",
+              "UNREGISTERED_CUSTODY"
+            ],
+            "pending": 0,
+            "primary": "NONE",
+            "proof": "NOT_STARTED_NO_RETURN",
+            "registered_lifetime": 0,
+            "remaining_submission_slots": 63,
+            "reservation_remaining": 1,
+            "reserved_credits": 3,
+            "rollback": "NOT_ADMITTED",
+            "stop": true,
+            "submission_slots": 1,
+            "unreserved_submission_slots": 60,
+            "unresolved": 0
+          }
+        },
+        "steps": [
+          {
+            "after_state_ref": "S1",
+            "before_state_ref": "S0",
+            "step": "RESERVE",
+            "supplied_result": {
+              "admitted": true,
+              "credits": 3,
+              "resources": 1
+            }
+          },
+          {
+            "after_state_ref": "S2",
+            "before_state_ref": "S1",
+            "hypothetical": true,
+            "step": "RAW_OPEN_CAPTURE",
+            "supplied_native_return": 41
+          },
+          {
+            "after_state_ref": "S3",
+            "before_state_ref": "S2",
+            "derived_first_rejection": "FD_RANGE",
+            "no_callback_or_complete": true,
+            "proposed_public_reply": {
+              "accepted": false,
+              "action": null,
+              "admission": {
+                "remaining_submission_slots": 63,
+                "submission_limit": 64,
+                "submission_slots": 1
+              },
+              "reason": "FD_RANGE",
+              "submission_slot": 1
+            },
+            "public_request": {
+              "event_id": "D06.register.1",
+              "fd": -1,
+              "kind": "REGISTER",
+              "token": {
+                "acquisition_id": "acq.D06",
+                "generation": 1,
+                "owner_id": "owner.D06",
+                "resource_id": "pidfd.D06",
+                "run_id": "P16FIX.D06",
+                "source_id": "future.direct_child.provider",
+                "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            "step": "REGISTER_REJECTED"
+          }
+        ],
+        "stop_before": [
+          "proof",
+          "successful RETURN",
+          "BEGIN",
+          "callback",
+          "COMPLETE",
+          "later acquisition",
+          "fork",
+          "receive",
+          "transfer",
+          "signal"
+        ],
+        "token": {
+          "acquisition_id": "acq.D06",
+          "generation": 1,
+          "owner_id": "owner.D06",
+          "resource_id": "pidfd.D06",
+          "run_id": "P16FIX.D06",
+          "source_id": "future.direct_child.provider",
+          "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "trace_id": "D06_REGISTER_REJECT_UNREGISTERED_CUSTODY"
+      }
+    ]
+  },
+  "schema": "ENGINE003_LINUXPORT001_P17_FIX001_SUPPLIED_FIXTURES_V1"
+}

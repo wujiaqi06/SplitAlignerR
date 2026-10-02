@@ -1,0 +1,177 @@
+{
+  "schema": "ENGINE003_LINUXPORT001_P17_FIX001_STATIC_CONDITION_DEFINITION_CHECKLIST_V1",
+  "status": "IMPLEMENTED_PENDING_STATIC_AND_SOURCE_ISOLATED_VERIFICATION",
+  "implementation_files": [
+    "direct_child_pidfd.py",
+    "integrated_native_effects.py",
+    "integrated_native_adapter.py",
+    "native_owner_controller.py",
+    "runtime_bindings.py",
+    "development_guard.py",
+    "recorded_native.py"
+  ],
+  "exact_dependencies": [
+    "ledger.py",
+    "common.py",
+    "pidfd_primitives.py",
+    "parsers.py",
+    "native_syscalls_factory.py"
+  ],
+  "required_definition_groups": {
+    "direct_child_pidfd.py": [
+      "CapabilityAuthority",
+      "PreOpenPrepareCapability",
+      "PreparedDirectChild",
+      "RawCaptureCapability",
+      "PostRegisterProofCapability",
+      "DirectChildProof",
+      "NonOwningViewCapability",
+      "DirectChildPidfdView",
+      "prepare_direct_child",
+      "capture_direct_child_open",
+      "prove_registered_direct_child",
+      "build_direct_child_view"
+    ],
+    "integrated_native_effects.py": [
+      "RawDirectChildCustody",
+      "RegisteredDirectChildCustody",
+      "PureCustodyTransitions.mark_registered",
+      "PureCustodyTransitions.retain_unregistered",
+      "IntegratedNativeEffects.acquire_direct_child_raw",
+      "IntegratedNativeEffects.mark_direct_child_registered",
+      "IntegratedNativeEffects.retain_unregistered",
+      "IntegratedNativeEffects.invoke"
+    ],
+    "integrated_native_adapter.py": [
+      "normalize_native",
+      "PureRollbackAdapter.begin",
+      "PureRollbackAdapter.invoke_and_normalize",
+      "PureRollbackAdapter.complete",
+      "IntegratedNativeAdapter.close_once"
+    ],
+    "native_owner_controller.py": [
+      "PrimaryFailureRecord",
+      "PureDirectChildController._sync",
+      "PureDirectChildController._require_effect_eligibility",
+      "PureDirectChildController.issue_prepare_capability",
+      "PureDirectChildController.issue_capture_capability",
+      "PureDirectChildController.issue_view_capability",
+      "PureDirectChildController.budget",
+      "PureDirectChildController.reserve",
+      "PureDirectChildController.attach_raw_custody",
+      "PureDirectChildController.register_captured",
+      "PureDirectChildController.registration_submission_baseline",
+      "PureDirectChildController.reconcile_registration_result",
+      "PureDirectChildController.derive_post_register_proof_capability",
+      "PureDirectChildController.accept_supplied_proof_and_view",
+      "PureDirectChildController._log_primary_report",
+      "PureDirectChildController.capture_primary_failure",
+      "PureDirectChildController.begin_close",
+      "PureDirectChildController.invoke_and_normalize",
+      "PureDirectChildController.complete_close",
+      "PureDirectChildController.retain_secondary_rollback_failure",
+      "PureDirectChildController.record_primary_and_rollback",
+      "PureDirectChildController.stop_unregistered_custody",
+      "NativeOwnerController.acquire_register_prove_direct_child",
+      "NativeOwnerController.derive_post_register_proof_capability",
+      "NativeOwnerController.capture_primary_failure",
+      "NativeOwnerController.record_primary_and_rollback"
+    ],
+    "runtime_bindings.py": [
+      "RuntimeBindings.__init__",
+      "RuntimeBindings.validate_native",
+      "RuntimeBindings.validate"
+    ],
+    "development_guard.py": [
+      "DevelopmentGuard.enter_phase",
+      "DevelopmentGuard.trace",
+      "DevelopmentGuard.profile",
+      "DevelopmentGuard.audit"
+    ],
+    "recorded_native.py": [
+      "RecordedRegisteredNative.record_open_attempt",
+      "RecordedRegisteredNative.record_registered_proven_return"
+    ]
+  },
+  "p01_exact_conditions": [
+    "exact AcquisitionPolicy with three true booleans",
+    "exact AcquisitionEnvironment integer fields",
+    "SA_NOCLDWAIT value exactly 2 and absent from flags",
+    "default SIGCHLD handler",
+    "one native task and one Python thread",
+    "PID exact int-not-bool in 1..2^31-1",
+    "expected exact ProcStat and PID/PPID current-owner match",
+    "first wait_without_reaping and bounded direct_child_stat",
+    "before PID/PPID/starttime exact expected match",
+    "one NativeSyscalls.open(pid,0) with immediate provider retention",
+    "second direct_child_stat exact before identity match",
+    "second wait_without_reaping",
+    "repeated complete acquisition environment validation",
+    "bounded fdinfo read of 8192",
+    "exactly one anchored Pid value equal to prepared PID",
+    "proof metadata and primitive-only scope retained",
+    "no bare os.close fallback"
+  ],
+  "ownership_conditions": [
+    "PreparedDirectChild has no fd or close authority",
+    "provider field is first reachable raw native-return assignment",
+    "raw and registered custody are the identical provider row",
+    "accepted REGISTER request uses exact captured FD in production",
+    "rejected REGISTER retains raw unregistered custody and reservation",
+    "proof capability reconciles controller/provider/ledger/row/token/fd/event/reservation/prepared/native/policy",
+    "proof capability is opaque nonserializable and one-use",
+    "rollback validates consumed capability provenance without reconsumption",
+    "DirectChildPidfdView has no close/context/destructor/receive/transfer",
+    "RETURN follows accepted REGISTER, successful proof, and constructed view",
+    "diagnostic failure preserves custody/view and has no fallback close"
+  ],
+  "rollback_conditions": [
+    "authentic raw exception reference is assigned before record construction",
+    "AUTHENTIC_CAUGHT_EXCEPTION and SUPPLIED_STATIC_REJECTION are distinct",
+    "supplied origin sets runtime_failure_observed false and static_fixture_only true",
+    "primary_error_preserved and three primary holds survive rollback",
+    "only full accepted BEGIN action enables one callback",
+    "raw None or exception reference precedes normalization",
+    "None maps to SUCCESS/0/null and OSError maps to ERROR/-1/exact errno",
+    "COMPLETE occurs once only after valid normalization",
+    "rejected BEGIN has zero callback and zero COMPLETE",
+    "rejected COMPLETE remains ATTEMPTED",
+    "accepted ERROR remains UNRESOLVED",
+    "no retry/fallback/handle/finally/destructor cleanup"
+  ],
+  "candidate_allowed_definitions": {
+    "ledger.py": ["Ledger", "LedgerError", "require", "fields", "label", "integer", "digest", "freeze", "thaw", "token_types", "outcome_types", "event_types"],
+    "common.py": ["immutable", "materialize", "detached", "raw_return", "raw_exception"],
+    "direct_child_pidfd.py": ["CapabilityAuthority", "_OpaqueOneUseCapability", "PreOpenPrepareCapability", "RawCaptureCapability", "PostRegisterProofCapability", "NonOwningViewCapability", "PreparedDirectChild", "DirectChildProof", "DirectChildPidfdView"],
+    "integrated_native_effects.py": ["RawDirectChildCustody", "RegisteredDirectChildCustody", "PureCustodyTransitions"],
+    "integrated_native_adapter.py": ["normalize_native", "PureRollbackAdapter"],
+    "native_owner_controller.py": ["PrimaryFailureRecord", "PureDirectChildController"]
+  },
+  "static_only": [
+    "all complete module imports",
+    "NativeSyscalls and RuntimeBindings construction",
+    "IntegratedNativeEffects and DevelopmentGuard construction",
+    "all real pre-open/post-register proof and host queries",
+    "all authentic exception/view/diagnostic failure paths",
+    "all native operations and formal008"
+  ],
+  "fix001_conditions": {
+    "F01": "trusted controller authority and exact issued objects across prepare/capture/proof/view; capture issued only after Prepared; validate_native wired",
+    "F02": "external slot/history mismatch creates sticky EXTERNAL_PUBLIC_SUBMISSION plus STOP and blocks proof/BEGIN/callback/COMPLETE",
+    "F03": "validity precedes outcome dereference; raw primary precedes formatting; invalid rollback retains primary and submits no COMPLETE",
+    "F04": "production has no D06/41/-1 fault method; runner submits invalid fixture request and shared production reconciliation consumes actual reply"
+  },
+  "fix002_conditions": {
+    "F01": "capture_primary_failure returns the exact retained PrimaryFailureRecord; the CAPTURE_PRIMARY_FAILURE report is logged separately by _log_primary_report and never carries authority; both record_primary_and_rollback consumers and retain_secondary_rollback_failure require exact type and exact identity; the native wrapper revalidates the handed-off object without reading core internals at the catch site",
+    "F01_bounded_unresolved": "a failure inside PrimaryFailureRecord construction itself keeps the raw primary and its token retained and propagates; no second record, no substitute authority and no arbitrary-failure resilience is claimed",
+    "F01_pure_contract": "the pure regression path and the native authority path now share one return contract: both receive the exact PrimaryFailureRecord object, and report dictionaries stay in controller.report()/_operations only"
+  },
+  "candidate_matrix": {
+    "cases": 12,
+    "public_submissions": 29,
+    "accepted": 22,
+    "rejected": 7,
+    "inert_callbacks": 7,
+    "D_after_states": 32
+  }
+}
