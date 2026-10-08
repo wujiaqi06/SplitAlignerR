@@ -1,0 +1,39 @@
+Package: SplitAlignerR
+Title: R Interface and Independent Graph Oracle for SplitAligner
+Version: 0.1.0.9002
+Authors@R:
+    person("Jiaqi", "Wu", email = "wujiaqi@hiroshima-u.ac.jp", role = c("aut", "cre"))
+Description: R interface and independent benchmark track for the SplitAligner
+    branch-coordinate framework. The package ships deterministic Catnip10
+    graph-oracle data, a pure R node-edge oracle that recomputes the benchmark,
+    and a C++17 graph-first mapper with strict finite-range branch-length
+    parsing, explicit structural/topological states, and composite-coordinate
+    provenance. A separate R paired-finalization layer retains the frozen
+    structured output-token rules and literal-NA provenance. See the
+    SplitAligner preprint, "SplitAligner: A Gene-Species Tree Reconciliation
+    Framework Using Split-Based Branch Mapping" (Wu 2026,
+    <doi:10.64898/2026.02.24.707838>).
+License: GPL-3
+Encoding: UTF-8
+Depends:
+    R (>= 3.5.0)
+Imports:
+    ape,
+    digest,
+    Rcpp,
+    utils
+LinkingTo:
+    Rcpp
+Suggests:
+    jsonlite,
+    knitr,
+    markdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/wujiaqi06/SplitAlignerR, https://wujiaqi06.github.io/SplitAlignerR/
+BugReports: https://github.com/wujiaqi06/SplitAlignerR/issues
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+SystemRequirements: C++17

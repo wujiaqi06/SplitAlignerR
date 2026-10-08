@@ -1,0 +1,20 @@
+citHeader("To cite SplitAlignerR in publications, please cite the SplitAligner preprint; v0.1.0 is the immutable Pro-RECERT-certified release, while package version 0.1.0.9000 is post-release development and is not covered by that decision.")
+
+bibentry(
+  bibtype  = "Article",
+  title    = "SplitAligner: A Gene-Species Tree Reconciliation Framework Using Split-Based Branch Mapping",
+  author   = person("Jiaqi", "Wu"),
+  year     = "2026",
+  journal  = "bioRxiv",
+  doi      = "10.64898/2026.02.24.707838",
+  note     = "Preprint"
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "SplitAlignerR: Catnip10 Graph-Oracle Benchmark Accessors for the SplitAligner Branch-Coordinate Framework",
+  author   = person("Jiaqi", "Wu"),
+  year     = "2026",
+  note     = "R package version 0.1.0.9000 post-release development; stable Pro-RECERT-certified release v0.1.0; software DOI not yet assigned",
+  url      = "https://github.com/wujiaqi06/SplitAlignerR"
+)
