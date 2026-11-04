@@ -2,6 +2,8 @@
 
 * `free_fusion_groups()` reports the exact projected split, primitive members
   and recovered length or `NA_fuse_topo` once per gene and fusion group.
+* `count_free_topology()` summarizes five disjoint outcomes per gene in an
+  explicit primitive-member or projected-coordinate unit.
 * The default paired schema 2.0.0 retains `NA_fuse` on every fused primitive.
   Select `rule = "legacy"` to replay schema 1.0.0 final matrices.
 

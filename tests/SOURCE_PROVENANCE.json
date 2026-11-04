@@ -139,9 +139,9 @@
     },
     {
       "path": "tests/testthat/test-fusion-groups.R",
-      "test_blocks": 2,
-      "sha256": "66dfc1a535d95f4a507abdb92ea8eddfed18713519679c78858c6a0b2c6a4bc0",
-      "origin": "Development 9005 layered composite reporting and paired regression."
+      "test_blocks": 4,
+      "sha256": "7edc9c1fecacc3281285dd50884a2954e3a5a25dfae5e91f74156d0db6924076",
+      "origin": "Development 9005 layered fusion-group reporting, paired finalization and explicit-unit topology accounting."
     }
   ]
 }

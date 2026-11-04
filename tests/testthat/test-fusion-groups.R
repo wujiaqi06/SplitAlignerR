@@ -54,3 +54,53 @@ test_that("group presence is independent of numeric evidence and resolution", {
                                   bad$state_ledger$state == "NA_fuse"] <- "another split"
   expect_error(pair_alignment_results(fixed, bad), "members or projected splits")
 })
+
+test_that("five outcome counts distinguish primitive and coordinate denominators", {
+  ref <- "((A,B),C,(D,(E,F)));"
+  trees <- c(all_present = ref,
+             g1 = "((A,B),D,(E,F));",
+             g2 = "((A,B),E,(D,F));",
+             g3 = "((A,D),B,(E,F));")
+  free <- align_branches(ref, trees)
+  before <- free$state_matrix
+  primitive <- count_free_topology(free, unit = "primitive")
+  coordinate <- count_free_topology(free, unit = "coordinate")
+  expect_identical(primitive$gene_id, names(trees))
+  expect_identical(coordinate$gene_id, names(trees))
+  expect_identical(primitive$unit, rep("primitive", 4))
+  expect_identical(coordinate$unit, rep("coordinate", 4))
+  expect_equal(primitive$Total, c(9, 9, 9, 9))
+  expect_equal(coordinate$Total, c(9, 8, 8, 8))
+  expect_equal(primitive$Mapped, c(9, 6, 5, 6))
+  expect_equal(primitive$NA_struct, c(0, 1, 1, 1))
+  expect_equal(primitive$NA_topo, c(0, 0, 1, 0))
+  expect_equal(primitive$NA_fuse, c(0, 2, 2, 0))
+  expect_equal(primitive$NA_fuse_topo, c(0, 0, 0, 2))
+  expect_equal(coordinate$NA_fuse, c(0, 1, 1, 0))
+  expect_equal(coordinate$NA_fuse_topo, c(0, 0, 0, 1))
+  for (counts in list(primitive, coordinate)) {
+    expect_equal(counts$Total, unname(rowSums(counts[4:8])))
+  }
+  expect_identical(free$state_matrix, before)
+  expect_error(count_free_topology(free), "Choose unit")
+  expect_error(count_free_topology(free, "prim"), "Choose unit")
+  expect_error(count_free_topology(free, NA_character_), "Choose unit")
+  expect_error(count_free_topology(align_branches(ref, ref, mode="fixed"),
+                                   "primitive"), "free-mode")
+})
+
+test_that("group weights follow each fiber across different retained taxa", {
+  ref <- "((A,B),C,(D,(E,F)));"
+  free <- align_branches(ref, c(long_path = "(A,F);",
+                                two_groups = "((A,D),(B,E));"))
+  primitive <- count_free_topology(free, "primitive")
+  coordinate <- count_free_topology(free, "coordinate")
+  # A--F collapses five primitive edges onto one displayed split.
+  # The four-taxon gene has one displayed and one absent two-member group.
+  expect_equal(primitive$NA_fuse, c(5, 2))
+  expect_equal(primitive$NA_fuse_topo, c(0, 2))
+  expect_equal(coordinate$NA_fuse, c(1, 1))
+  expect_equal(coordinate$NA_fuse_topo, c(0, 1))
+  expect_equal(primitive$NA_struct, c(4, 2))
+  expect_equal(coordinate$Total, c(5, 7))
+})

@@ -98,8 +98,21 @@ The shared split is present at length 0.31 in g1 and 0.26 in g2. The g3 tree
 lacks the split, so its group token is `NA_fuse_topo`. Both members still
 carry `NA_fuse` in all three genes. A displayed group with no finite length
 has graph class `Mapped` and a literal `NA` value. An unresolved free tree
-can also lack the split. Count each group once in group summaries and count
-each member once on the primitive axis.
+can also lack the split.
+
+To tabulate the five outcomes, choose the denominator explicitly:
+
+```r
+count_free_topology(free, unit = "primitive")
+count_free_topology(free, unit = "coordinate")
+```
+
+Each row satisfies `Total = Mapped + NA_struct + NA_fuse + NA_topo + NA_fuse_topo`.
+For g3, the absent shared split contributes two to `NA_fuse_topo` in primitive
+accounting (Total = 9) and one in coordinate accounting (Total = 8).
+`Mapped` counts displayed singletons, including those with missing lengths.
+Both units count each structurally lost primitive once. The accounting weights
+leave the two primitive cells for the absent split labeled `NA_fuse`.
 
 The default `pair_alignment_results(fixed, free)` exposes the same group
 table as `$free_fusion_groups`. Use `rule = "legacy"` for frozen paired
