@@ -100,7 +100,7 @@ carry `NA_fuse` in all three genes. A displayed group with no finite length
 has graph class `Mapped` and a literal `NA` value. An unresolved free tree
 can also lack the split.
 
-To tabulate the five outcomes, choose the denominator explicitly:
+Choose the counting unit when tabulating the five outcomes.
 
 ```r
 count_free_topology(free, unit = "primitive")
@@ -113,6 +113,12 @@ accounting (Total = 9) and one in coordinate accounting (Total = 8).
 `Mapped` counts displayed singletons, including those with missing lengths.
 Both units count each structurally lost primitive once. The accounting weights
 leave the two primitive cells for the absent split labeled `NA_fuse`.
+
+Primitive branch recovery uses only eligible reference branches. In g3, each
+member of the absent group is already `NA_fuse` in the reference layer and
+has no independent observation in the free tree. Each therefore contributes
+zero to both the recovery numerator and its denominator. The group still
+appears once in the group table.
 
 The default `pair_alignment_results(fixed, free)` exposes the same group
 table as `$free_fusion_groups`. Use `rule = "legacy"` for frozen paired
