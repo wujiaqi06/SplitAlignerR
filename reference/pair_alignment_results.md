@@ -1,4 +1,4 @@
-# Apply the frozen paired finalized-matrix bookkeeping layer
+# Finalize paired fixed and free branch alignments
 
 Pair fixed-topology and free-topology single-tree results without
 modifying either graph-state ledger. The finalized matrix is computed
@@ -9,7 +9,7 @@ a graph state.
 ## Usage
 
 ``` r
-pair_alignment_results(fixed, free)
+pair_alignment_results(fixed, free, rule = c("layered", "legacy"))
 ```
 
 ## Arguments
@@ -22,12 +22,19 @@ pair_alignment_results(fixed, free)
 
   A `splitaligner_result` generated with `mode = "free"`.
 
+- rule:
+
+  Use the default `"layered"` rule (paired schema 2.0.0) or `"legacy"`
+  to reproduce the frozen schema 1.0.0 final matrix.
+
 ## Value
 
 A `splitaligner_paired_result` containing graph states, fixed and free
 pre-promotion matrices, the finalized free matrix, a per-cell ledger,
 literal-`NA` summary rows, conventions, and versioned metadata. The
-input single-tree results are not modified.
+input single-tree results are not modified. In layered mode,
+`free_fusion_groups` reports free-tree recovery once per gene and
+composite.
 
 ## Details
 
@@ -37,7 +44,9 @@ finite composite evidence, and literal `NA` otherwise. Paired
 finalization then promotes graph-state `NA_struct` to `NA_struct`, and
 promotes graph-state `NA_topo` to `NA_topo` only when the fixed
 primitive is mapped with finite evidence. Finite evidence on a fixed
-fused coordinate never satisfies that primitive gate. A literal
+fused coordinate never satisfies that primitive gate. In layered mode,
+every fused primitive remains `NA_fuse`. The group carries the recovered
+length or, when the projected split is absent, `NA_fuse_topo`. A literal
 finalized `NA` remains `NA` on serialization and is summarized as
 `residual_NA`.
 
@@ -52,33 +61,9 @@ free <- align_branches(
   species, c(g = "((A:1,D:1):1,(B:1,E:1):1);"), mode = "free"
 )
 paired <- pair_alignment_results(fixed, free)
-paired$residual_NA
-#>   gene_id coordinate_id branch_type fixed_primitive_state free_primitive_state
-#> 7       g            B7    internal               NA_fuse              NA_fuse
-#> 8       g            B8    internal               NA_fuse              NA_fuse
-#> 9       g            B9    internal               NA_fuse              NA_fuse
-#>   fixed_fiber_member_set free_fiber_member_set
-#> 7               B7|B8|B9              B7|B8|B9
-#> 8               B7|B8|B9              B7|B8|B9
-#> 9               B7|B8|B9              B7|B8|B9
-#>   fixed_primitive_numeric_available free_primitive_numeric_available
-#> 7                             FALSE                            FALSE
-#> 8                             FALSE                            FALSE
-#> 9                             FALSE                            FALSE
-#>   fixed_fused_numeric_available free_fused_numeric_available
-#> 7                          TRUE                        FALSE
-#> 8                          TRUE                        FALSE
-#> 9                          TRUE                        FALSE
-#>   fixed_composite_coordinate free_composite_coordinate
-#> 7                F[B7|B8|B9]               F[B7|B8|B9]
-#> 8                F[B7|B8|B9]               F[B7|B8|B9]
-#> 9                F[B7|B8|B9]               F[B7|B8|B9]
-#>   fixed_composite_recovery_status free_composite_recovery_status
-#> 7               recovered_numeric                    unrecovered
-#> 8               recovered_numeric                    unrecovered
-#> 9               recovered_numeric                    unrecovered
-#>   free_pre_promotion_token final_matrix_token summary_class residual_NA
-#> 7                       NA                 NA   residual_NA        TRUE
-#> 8                       NA                 NA   residual_NA        TRUE
-#> 9                       NA                 NA   residual_NA        TRUE
+paired$free_fusion_groups
+#>   gene_id composite_id projected_split recovery_status numeric_available
+#> 1       g  F[B7|B8|B9]      A..B||D..E     unrecovered             FALSE
+#>   numeric_value numeric_status primitive_members  graph_class  final_token
+#> 1            NA  not_recovered        B7, B8, B9 NA_fuse_topo NA_fuse_topo
 ```

@@ -40,7 +40,7 @@ result <- align_branches(species, genes, mode = "free")
 result
 #> <splitaligner_result> 3 genes x 5 primitive coordinates; 0 composite coordinates
 #>   mapped=14  NA_struct=0  NA_fuse=0  NA_topo=1
-#>   core=0.1.0  schema=1.0.0  mode=free
+#>   core=0.2.0-fast-abi2  schema=1.0.0  mode=free
 result$state_matrix
 #>            B1       B2       B3       B4       B5       
 #> concordant "mapped" "mapped" "mapped" "mapped" "mapped" 
@@ -78,6 +78,11 @@ fixed <- align_branches(species, genes["concordant"], mode = "fixed",
 free <- align_branches(species, genes["discordant"], mode = "free",
                         gene_ids = "g1")
 paired <- pair_alignment_results(fixed, free)
+paired$free_fusion_groups
+#>  [1] gene_id           composite_id      projected_split   recovery_status  
+#>  [5] numeric_available numeric_value     numeric_status    primitive_members
+#>  [9] graph_class       final_token      
+#> <0 rows> (or 0-length row.names)
 paired$semantic_state_matrix
 #>    B1       B2       B3       B4       B5       
 #> g1 "mapped" "mapped" "mapped" "mapped" "NA_topo"
@@ -107,10 +112,14 @@ represented by literal `NA`; only mapped finite evidence becomes numeric
 and only a fused state with finite composite evidence becomes `NA_fuse`.
 The paired gate then uses the graph state to assign `NA_struct`, or
 assigns `NA_topo` only when the fixed primitive is mapped with finite
-evidence. A finite fixed fused coordinate cannot satisfy that gate.
-Final literal `NA` is retained as `NA` and summarized as `residual_NA`.
-Empirical split conflict or adjacent side-clade loss may explain a
-frozen data set, but neither is a classification predicate.
+evidence. A finite fixed fused coordinate cannot satisfy that gate. In
+layered mode, all fused primitive members keep `NA_fuse`; each group
+carries its recovered length, literal `NA` for a displayed split with no
+finite length, or `NA_fuse_topo` for an absent split. Use
+`rule = "legacy"` to replay schema 1.0.0 matrices. Final literal `NA` is
+retained as `NA` and summarized as `residual_NA`. Empirical split
+conflict or adjacent side-clade loss may explain a frozen data set, but
+neither is a classification predicate.
 
 ## Structural restriction and composite provenance
 

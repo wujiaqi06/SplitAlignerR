@@ -21,7 +21,7 @@ identifiers.
 ``` r
 splitaligner_core_info()
 #> $core_version
-#> [1] "0.1.0"
+#> [1] "0.2.0-fast-abi2"
 #> 
 #> $schema_version
 #> [1] "1.0.0"
@@ -37,5 +37,14 @@ splitaligner_core_info()
 #> 
 #> $oracle_calls_production_core
 #> [1] FALSE
+#> 
+#> $backend_name
+#> [1] "SplitAlignerFast"
+#> 
+#> $backend_abi
+#> [1] 2
+#> 
+#> $backend_source_commit
+#> [1] "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc"
 #> 
 ```

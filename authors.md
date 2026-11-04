@@ -25,7 +25,7 @@ Preprint.
 
 Wu J (2026). *SplitAlignerR: Catnip10 Graph-Oracle Benchmark Accessors
 for the SplitAligner Branch-Coordinate Framework*. R package version
-0.1.0.9000 post-release development; stable Pro-RECERT-certified release
+0.1.0.9005 post-release development; stable Pro-RECERT-certified release
 v0.1.0; software DOI not yet assigned,
 <https://github.com/wujiaqi06/SplitAlignerR>.
 
@@ -33,6 +33,6 @@ v0.1.0; software DOI not yet assigned,
       title = {SplitAlignerR: Catnip10 Graph-Oracle Benchmark Accessors for the SplitAligner Branch-Coordinate Framework},
       author = {Jiaqi Wu},
       year = {2026},
-      note = {R package version 0.1.0.9000 post-release development; stable Pro-RECERT-certified release v0.1.0; software DOI not yet assigned},
+      note = {R package version 0.1.0.9005 post-release development; stable Pro-RECERT-certified release v0.1.0; software DOI not yet assigned},
       url = {https://github.com/wujiaqi06/SplitAlignerR},
     }

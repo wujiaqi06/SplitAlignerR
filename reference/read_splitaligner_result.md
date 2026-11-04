@@ -36,5 +36,5 @@ save_splitaligner_result(result, path)
 read_splitaligner_result(path)
 #> <splitaligner_result> 1 genes x 5 primitive coordinates; 0 composite coordinates
 #>   mapped=5  NA_struct=0  NA_fuse=0  NA_topo=0
-#>   core=0.1.0  schema=1.0.0  mode=free
+#>   core=0.2.0-fast-abi2  schema=1.0.0  mode=free
 ```
