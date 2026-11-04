@@ -9,18 +9,21 @@ if (length(args) != 2L) {
 source_root <- normalizePath(args[[1L]], mustWork = TRUE)
 output_report <- args[[2L]]
 expected <- list(
-  package = "0.1.0.9000",
-  core = "0.1.0",
+  package = "0.1.0.9005",
+  core = "0.2.0-fast-abi2",
+  historical_convention_core = "0.1.0",
+  backend_commit = "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
   general_schema = "1.0.0",
-  paired_schema = "1.0.0",
+  paired_schema = "2.0.0",
+  legacy_paired_schema = "1.0.0",
   candidate = "v0.1.0-rc3",
   certified_release = "v0.1.0",
   certified_commit = "17a0927095c7a067817bf598a2556cbe7348a6d0",
-  development_status = "post-release development",
-  recert_status = "not covered by v0.1.0 Pro PASS",
+  development_status = "Layered fusion-group classification on Fast C ABI 2",
+  recert_status = "not covered by v0.1.0 Pro PASS; Fast core acceptance is separate from R integration acceptance",
   certified_release_tag_created = TRUE,
   certified_github_release_published = TRUE,
-  development_release_authorized = FALSE,
+  development_release_authorized = TRUE,
   doi = "10.64898/2026.02.24.707838",
   software_title = paste(
     "SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner"
@@ -106,6 +109,30 @@ add_check(
   core_info$schema_version
 )
 
+add_check("installed_package_version",
+          identical(as.character(utils::packageVersion("SplitAlignerR")), expected$package),
+          as.character(utils::packageVersion("SplitAlignerR")))
+add_check("backend_identity",
+          identical(core_info$backend_name, "SplitAlignerFast") &&
+            identical(core_info$backend_abi, 2L) &&
+            identical(core_info$backend_source_commit, expected$backend_commit),
+          core_info$backend_source_commit)
+
+lock <- jsonlite::read_json(file.path(source_root, "inst/fast-backend/SOURCE_LOCK.json"))
+add_check("source_lock_identity",
+          identical(lock$accepted_source_commit, expected$backend_commit),
+          lock$accepted_source_commit)
+for (entry in lock$files) {
+  sha <- digest::digest(file = file.path(source_root, entry$path), algo = "sha256")
+  add_check(paste0("native_source_", basename(entry$path)), identical(sha, entry$sha256), entry$path)
+}
+
+license_sha <- "a80e451615a111ac689551474e8061b8201cbe8e2e26492f273acab8d8fdebe8"
+installed_mit <- system.file("fast-backend", "LICENSE", package = "SplitAlignerR",
+                             mustWork = TRUE)
+add_check("bundled_MIT_license", identical(digest::digest(file = installed_mit,
+          algo = "sha256"), license_sha), "installed Fast copyright and license")
+
 tiny_species <- "((A:1,B:1):1,(C:1,D:1):1);"
 tiny_fixed <- align_branches(
   tiny_species, c(g = tiny_species), mode = "fixed"
@@ -128,7 +155,7 @@ convention_general <- json_string(conventions, "schema_version")
 convention_paired <- json_string(conventions, "paired_schema")
 add_check(
   "conventions_core_version",
-  identical(convention_core, expected$core),
+  identical(convention_core, expected$historical_convention_core),
   convention_core
 )
 add_check(
@@ -138,7 +165,7 @@ add_check(
 )
 add_check(
   "conventions_paired_schema",
-  identical(convention_paired, expected$paired_schema),
+  identical(convention_paired, expected$legacy_paired_schema),
   convention_paired
 )
 
@@ -228,12 +255,19 @@ add_check(
   identity_certified_release_published
 )
 add_check(
-  "release_identity_development_release_not_authorized",
+  "release_identity_development_prerelease_authorized",
   identical(
     identity_development_release_authorized,
     expected$development_release_authorized
   ),
   identity_development_release_authorized
+)
+
+development_tag <- json_string(release_identity, "authorized_development_prerelease_tag")
+add_check(
+  "release_identity_authorized_development_tag",
+  identical(development_tag, paste0("v", expected$package)),
+  development_tag
 )
 
 legacy_authorization_fields <- c(
@@ -272,6 +306,7 @@ extract_cff_title <- function(lines) {
   }
   sub('^\\s*title:\\s*"([^"]+)"\\s*$', "\\1", hit, perl = TRUE)
 }
+add_check("cff_package_version", paste("version:", expected$package) %in% cff_lines, expected$package)
 software_title <- extract_cff_title(cff_lines[seq_len(preferred_start - 1L)])
 preferred_title <- extract_cff_title(
   cff_lines[preferred_start:length(cff_lines)]
@@ -308,9 +343,9 @@ documentation_text <- c(
 )
 add_check(
   "documentation_package_version",
-  grepl("0.1.0.9000", documentation_text[[1L]], fixed = TRUE) &&
-    grepl("package version 0.1.0.9000", documentation_text[[2L]], fixed = TRUE),
-  "README.md and inst/CITATION declare development version 0.1.0.9000"
+  grepl("0.1.0.9005", documentation_text[[1L]], fixed = TRUE) &&
+    grepl("package version 0.1.0.9005", documentation_text[[2L]], fixed = TRUE),
+  "README.md and inst/CITATION declare development version 0.1.0.9005"
 )
 add_check(
   "documentation_certified_release_boundary",
@@ -340,13 +375,13 @@ add_check(
   "stable install uses @v0.1.0"
 )
 add_check(
-  "readme_development_install_targets_default_branch",
+  "readme_development_install_targets_prerelease_tag",
   grepl(
-    'remotes::install_github("wujiaqi06/SplitAlignerR")',
+    sprintf('remotes::install_github("wujiaqi06/SplitAlignerR@%s")', development_tag),
     readme,
     fixed = TRUE
   ),
-  "development install uses the default branch"
+  paste("development install uses", development_tag)
 )
 stale_readme_phrases <- c(
   "release-candidate line",

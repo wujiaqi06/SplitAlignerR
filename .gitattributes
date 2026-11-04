@@ -1,0 +1,6 @@
+# Preserve the exact upstream bytes recorded in inst/fast-backend/SOURCE_LOCK.json.
+/src/fast_core.cpp text eol=lf
+/src/fast_c_api.cpp text eol=lf
+/src/splitaligner/fast_core.hpp text eol=lf
+/src/splitaligner/fast_c_api.h text eol=lf
+/inst/fast-backend/LICENSE text eol=lf

@@ -69,6 +69,7 @@ fixed <- align_branches(species, genes["concordant"], mode = "fixed",
 free <- align_branches(species, genes["discordant"], mode = "free",
                         gene_ids = "g1")
 paired <- pair_alignment_results(fixed, free)
+paired$free_fusion_groups
 paired$semantic_state_matrix
 paired$free_pre_promotion_matrix
 paired$final_matrix
@@ -81,7 +82,10 @@ by literal `NA`; only mapped finite evidence becomes numeric and only a fused
 state with finite composite evidence becomes `NA_fuse`. The paired gate then
 uses the graph state to assign `NA_struct`, or assigns `NA_topo` only when the
 fixed primitive is mapped with finite evidence. A finite fixed fused coordinate
-cannot satisfy that gate. Final literal `NA` is retained as `NA` and summarized
+cannot satisfy that gate. In layered mode, all fused primitive members keep
+`NA_fuse`; each group carries its recovered length, literal `NA` for a
+displayed split with no finite length, or `NA_fuse_topo` for an absent split.
+Use `rule = "legacy"` to replay schema 1.0.0 matrices. Final literal `NA` is retained as `NA` and summarized
 as `residual_NA`. Empirical split conflict or adjacent side-clade loss may
 explain a frozen data set, but neither is a classification predicate.
 

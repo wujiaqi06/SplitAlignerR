@@ -1,0 +1,26 @@
+{
+  "accepted_source_commit": "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
+  "r_baseline_tar_sha256": "c4fcc16cce3aaf90189a686b57dd0eadba2d20fccfd246d42deeef353f83522f",
+  "files": [
+    {
+      "path": "src/fast_core.cpp",
+      "bytes": 12051,
+      "sha256": "a8856672138a9af3280ceaa500c79a7dec18d95b56a5b19248d174a739050ba7"
+    },
+    {
+      "path": "src/fast_c_api.cpp",
+      "bytes": 8453,
+      "sha256": "eb16e3e1a1aadcc882f9e02f34e93d56262095d192349e29e8e80aa6894ca8a1"
+    },
+    {
+      "path": "src/splitaligner/fast_core.hpp",
+      "bytes": 3907,
+      "sha256": "11f7a08b97424b5ff9d05d5294f76540d6038b091adf5b6976584dd417011ecf"
+    },
+    {
+      "path": "src/splitaligner/fast_c_api.h",
+      "bytes": 4957,
+      "sha256": "b61006fa7af9746786a0f77f9b587848852aa67bede6c0ecb12d70c88d6f1f4e"
+    }
+  ]
+}

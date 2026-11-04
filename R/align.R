@@ -90,9 +90,20 @@ validate_explicit_gene_ids <- function(ids, count) {
 }
 
 gene_id_byte_key <- function(ids) {
-  vapply(ids, function(id) {
+  to_key <- function(values) vapply(values, function(id) {
     paste(as.character(charToRaw(id)), collapse = "")
   }, character(1), USE.NAMES = FALSE)
+  if (!is.character(ids) || is.object(ids) || !is.null(dim(ids)) ||
+      length(ids) < 2L) return(to_key(ids))
+
+  # Deduplicate raw representations, without transcoding. Ordinary unique()
+  # can merge UTF-8 and Latin-1 strings that compare equal but have different
+  # bytes; the byte keys intentionally distinguish those representations.
+  byte_ids <- ids
+  Encoding(byte_ids) <- "bytes"
+  representatives <- unique(byte_ids)
+  keys <- to_key(representatives)
+  unname(keys[match(byte_ids, representatives)])
 }
 
 restore_gene_id_encodings <- function(result, ids) {
@@ -114,7 +125,7 @@ restore_gene_id_encodings <- function(result, ids) {
     )
   }
 
-  key_to_id <- stats::setNames(ids, gene_id_byte_key(ids))
+  key_to_id <- stats::setNames(ids, expected_keys)
   restore <- function(values) {
     restored <- unname(key_to_id[gene_id_byte_key(values)])
     if (anyNA(restored)) {

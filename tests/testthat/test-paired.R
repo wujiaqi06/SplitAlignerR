@@ -183,7 +183,7 @@ test_that("fixed fused recovery and free generic NA remain residual NA", {
     c(g = "((A:1,D:1):1,(B:1,E:1):1);"),
     mode = "free"
   )
-  paired <- pair_alignment_results(fixed, free)
+  paired <- pair_alignment_results(fixed, free, rule = "legacy")
   residual <- paired$residual_NA
 
   expect_gt(nrow(residual), 0L)
@@ -299,7 +299,7 @@ test_that("production paired outputs equal the canonical finalizer", {
     free <- align_branches(
       specification$species, c(g = specification$free), mode = "free"
     )
-    paired <- pair_alignment_results(fixed, free)
+    paired <- pair_alignment_results(fixed, free, rule = "legacy")
     coordinates <- colnames(fixed$state_matrix)
     genes <- rownames(fixed$state_matrix)
     cell_gene <- rep(genes, each = length(coordinates))

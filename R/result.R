@@ -373,6 +373,16 @@ validate_splitaligner_result_object <- function(result,
     retained_taxa_key_schema = "length-prefixed-UTF8-bytes-RT1",
     production_core = "C++17 graph-first mapper"
   )
+  # Backend identity is versioned independently of the unchanged result schema.
+  # Legacy objects remain structurally readable with check_version = FALSE;
+  # current Fast objects must carry the exact compiled backend identity.
+  if (identical(result$metadata$core_version, "0.2.0-fast-abi2")) {
+    supported_backend <- splitaligner_core_info()
+    expected_metadata$production_core <- "SplitAlignerFast exact-bitset C ABI 2"
+    for (field in c("backend_name", "backend_abi", "backend_source_commit")) {
+      expected_metadata[[field]] <- supported_backend[[field]]
+    }
+  }
   for (field in names(expected_metadata)) {
     if (!identical(result$metadata[[field]], expected_metadata[[field]])) {
       result_invariant_error(sprintf(

@@ -1,0 +1,204 @@
+SplitAlignerFast C ABI 2 in SplitAlignerR
+
+The R functions validate_species_tree() and align_branches() call the native
+mapping engine. splitaligner_core_info() reports the active ABI and Fast
+source version. This reference describes the native contracts used by the R
+adapter. Function signatures are in src/splitaligner/fast_c_api.h in the R
+source package. Function names below omit the saf_ prefix where convenient.
+
+Identity and tree input
+  An instance of Reference establishes one runtime identity. It contains a
+  nonempty, caller-supplied universe_id plus the exact complete reference axes.
+  Equal text or n_taxa does not join separate Reference instances. Support
+  update/merge checks the shared Reference object identity; merge also checks
+  exact unit_id and cohort_id. The support definition is fixed by this library
+  version (topology-support-v1); counters from another definition are not importable.
+
+  Integer callers own the meaning of taxon IDs and must use the same dictionary
+  for every related tree. The native API cannot certify external names from an
+  integer count or user-supplied label. Persist the full dictionary and axes in
+  the adapter context. Newick parsing, original tokens and comments are adapter
+  responsibilities and are never used in native matching or apply.
+
+  parent and taxon each address n_nodes int64_t entries. Exactly one node has
+  parent=-1. Leaf nodes have taxon in [0,n_taxa); every internal node has taxon=-1.
+  There must be at least two leaves and every internal node, including the root,
+  must have at least two children. Multifurcations are accepted. The arrays need
+  not be topologically sorted. Reference contains every universe taxon exactly
+  once; a gene contains a duplicate-free subset exactly equal to its Coverage.
+  Invalid indices, unary nodes, multiple roots, disconnected components and
+  cycles are rejected. n_taxa and n_nodes must fit int64_t.
+
+  A binary representation root contributes two child edges to one unrooted
+  split. They are merged only when both duplicate edges are the two children of
+  that binary root. Every other duplicate split is rejected. The reference and
+  gene source lists contain original input node IDs, ascending; the root itself
+  is never a source. A two-taxon input has one terminal unrooted edge with two
+  node sources, not two independent topology observations.
+
+Words and IDs
+  n_words = n_taxa/64 + (n_taxa%64 != 0). Word 0 contains taxon IDs 0..63;
+  bit (taxon_id%64) of word taxon_id/64 denotes a taxon. Unused high bits of the
+  last word must be zero. Coverage receives exactly n_words words, including
+  all-zero/all-singleton masks. The native vector is not a portable binary file
+  serialization; adapter text must specify byte/word order explicitly.
+
+  side = min_unsigned(side, coverage XOR side), comparing highest word first.
+  The complementary side is relative to current coverage, not the full universe.
+  Hash tables always check complete word-vector equality. Terminal means
+  min(side_count,other_count)==1, not canonical-side count alone.
+
+  Reference axis IDs, projection IDs and gene edge IDs are zero-based and sorted
+  by that same unsigned exact split order. Each ID is local to its parent plan.
+  Source/member lists are ascending input-node/axis IDs. Absent links use
+  SAF_NONE=(size_t)-1. Axis order is stable across equivalent representations
+  under the same taxon ID dictionary; source node IDs generally are not.
+
+Plan and query model
+  Reference -> Coverage -> Mapping. Plans are immutable after factory creation;
+  private constructors/fields and explicitly deleted copy/move constructors and
+  copy/move assignments prevent ordinary writable plan copies and replacement
+  behind an existing child. Copy the shared_ptr<const Plan> owner to share a plan;
+  copying/moving the plan object itself is prohibited for all three plan classes.
+  A child owns a shared parent plan. Destroying parent handle shells does not
+  invalidate children. Handles can be read concurrently with separate output
+  buffers. Never concurrently use and destroy the same handle, and never update
+  the same support accumulator concurrently. Independent accumulators can be
+  merged after workers stop; merge callers guarantee disjoint observations.
+
+  destroy(NULL) is a no-op. All create functions set a supplied *out=NULL before
+  work and leave it NULL on failure; out itself is mandatory. Dangling handles,
+  inaccessible arrays or false capacities are invalid caller memory, outside
+  the diagnosable contract of this ordinary C ABI.
+
+  get_info requires non-NULL handle and out. Variable-length queries always
+  require out_count. Passing array=NULL,capacity=0 requests the required count.
+  Passing NULL with nonzero capacity is invalid. A non-NULL array with insufficient
+  capacity returns SAF_CAPACITY, sets out_count to the required element count,
+  and does not copy any array element. With enough capacity only the required
+  prefix is written; unused tail elements are untouched. Capacity/count units
+  are elements, except universe which uses bytes INCLUDING its trailing NUL.
+  Empty variable results accept NULL/0 and return count 0. The caller must not
+  alias out_count or optional metadata with array storage.
+
+  reference_axis, coverage_projection and mapping_gene_split expose the complete
+  exact split plus optional saf_split_info (side_count,other_count,terminal).
+  info may be NULL. A count-only query may still populate info. If capacity is
+  insufficient, info and the word array are both unchanged (out_count is set).
+  reference_sources and mapping_gene_sources return original input node IDs.
+  coverage_members returns all reference primitives in a nondegenerate group.
+
+  coverage_axes is fixed-length: get_info.n_axes entries in each of its three
+  mandatory arrays (axis_to_projection, structural and eligible). All pointers
+  and the common capacity are checked before any array is written. There is no
+  NULL/0 count-only shortcut; use get_info. Structural axes have projection
+  SAF_NONE; other axes point to their complete group. The structural and eligible
+  bytes are 0 or 1. All axes are structural for zero/one observed taxa.
+
+  Eligibility requires a singleton projection group. A reference terminal axis
+  is then eligible; a reference internal axis additionally requires a nontrivial
+  projected split. Full reference axes, including terminals, are always included
+  before projecting; root aliases are normalized before fusion grouping.
+
+  mapping_projection_to_gene and mapping_gene_to_projection expose the inverse
+  partial bijection. mapping_reference_absent and mapping_gene_unmatched return
+  the respective missing projection/gene-edge index lists. Matched composites
+  belong to the matched partition, never to gene_unmatched. Native code does not
+  infer a correspondence between the two unmatched directions.
+
+  mapping_states requires n_axes writable bytes, with no NUL terminator. States:
+    S: structural, no primitive source or numeric value.
+    F: membership in a multi-primitive projection group; composite recovery is
+       separate. The primitive has no numeric value or support denominator.
+    D: recovered eligible singleton; sources are found by axis_to_projection ->
+       projection_to_gene -> mapping_gene_sources.
+    U: eligible singleton absent; no primitive source or numeric value.
+  mapping_recovered requires n_projections bytes (0/1). Both fixed calls check
+  handle/pointer/capacity first; use get_info for counts. Null is allowed only
+  for an actually empty result with capacity 0. Mapping itself requires >=2
+  observed taxa, so normal valid mappings have nonempty arrays.
+
+  Multifurcation absence means not recovered. Compatibility is not assessed;
+  no conflict or unresolved status is implied. These S/F/D/U definitions are
+  versioned native raw states and do not claim old Perl raw-F or paired-finalized
+  token compatibility.
+
+Apply: three independent output families
+  saf_mapping_apply consumes lengths in the ORIGINAL input node layout of this
+  Mapping, and optional uint8_t length_valid in that same layout. If topology,
+  parent/taxon layout or node-to-edge association changes, build a new Mapping.
+  Equal node count or equal split set is insufficient. Merely changing lengths
+  permits reuse. The API cannot detect incorrect external array permutations.
+
+  primitive: n_axes slots. Only state D has a source/value.
+  projection: n_projections slots, including singletons and fused composites.
+              A recovered projection aggregates its matched gene edge sources.
+  gene_edge: n_gene_splits slots, including all unmatched gene edges.
+
+  Each saf_value_buffer is either {NULL,NULL,0} to skip a family, or supplies
+  both values and valid with capacity >= its required slot count. Mixed NULL
+  pointers are invalid. All output descriptors/capacities are checked first.
+  If every family is skipped, the handle and descriptors are validated; lengths,
+  valid and n_nodes are ignored and never accessed. Otherwise node_lengths must
+  be non-NULL and n_nodes must exactly match mapping_get_info.n_nodes.
+
+  Input ranges and requested output ranges must not overlap; no pair of requested
+  values/valid arrays may overlap either. The implementation checks byte ranges
+  before writing. This range check covers required prefixes, not unused capacity
+  tails. All capacities and argument relationships are checked before any output
+  write. Exceeding capacity does not zero old values; it is an error.
+
+  length_valid=NULL means all nodes are marked usable. A zero validity byte
+  skips reading that source length. Any unavailable or nonfinite source makes
+  the aggregate unavailable (value=NaN, valid=0). The complete source group is
+  checked before addition, so missing data takes precedence over an otherwise
+  overflowing finite prefix. Sources are added in ascending original node ID.
+  All sources finite but a nonfinite total returns SAF_NUMERIC_OVERFLOW.
+  Finite zeros, negatives and representable subnormals are preserved. A negative
+  zero's sign is not guaranteed after summation. The root length/validity slot is
+  never read. Skipped output families do not aggregate any values.
+
+  On success every requested slot receives a value and valid byte, and tails
+  stay untouched. On a numeric error ALL outputs from that call are invalid,
+  including prefixes already written. Discard them; no rollback buffer is
+  allocated. Accepted/proposal MCMC states should use separate plans/buffers and
+  choose the accepted one only after a successful call.
+
+  Successful native apply does no allocations, parsing, split construction,
+  filesystem access or string-dictionary operations. This guarantee excludes
+  wrappers, query/build operations and error paths.
+
+Free topology support
+  Create with an existing Reference, nonempty unit_id and nonempty cohort_id.
+  One update is one observation, independent of lengths and fixed trees. The API
+  has no gene/sample ID and does not deduplicate observations. Callers using
+  posterior samples must preserve sample IDs and specify their statistical unit
+  and weighting outside this counter.
+
+  Counts per reference axis:
+    n_valid_topologies: all successful update observations.
+    n_struct: structural observations.
+    n_fused: fusion memberships.
+    n_dec: eligible observations.
+    n_rec: eligible recovered observations.
+    n_not_recovered: eligible absent observations (=n_dec-n_rec).
+  support_fraction=n_rec/n_dec and percent=100*fraction if n_dec>0; otherwise
+  report NA. Terminal and internal types are read from the Reference axes.
+  Composite recovery is available per Mapping, independently of these primitive
+  denominators. Existing Perl numeric Support is a different definition.
+
+  Every counter is uint64_t. Update and merge preflight every affected counter
+  before committing any counter. Overflow returns SAF_COUNT_OVERFLOW without
+  mutation. Self-merge is rejected. Merging requires matching Reference identity,
+  universe (inherited), support definition, unit and cohort; shard disjointness
+  remains the caller's responsibility. support_read is a variable-length query.
+
+Errors and exception boundary
+  SAF_OK=0; SAF_INVALID_ARGUMENT=1; SAF_CAPACITY=2; SAF_NO_MEMORY=3;
+  SAF_NUMERIC_OVERFLOW=4; SAF_COUNT_OVERFLOW=5; SAF_INTERNAL_ERROR=6.
+  All potentially throwing C entry points catch C++ exceptions. bad_alloc maps
+  to NO_MEMORY; length_error maps to INVALID_ARGUMENT. Error reporting copies
+  at most 511 bytes into a 512-byte thread_local buffer and cannot throw.
+  saf_last_error returns this thread's buffer; a successful status call clears
+  it. Copy a message before another call on that thread. saf_version and
+  saf_last_error return static/thread-local storage and do not throw or allocate.

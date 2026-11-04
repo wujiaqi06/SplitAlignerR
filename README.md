@@ -7,15 +7,14 @@
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
 
-SplitAlignerR is the R interface and independent benchmark track for the
-SplitAligner branch-coordinate framework. It provides a production C++17
-graph-first mapper, strict finite-range branch-length validation, and a pure R
-node-edge implementation that independently recomputes the Catnip10
-graph-oracle benchmark.
+SplitAlignerR aligns gene-tree branches to species-tree coordinates. The C++17
+SplitAlignerFast backend maps exact taxon bitsets through C ABI 2. A separate
+pure R implementation independently recomputes the Catnip10 graph-oracle benchmark.
+The package checks branch-length tokens before using them as numeric evidence.
 
 `v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
-the post-release development line and is not covered by the `v0.1.0` RECERT
-decision; its current package version is `0.1.0.9000`. The frozen
+the post-release development line. The Fast-backed prerelease has package version
+`0.1.0.9005` and is not covered by the `v0.1.0` RECERT decision. The frozen
 `v0.1.0-rc1`, `v0.1.0-rc2`, and `v0.1.0-rc3` tags are retained as historical
 release candidates.
 
@@ -29,8 +28,8 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 # Stable, Pro-RECERT-certified release:
 remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0")
 
-# Post-release development line (not covered by the v0.1.0 RECERT decision):
-remotes::install_github("wujiaqi06/SplitAlignerR")
+# Fast-backed prerelease
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0.9005")
 ```
 
 ## Minimal Example
@@ -64,6 +63,70 @@ aligned <- align_branches(species, genes, mode = "free")
 aligned$state_matrix
 aligned$numeric_matrix
 ```
+
+## Fast-backed development package
+
+Build the prerelease with a C++17 compiler and the Rcpp, ape and digest packages.
+Install the source archive using `R CMD INSTALL SplitAlignerR_0.1.0.9005.tar.gz`.
+Use `splitaligner_core_info()` to inspect the active backend and source version.
+
+The mapper uses exact taxon bitsets. It caches coverage projections within an
+alignment while preserving the R result's branch order, source indices and
+fusion memberships. The fixed and free outputs retain separate graph states
+and numeric evidence. Pair them with `pair_alignment_results()` to produce
+the finalized matrix. Full result objects include per-cell provenance ledgers.
+
+### Fusion members and their shared split
+
+For each gene, missing taxa can cause two or more reference branches to project
+onto one split. Each primitive member keeps `NA_fuse` in its own cell. Inspect
+the group once to find its length or see why the length is unavailable:
+
+```r
+species <- "((A,B),C,(D,(E,F)));"
+genes <- c(g1 = "((A,B):0.31,D,(E,F):0.17);",
+           g2 = "((A,B):0.26,E,(D,F));",
+           g3 = "((A,D),B,(E,F):0.23);")
+free <- align_branches(species, genes, mode = "free")
+groups <- free_fusion_groups(free)
+groups[, c("gene_id", "primitive_members", "projected_split", "recovery_status",
+           "graph_class", "final_token")]
+```
+
+For these three genes, the same two reference branches form a fusion group.
+The shared split is present at length 0.31 in g1 and 0.26 in g2. The g3 tree
+lacks the split, so its group token is `NA_fuse_topo`. Both members still
+carry `NA_fuse` in all three genes. A displayed group with no finite length
+has graph class `Mapped` and a literal `NA` value. An unresolved free tree
+can also lack the split.
+
+Choose the counting unit when tabulating the five outcomes.
+
+```r
+count_free_topology(free, unit = "primitive")
+count_free_topology(free, unit = "coordinate")
+```
+
+Each row satisfies `Total = Mapped + NA_struct + NA_fuse + NA_topo + NA_fuse_topo`.
+For g3, the absent shared split contributes two to `NA_fuse_topo` in primitive
+accounting (Total = 9) and one in coordinate accounting (Total = 8).
+`Mapped` counts displayed singletons, including those with missing lengths.
+Both units count each structurally lost primitive once. The accounting weights
+leave the two primitive cells for the absent split labeled `NA_fuse`.
+
+Primitive branch recovery uses only eligible reference branches. In g3, each
+member of the absent group is already `NA_fuse` in the reference layer and
+has no independent observation in the free tree. Each therefore contributes
+zero to both the recovery numerator and its denominator. The group still
+appears once in the group table.
+
+The default `pair_alignment_results(fixed, free)` exposes the same group
+table as `$free_fusion_groups`. Use `rule = "legacy"` for frozen paired
+schema 1.0.0 matrices, including their historical residual `NA` tokens.
+
+Use `export_splitaligner_exchange()` for fixed-mode exchange and
+`validate_splitaligner_exchange()` to verify an exchange object's structure
+and seals. See `?splitaligner_exchange` for its reference-tree requirements.
 
 ## V1 Scope
 
@@ -105,7 +168,7 @@ The production mapper lives in the C++ core. R converts inputs and wraps the
 result; the Catnip10 Oracle remains a separate pure R node-edge implementation
 that never calls the core or uses projected splits for structural states.
 
-The contract field `finalized_perl_matrices_are_authoritative` is intentionally
+The legacy contract field `finalized_perl_matrices_are_authoritative` is intentionally
 named. Here, Perl refers to the frozen SplitAligner reference implementation;
 SplitAlignerR does not require Perl at runtime.
 
@@ -132,4 +195,16 @@ See [`CITATION.cff`](CITATION.cff) and `citation("SplitAlignerR")`.
 
 ## License
 
-GPL-3. See [LICENSE.md](LICENSE.md).
+SplitAlignerR uses GPL-3. See [LICENSE.md](LICENSE.md). The four vendored
+SplitAlignerFast core files are distributed under the [MIT License](inst/fast-backend/LICENSE).
+
+## Acknowledgments
+
+We are especially grateful to Chao Zhang (张超) for his generous technical
+help and for sharing his fastSplitAligner.py implementation. His
+implementation provided an important reference for efficient split-based
+branch mapping and a comparison baseline during the development and
+validation of SplitAlignerFast.
+
+SplitAlignerR also benefits from this contribution through its shared
+SplitAlignerFast core.

@@ -10,6 +10,337 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// cpp_engine002_authority_create
+SEXP cpp_engine002_authority_create(Rcpp::CharacterVector taxon_labels, Rcpp::IntegerVector terminal_taxon_ids, Rcpp::List primitive_splits);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_authority_create(SEXP taxon_labelsSEXP, SEXP terminal_taxon_idsSEXP, SEXP primitive_splitsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type taxon_labels(taxon_labelsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type terminal_taxon_ids(terminal_taxon_idsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type primitive_splits(primitive_splitsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_authority_create(taxon_labels, terminal_taxon_ids, primitive_splits));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_authority_info
+Rcpp::List cpp_engine002_authority_info(SEXP authority_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_authority_info(SEXP authority_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_authority_info(authority_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_authority_close
+bool cpp_engine002_authority_close(SEXP authority_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_authority_close(SEXP authority_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_authority_close(authority_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_encode
+Rcpp::RawVector cpp_engine002_plan_encode(SEXP authority_pointer, double pattern_id, Rcpp::RawVector retained, Rcpp::IntegerVector states, Rcpp::List primitive_queries);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_encode(SEXP authority_pointerSEXP, SEXP pattern_idSEXP, SEXP retainedSEXP, SEXP statesSEXP, SEXP primitive_queriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_id(pattern_idSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type retained(retainedSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type states(statesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type primitive_queries(primitive_queriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_encode(authority_pointer, pattern_id, retained, states, primitive_queries));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_decode
+Rcpp::List cpp_engine002_plan_decode(SEXP authority_pointer, Rcpp::RawVector record);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_decode(SEXP authority_pointerSEXP, SEXP recordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_decode(authority_pointer, record));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_view_snapshot
+Rcpp::List cpp_engine002_plan_view_snapshot(SEXP authority_pointer, Rcpp::RawVector record);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_view_snapshot(SEXP authority_pointerSEXP, SEXP recordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_view_snapshot(authority_pointer, record));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_plan_view_probe
+Rcpp::List cpp_engine002_plan_view_probe(SEXP authority_pointer, Rcpp::RawVector record, Rcpp::IntegerVector primitive_ids, int repeats);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_plan_view_probe(SEXP authority_pointerSEXP, SEXP recordSEXP, SEXP primitive_idsSEXP, SEXP repeatsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type primitive_ids(primitive_idsSEXP);
+    Rcpp::traits::input_parameter< int >::type repeats(repeatsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_plan_view_probe(authority_pointer, record, primitive_ids, repeats));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_hash_reference_vectors
+Rcpp::List cpp_engine002_hash_reference_vectors();
+RcppExport SEXP _SplitAlignerR_cpp_engine002_hash_reference_vectors() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_hash_reference_vectors());
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_large_offset_arithmetic_probe
+Rcpp::List cpp_engine002_large_offset_arithmetic_probe(double record_bytes_value, double pattern_count_value);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe(SEXP record_bytes_valueSEXP, SEXP pattern_count_valueSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type record_bytes_value(record_bytes_valueSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count_value(pattern_count_valueSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_large_offset_arithmetic_probe(record_bytes_value, pattern_count_value));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_sha_invariant_probe
+std::string cpp_engine002_sha_invariant_probe(int scenario);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_sha_invariant_probe(SEXP scenarioSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type scenario(scenarioSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_sha_invariant_probe(scenario));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_set_constant_fast_hash
+bool cpp_engine002_set_constant_fast_hash(bool enabled);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_set_constant_fast_hash(SEXP enabledSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type enabled(enabledSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_set_constant_fast_hash(enabled));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_constant_hash_registry_probe
+Rcpp::IntegerVector cpp_engine002_constant_hash_registry_probe();
+RcppExport SEXP _SplitAlignerR_cpp_engine002_constant_hash_registry_probe() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_constant_hash_registry_probe());
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_build_authority_scale_store
+Rcpp::List cpp_engine002_build_authority_scale_store(std::string directory, std::string run_store_id, double pattern_count, double cache_budget, double scratch_budget, double index_budget, double metadata_budget, double combined_runtime_bound);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_build_authority_scale_store(SEXP directorySEXP, SEXP run_store_idSEXP, SEXP pattern_countSEXP, SEXP cache_budgetSEXP, SEXP scratch_budgetSEXP, SEXP index_budgetSEXP, SEXP metadata_budgetSEXP, SEXP combined_runtime_boundSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type directory(directorySEXP);
+    Rcpp::traits::input_parameter< std::string >::type run_store_id(run_store_idSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count(pattern_countSEXP);
+    Rcpp::traits::input_parameter< double >::type cache_budget(cache_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type scratch_budget(scratch_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type index_budget(index_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type metadata_budget(metadata_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type combined_runtime_bound(combined_runtime_boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_build_authority_scale_store(directory, run_store_id, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_reopen_authority_scale_store
+Rcpp::List cpp_engine002_reopen_authority_scale_store(std::string manifest_path, double pattern_count, double cache_budget, double scratch_budget, double index_budget, double metadata_budget, double combined_runtime_bound);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_reopen_authority_scale_store(SEXP manifest_pathSEXP, SEXP pattern_countSEXP, SEXP cache_budgetSEXP, SEXP scratch_budgetSEXP, SEXP index_budgetSEXP, SEXP metadata_budgetSEXP, SEXP combined_runtime_boundSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type manifest_path(manifest_pathSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count(pattern_countSEXP);
+    Rcpp::traits::input_parameter< double >::type cache_budget(cache_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type scratch_budget(scratch_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type index_budget(index_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type metadata_budget(metadata_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type combined_runtime_bound(combined_runtime_boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_reopen_authority_scale_store(manifest_path, pattern_count, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_memory_store_create
+SEXP cpp_engine002_memory_store_create(SEXP authority_pointer, double pattern_count);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_memory_store_create(SEXP authority_pointerSEXP, SEXP pattern_countSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_count(pattern_countSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_memory_store_create(authority_pointer, pattern_count));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_disk_store_create
+SEXP cpp_engine002_disk_store_create(SEXP authority_pointer, Rcpp::List retained_patterns, std::string directory, std::string run_store_id, double cache_budget, double scratch_budget, double index_budget, double metadata_budget, double combined_runtime_bound);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_disk_store_create(SEXP authority_pointerSEXP, SEXP retained_patternsSEXP, SEXP directorySEXP, SEXP run_store_idSEXP, SEXP cache_budgetSEXP, SEXP scratch_budgetSEXP, SEXP index_budgetSEXP, SEXP metadata_budgetSEXP, SEXP combined_runtime_boundSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type retained_patterns(retained_patternsSEXP);
+    Rcpp::traits::input_parameter< std::string >::type directory(directorySEXP);
+    Rcpp::traits::input_parameter< std::string >::type run_store_id(run_store_idSEXP);
+    Rcpp::traits::input_parameter< double >::type cache_budget(cache_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type scratch_budget(scratch_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type index_budget(index_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type metadata_budget(metadata_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type combined_runtime_bound(combined_runtime_boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_disk_store_create(authority_pointer, retained_patterns, directory, run_store_id, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_disk_store_open
+SEXP cpp_engine002_disk_store_open(SEXP authority_pointer, std::string manifest_path, double cache_budget, double scratch_budget, double index_budget, double metadata_budget, double combined_runtime_bound);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_disk_store_open(SEXP authority_pointerSEXP, SEXP manifest_pathSEXP, SEXP cache_budgetSEXP, SEXP scratch_budgetSEXP, SEXP index_budgetSEXP, SEXP metadata_budgetSEXP, SEXP combined_runtime_boundSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type authority_pointer(authority_pointerSEXP);
+    Rcpp::traits::input_parameter< std::string >::type manifest_path(manifest_pathSEXP);
+    Rcpp::traits::input_parameter< double >::type cache_budget(cache_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type scratch_budget(scratch_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type index_budget(index_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type metadata_budget(metadata_budgetSEXP);
+    Rcpp::traits::input_parameter< double >::type combined_runtime_bound(combined_runtime_boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_disk_store_open(authority_pointer, manifest_path, cache_budget, scratch_budget, index_budget, metadata_budget, combined_runtime_bound));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_store_insert
+bool cpp_engine002_store_insert(SEXP store_pointer, Rcpp::RawVector record);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_store_insert(SEXP store_pointerSEXP, SEXP recordSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type store_pointer(store_pointerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type record(recordSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_store_insert(store_pointer, record));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_store_finalize
+SEXP cpp_engine002_store_finalize(SEXP store_pointer, std::string directory, std::string run_store_id);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_store_finalize(SEXP store_pointerSEXP, SEXP directorySEXP, SEXP run_store_idSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type store_pointer(store_pointerSEXP);
+    Rcpp::traits::input_parameter< std::string >::type directory(directorySEXP);
+    Rcpp::traits::input_parameter< std::string >::type run_store_id(run_store_idSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_store_finalize(store_pointer, directory, run_store_id));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_store_lookup_snapshot
+Rcpp::List cpp_engine002_store_lookup_snapshot(SEXP store_pointer, double pattern_id, Rcpp::RawVector retained);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_store_lookup_snapshot(SEXP store_pointerSEXP, SEXP pattern_idSEXP, SEXP retainedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type store_pointer(store_pointerSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_id(pattern_idSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type retained(retainedSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_store_lookup_snapshot(store_pointer, pattern_id, retained));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_store_debug_pin
+SEXP cpp_engine002_store_debug_pin(SEXP store_pointer, double pattern_id, Rcpp::RawVector retained);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_store_debug_pin(SEXP store_pointerSEXP, SEXP pattern_idSEXP, SEXP retainedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type store_pointer(store_pointerSEXP);
+    Rcpp::traits::input_parameter< double >::type pattern_id(pattern_idSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector >::type retained(retainedSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_store_debug_pin(store_pointer, pattern_id, retained));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_pin_release
+bool cpp_engine002_pin_release(SEXP pin_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_pin_release(SEXP pin_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type pin_pointer(pin_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_pin_release(pin_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_store_stats
+Rcpp::List cpp_engine002_store_stats(SEXP store_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_store_stats(SEXP store_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type store_pointer(store_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_store_stats(store_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_store_close
+bool cpp_engine002_store_close(SEXP store_pointer);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_store_close(SEXP store_pointerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type store_pointer(store_pointerSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_store_close(store_pointer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_set_publication_failpoint
+bool cpp_engine002_set_publication_failpoint(int stage);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_set_publication_failpoint(SEXP stageSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type stage(stageSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_set_publication_failpoint(stage));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_engine002_set_io_faultpoint
+bool cpp_engine002_set_io_faultpoint(int fault);
+RcppExport SEXP _SplitAlignerR_cpp_engine002_set_io_faultpoint(SEXP faultSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type fault(faultSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_engine002_set_io_faultpoint(fault));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_splitaligner_core_info
 Rcpp::List cpp_splitaligner_core_info();
 RcppExport SEXP _SplitAlignerR_cpp_splitaligner_core_info() {
@@ -58,6 +389,32 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SplitAlignerR_cpp_engine002_authority_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_authority_create, 3},
+    {"_SplitAlignerR_cpp_engine002_authority_info", (DL_FUNC) &_SplitAlignerR_cpp_engine002_authority_info, 1},
+    {"_SplitAlignerR_cpp_engine002_authority_close", (DL_FUNC) &_SplitAlignerR_cpp_engine002_authority_close, 1},
+    {"_SplitAlignerR_cpp_engine002_plan_encode", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_encode, 5},
+    {"_SplitAlignerR_cpp_engine002_plan_decode", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_decode, 2},
+    {"_SplitAlignerR_cpp_engine002_plan_view_snapshot", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_snapshot, 2},
+    {"_SplitAlignerR_cpp_engine002_plan_view_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_plan_view_probe, 4},
+    {"_SplitAlignerR_cpp_engine002_hash_reference_vectors", (DL_FUNC) &_SplitAlignerR_cpp_engine002_hash_reference_vectors, 0},
+    {"_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_large_offset_arithmetic_probe, 2},
+    {"_SplitAlignerR_cpp_engine002_sha_invariant_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_sha_invariant_probe, 1},
+    {"_SplitAlignerR_cpp_engine002_set_constant_fast_hash", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_constant_fast_hash, 1},
+    {"_SplitAlignerR_cpp_engine002_constant_hash_registry_probe", (DL_FUNC) &_SplitAlignerR_cpp_engine002_constant_hash_registry_probe, 0},
+    {"_SplitAlignerR_cpp_engine002_build_authority_scale_store", (DL_FUNC) &_SplitAlignerR_cpp_engine002_build_authority_scale_store, 8},
+    {"_SplitAlignerR_cpp_engine002_reopen_authority_scale_store", (DL_FUNC) &_SplitAlignerR_cpp_engine002_reopen_authority_scale_store, 7},
+    {"_SplitAlignerR_cpp_engine002_memory_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_memory_store_create, 2},
+    {"_SplitAlignerR_cpp_engine002_disk_store_create", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_create, 9},
+    {"_SplitAlignerR_cpp_engine002_disk_store_open", (DL_FUNC) &_SplitAlignerR_cpp_engine002_disk_store_open, 7},
+    {"_SplitAlignerR_cpp_engine002_store_insert", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_insert, 2},
+    {"_SplitAlignerR_cpp_engine002_store_finalize", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_finalize, 3},
+    {"_SplitAlignerR_cpp_engine002_store_lookup_snapshot", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_lookup_snapshot, 3},
+    {"_SplitAlignerR_cpp_engine002_store_debug_pin", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_debug_pin, 3},
+    {"_SplitAlignerR_cpp_engine002_pin_release", (DL_FUNC) &_SplitAlignerR_cpp_engine002_pin_release, 1},
+    {"_SplitAlignerR_cpp_engine002_store_stats", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_stats, 1},
+    {"_SplitAlignerR_cpp_engine002_store_close", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_close, 1},
+    {"_SplitAlignerR_cpp_engine002_set_publication_failpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_publication_failpoint, 1},
+    {"_SplitAlignerR_cpp_engine002_set_io_faultpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_io_faultpoint, 1},
     {"_SplitAlignerR_cpp_splitaligner_core_info", (DL_FUNC) &_SplitAlignerR_cpp_splitaligner_core_info, 0},
     {"_SplitAlignerR_cpp_validate_branch_length_tokens", (DL_FUNC) &_SplitAlignerR_cpp_validate_branch_length_tokens, 1},
     {"_SplitAlignerR_cpp_validate_species_tree", (DL_FUNC) &_SplitAlignerR_cpp_validate_species_tree, 1},

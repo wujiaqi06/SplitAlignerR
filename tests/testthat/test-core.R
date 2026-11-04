@@ -1,11 +1,15 @@
 test_that("compiled core reports versioned implementation metadata", {
   info <- splitaligner_core_info()
   expect_type(info, "list")
-  expect_identical(info$core_version, "0.1.0")
+  expect_identical(info$core_version, "0.2.0-fast-abi2")
   expect_identical(info$schema_version, "1.0.0")
   expect_identical(info$production_language, "C++17")
   expect_identical(info$numeric_policy, "finite-double-v1")
   expect_false(info$oracle_calls_production_core)
+  expect_identical(info$backend_name, "SplitAlignerFast")
+  expect_identical(info$backend_abi, 2L)
+  expect_identical(info$backend_source_commit,
+                   "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc")
 })
 
 test_that("numeric tokens are consumed completely and finite-range checked", {
