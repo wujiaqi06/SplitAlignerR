@@ -1,3 +1,13 @@
+# SplitAlignerR 0.1.0.9004 (development)
+
+* The exact-bitset SplitAlignerFast backend supplies branch mapping through C ABI 2.
+  The R adapter reuses display strings and gene-ID keys when building full result
+  matrices and ledgers.
+* The package includes fixed-mode exchange and label tools introduced in 0.1.0.9002.
+* Restored the Catnip10 regression suite and quick-start vignette and added
+  backend identity, byte-key and result restoration tests.
+* Included the MIT notice for the four vendored Fast source files.
+
 # SplitAlignerR 0.1.0.9000
 
 * Published the immutable, Pro-RECERT-certified `v0.1.0` release.

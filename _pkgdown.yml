@@ -16,6 +16,20 @@ reference:
       - validate_branch_length_tokens
       - validate_species_tree
       - splitaligner_core_info
+  - title: Fixed-mode exchange and label tools
+    contents:
+      - splitaligner_label_registry
+      - export_splitaligner_exchange
+      - validate_splitaligner_exchange
+      - read_splitaligner_exchange
+      - transpose_splitaligner_exchange
+      - annotate_splitaligner_exchange
+      - new_splitaligner_label_migration
+      - migrate_splitaligner_labels
+      - splitaligner_exchange_schema
+      - audit_splitaligner_legacy_labels
+      - validate_splitaligner_legacy_profile
+      - legacy_profile_label_migration
   - title: Benchmark data
     desc: Catnip10 graph-oracle benchmark accessors and validation helpers.
     contents:

@@ -9,6 +9,10 @@ fi
 source_root="$(cd "$1" && pwd)"
 authority_root="$(cd "$2" && pwd)"
 expected_commit="$3"
+if ! grep -qx 'Version: 0.1.0' "$source_root/DESCRIPTION"; then
+  echo "This historical V1 RECERT runner requires package 0.1.0. Use the R-CMD-check workflow for development versions." >&2
+  exit 64
+fi
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 runner_temp="${RUNNER_TEMP:?RUNNER_TEMP is required}"
 runner_os="${RUNNER_OS:-unknown-os}"

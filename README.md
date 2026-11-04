@@ -7,15 +7,14 @@
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
 
-SplitAlignerR is the R interface and independent benchmark track for the
-SplitAligner branch-coordinate framework. It provides a production C++17
-graph-first mapper, strict finite-range branch-length validation, and a pure R
-node-edge implementation that independently recomputes the Catnip10
-graph-oracle benchmark.
+SplitAlignerR aligns gene-tree branches to species-tree coordinates. The C++17
+SplitAlignerFast backend maps exact taxon bitsets through C ABI 2. A separate
+pure R implementation independently recomputes the Catnip10 graph-oracle benchmark.
+The package checks branch-length tokens before using them as numeric evidence.
 
 `v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
-the post-release development line and is not covered by the `v0.1.0` RECERT
-decision; its current package version is `0.1.0.9000`. The frozen
+the post-release development line. This source candidate has package version
+`0.1.0.9004` and is not covered by the `v0.1.0` RECERT decision. The frozen
 `v0.1.0-rc1`, `v0.1.0-rc2`, and `v0.1.0-rc3` tags are retained as historical
 release candidates.
 
@@ -64,6 +63,22 @@ aligned <- align_branches(species, genes, mode = "free")
 aligned$state_matrix
 aligned$numeric_matrix
 ```
+
+## Fast-backed development package
+
+Build the candidate with a C++17 compiler and the Rcpp, ape and digest packages.
+Install the source archive using `R CMD INSTALL SplitAlignerR_0.1.0.9004.tar.gz`.
+Use `splitaligner_core_info()` to inspect the active backend and source version.
+
+The mapper uses exact taxon bitsets. It caches coverage projections within an
+alignment while preserving the R result's branch order, source indices and
+fusion memberships. The fixed and free outputs retain separate graph states
+and numeric evidence. Pair them with `pair_alignment_results()` to produce
+the finalized matrix. Full result objects include per-cell provenance ledgers.
+
+Use `export_splitaligner_exchange()` for fixed-mode exchange and
+`validate_splitaligner_exchange()` to verify an exchange object's structure
+and seals. See `?splitaligner_exchange` for its reference-tree requirements.
 
 ## V1 Scope
 
@@ -132,4 +147,16 @@ See [`CITATION.cff`](CITATION.cff) and `citation("SplitAlignerR")`.
 
 ## License
 
-GPL-3. See [LICENSE.md](LICENSE.md).
+SplitAlignerR uses GPL-3. See [LICENSE.md](LICENSE.md). The four vendored
+SplitAlignerFast core files are distributed under the [MIT License](inst/fast-backend/LICENSE).
+
+## Acknowledgments
+
+We are especially grateful to Chao Zhang (张超) for his generous technical
+help and for sharing his fastSplitAligner.py implementation. His
+implementation provided an important reference for efficient split-based
+branch mapping and a comparison baseline during the development and
+validation of SplitAlignerFast.
+
+SplitAlignerR also benefits from this contribution through its shared
+SplitAlignerFast core.

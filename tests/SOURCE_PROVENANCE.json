@@ -1,0 +1,138 @@
+{
+  "source_repository": "https://github.com/wujiaqi06/SplitAlignerR",
+  "source_commit": "e847dd0cc4bc8026cd75a34d2ca75be1b4fe0771",
+  "source_version": "0.1.0.9000",
+  "source_tree": "73b393df0e63b8effa3d8463fdc3a69c4df4419a",
+  "restored_test_files": 11,
+  "restored_test_blocks": 76,
+  "original_files": [
+    {
+      "path": "tests/testthat.R",
+      "sha256": "1f019b187950381d76e48ff3002fd4d948eb06838e00d417c290c7fef082f66e",
+      "bytes": 70,
+      "git_blob": "d9da2d4fe29730321ce55dfec73a47284c3c2a78"
+    },
+    {
+      "path": "tests/testthat/fixtures/catnip10_species_axis.tsv",
+      "sha256": "7f7c21849ac790c19b1616ab2118984ebd406620364c4cdafb22dc95b35cc8d2",
+      "bytes": 769,
+      "git_blob": "74ccf32edbe7351d219f5d9eb2d05c1fa5f1b7cb"
+    },
+    {
+      "path": "tests/testthat/test-align.R",
+      "sha256": "82209ccef2ef04d10038530eb39df1f7be5d0332f3c46f2bada66616c27f396d",
+      "bytes": 12963,
+      "git_blob": "508de19d486b473421564a70bf280b978d7ff44f"
+    },
+    {
+      "path": "tests/testthat/test-core.R",
+      "sha256": "94362b574b7780c49f5496a17099c477473256c8b6879aa18d46807a63e0fcff",
+      "bytes": 2758,
+      "git_blob": "5514dbe82726641ffd2590bcabc0eeac55322d3d"
+    },
+    {
+      "path": "tests/testthat/test-mammal-external.R",
+      "sha256": "14b0ecb35d8273f0f81ebb7e2760f4a67ddec9384fc19409447403177ca479e7",
+      "bytes": 6844,
+      "git_blob": "5ad729af5f1175f85f63a08f83d5a64199164a4c"
+    },
+    {
+      "path": "tests/testthat/test-oracle-recompute.R",
+      "sha256": "91895bcdd6e7d47da20d667ad76fa8cb5f2bc9e5a2c21171b55e3733004c9d70",
+      "bytes": 6262,
+      "git_blob": "da9248b93f338cb57495024219b3f6f396eb9726"
+    },
+    {
+      "path": "tests/testthat/test-paired.R",
+      "sha256": "ad40cfbf603ac3afe0d2f2350ed50afc173e889452ff61182b96a17a0e77ac19",
+      "bytes": 13923,
+      "git_blob": "87675c21aea6eb14dad774c4af850f06fa165a1e"
+    },
+    {
+      "path": "tests/testthat/test-properties.R",
+      "sha256": "a7cd91bb3b083d803113f94483579c37c4a2825361c1a0a9c6e22ed0d20f153d",
+      "bytes": 6471,
+      "git_blob": "ddb2830d5fef3fe81034acc1f48d695a3984d678"
+    },
+    {
+      "path": "tests/testthat/test-release-metadata.R",
+      "sha256": "736c16922f1783d8c9ad6d0c82f4c91f641c96622d0770d2ddbb72a180b2a408",
+      "bytes": 2068,
+      "git_blob": "ce376fe8dbc020e4206ca508d04a58147529fd71"
+    },
+    {
+      "path": "tests/testthat/test-result.R",
+      "sha256": "486e67c94c4f7232e5849eeedb37799975a5e55bcc4863d33027e01694e909d5",
+      "bytes": 4255,
+      "git_blob": "6f9fa04fd7e8a152f894e3db8f43260863e18605"
+    },
+    {
+      "path": "tests/testthat/test-scaffold.R",
+      "sha256": "7d2f3fe743d03ebc64337f6d4f390b75c8c5f961436c2a1c2e26e1ee4d7a5385",
+      "bytes": 4271,
+      "git_blob": "c187b9e676289de77aaa008b43af590ddd87fab7"
+    },
+    {
+      "path": "tests/testthat/test-session-option-invariance.R",
+      "sha256": "359dacddb57f23f9910b634defe504370bd205fab404e160ced42bd787ab3547",
+      "bytes": 8546,
+      "git_blob": "ce203d821d5a6e60fc232dbe01c1abc16795ae29"
+    },
+    {
+      "path": "tests/testthat/test-tree-input.R",
+      "sha256": "92cf1cb2d8f05827bea3de5ab5f3de616f3cdd85cfbb7cf03f32f8da2a7cbdf9",
+      "bytes": 5388,
+      "git_blob": "a03105ddbff504ebb658d858cbe6a3cd58df43b3"
+    },
+    {
+      "path": "vignettes/quick-start.Rmd",
+      "sha256": "f735795c79626873350874c1982b2f002eb095933bf515e40c1c81592648cda2",
+      "bytes": 5974,
+      "git_blob": "341a6fada50a67d617a815e25e917b505e5d9dd5"
+    }
+  ],
+  "candidate_package_version": "0.1.0.9004",
+  "candidate_core_version": "0.2.0-fast-abi2",
+  "backend_source_commit": "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
+  "adapted_files": {
+    "tests/testthat/test-core.R": "Core version assertion; exact Fast backend name, ABI and source-commit assertions in the existing metadata block.",
+    "tests/testthat/test-release-metadata.R": "Package/core/development version and status assertions only."
+  },
+  "unchanged_expectations": "Scientific, numeric, oracle, input/error, persistence and external-fixture assertions are unchanged.",
+  "authoritative_9002": {
+    "source_commit": "d3d212d847fc3526bee2077c32d8e1e0141e3dce",
+    "archive_sha256": "c4fcc16cce3aaf90189a686b57dd0eadba2d20fccfd246d42deeef353f83522f",
+    "contains_tests_or_vignettes": false
+  },
+  "coverage_exclusions": [
+    "exchange APIs",
+    "ENGINE002 storage",
+    "Fast C ABI native lifecycle"
+  ],
+  "prior_exchange_evidence": {
+    "package_version": "0.1.0.9003",
+    "source_commit": "d74285b66df2f1dcb956a006a992646029d3f11f",
+    "package_sha256": "640b1bec2b6d0446702cc246312925338d4db952cd6497493d55ce9e89070f4c",
+    "scope": "Separate accepted bounded Linux engineering suite; not a current 0.1.0.9004 test result."
+  },
+  "new_tests": [
+    {
+      "path": "tests/testthat/test-fast-adapter.R",
+      "test_blocks": 7,
+      "sha256": "0e36973148cd34167f4ef980fc7c8f974f2f7ba6bd262f5ae1ce1312060044c3",
+      "origin": "New bounded adapter regressions; not part of restored historical e847dd0 tests.",
+      "scalar_oracle_origin": "Exact gene_id_byte_key scalar algorithm from e847dd0 R/align.R.",
+      "scope": [
+        "Differential byte-key semantics including invalid bytes, NA/literalNA, encoding marks and names; classed-character and dimensional fallback",
+        "Unchanged complete restored output and malformed/unknown ID rejection",
+        "Fast backend tamper/missing/wrong-type rejection with check_version TRUE and FALSE",
+        "Public print and summary backend identity"
+      ],
+      "excludes": [
+        "Long >64-coverage FIFO eviction stress",
+        "gctorture stress",
+        "Exchange API and ENGINE002 storage qualification"
+      ]
+    }
+  ]
+}

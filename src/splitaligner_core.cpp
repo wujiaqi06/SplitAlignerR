@@ -1,18 +1,22 @@
 #include <Rcpp.h>
 
 #include "numeric_policy.h"
+#include "fast_backend_identity.h"
 
 #include <string>
 
 // [[Rcpp::export]]
 Rcpp::List cpp_splitaligner_core_info() {
   return Rcpp::List::create(
-    Rcpp::Named("core_version") = "0.1.0",
+    Rcpp::Named("core_version") = SAF_R_CORE_VERSION,
     Rcpp::Named("schema_version") = "1.0.0",
     Rcpp::Named("production_language") = "C++17",
     Rcpp::Named("numeric_policy") = "finite-double-v1",
     Rcpp::Named("oracle_language") = "pure R node-edge graph surgery",
-    Rcpp::Named("oracle_calls_production_core") = false
+    Rcpp::Named("oracle_calls_production_core") = false,
+    Rcpp::Named("backend_name") = "SplitAlignerFast",
+    Rcpp::Named("backend_abi") = 2,
+    Rcpp::Named("backend_source_commit") = SAF_R_SOURCE_COMMIT
   );
 }
 

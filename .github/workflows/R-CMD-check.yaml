@@ -47,3 +47,15 @@ jobs:
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+
+      - name: Check installed backend, license and release metadata
+        shell: Rscript {0}
+        run: |
+          checks <- list.dirs("check", recursive = TRUE, full.names = TRUE)
+          libs <- checks[basename(checks) == "SplitAlignerR.Rcheck"]
+          stopifnot(length(libs) == 1L, dir.exists(file.path(libs, "SplitAlignerR")))
+          .libPaths(c(normalizePath(libs), .libPaths()))
+          args <- c(shQuote(".github/recert/release_metadata_gate.R"),
+                    shQuote("."), shQuote(file.path(tempdir(), "release-metadata.tsv")))
+          Sys.setenv(R_LIBS = paste(.libPaths(), collapse = .Platform$path.sep))
+          stopifnot(system2(file.path(R.home("bin"), "Rscript"), args) == 0L)

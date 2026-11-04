@@ -1,6 +1,14 @@
 #include <Rcpp.h>
 
 #include "numeric_policy.h"
+#include "splitaligner/fast_c_api.h"
+#include "fast_backend_identity.h"
+
+#include <cstdint>
+#include <deque>
+#include <limits>
+#include <memory>
+#include <numeric>
 
 #include <algorithm>
 #include <cctype>
@@ -29,14 +37,6 @@ struct CanonicalSplit {
   std::string key;
   std::vector<std::string> side_a;
   std::vector<std::string> side_b;
-};
-
-struct EdgeRecord {
-  int node_index = -1;
-  int branch_number = 0;
-  std::string branch_id;
-  std::string branch_type;
-  CanonicalSplit split;
 };
 
 class NewickParser {
@@ -71,6 +71,7 @@ class NewickParser {
   std::size_t position_ = 0;
   std::vector<Node> nodes_;
   int annotation_count_ = 0;
+  std::size_t depth_ = 0;
 
   bool at_end() const {
     return position_ >= text_.size();
@@ -195,6 +196,7 @@ class NewickParser {
   }
 
   int parse_subtree() {
+    if (++depth_ > 4096U) fail("tree nesting exceeds 4096");
     skip_trivia();
     Node node;
 
@@ -229,7 +231,10 @@ class NewickParser {
     }
     skip_trivia();
 
+    if (nodes_.size() >= static_cast<std::size_t>(std::numeric_limits<int>::max()))
+      fail("tree has too many nodes for R integer indices");
     nodes_.push_back(std::move(node));
+    --depth_;
     return static_cast<int>(nodes_.size()) - 1;
   }
 };
@@ -255,21 +260,6 @@ void collect_internal_postorder(const std::vector<Node>& nodes, int node_index,
   if (!node.children.empty() && node_index != root_index) {
     output.push_back(node_index);
   }
-}
-
-std::vector<std::string> descendant_tips(const std::vector<Node>& nodes,
-                                         int node_index) {
-  const Node& node = nodes[node_index];
-  if (node.children.empty()) {
-    return {node.label};
-  }
-  std::vector<std::string> tips;
-  for (int child : node.children) {
-    std::vector<std::string> child_tips = descendant_tips(nodes, child);
-    tips.insert(tips.end(), child_tips.begin(), child_tips.end());
-  }
-  std::sort(tips.begin(), tips.end());
-  return tips;
 }
 
 std::string join(const std::vector<std::string>& values,
@@ -340,6 +330,79 @@ CanonicalSplit canonical_split(std::vector<std::string> left,
   return {prefix + right_key + "||" + left_key, right, left};
 }
 
+
+using Bits = std::vector<uint64_t>;
+using ReferenceHandle = std::unique_ptr<saf_reference, decltype(&saf_reference_destroy)>;
+using CoverageHandle = std::unique_ptr<saf_coverage, decltype(&saf_coverage_destroy)>;
+using MappingHandle = std::unique_ptr<saf_mapping, decltype(&saf_mapping_destroy)>;
+
+void fast_check(saf_status status) {
+  if (status != SAF_OK) {
+    const std::string message = saf_last_error();
+    throw std::runtime_error("SplitAlignerFast: " + message);
+  }
+}
+
+template <typename T, typename Query>
+std::vector<T> fast_query(Query query) {
+  std::size_t count = 0;
+  fast_check(query(nullptr, 0, &count));
+  std::vector<T> result(count);
+  fast_check(query(result.data(), result.size(), &count));
+  if (count != result.size()) throw std::runtime_error("SplitAlignerFast query size changed");
+  return result;
+}
+
+void node_arrays(const std::vector<Node>& nodes, int root,
+                 const std::map<std::string, std::size_t>& taxon_ids,
+                 std::vector<int64_t>& parent, std::vector<int64_t>& taxon) {
+  parent.assign(nodes.size(), -1);
+  taxon.assign(nodes.size(), -1);
+  for (std::size_t i = 0; i < nodes.size(); ++i) {
+    for (int child : nodes[i].children) parent[static_cast<std::size_t>(child)] = i;
+    if (nodes[i].children.empty()) taxon[i] = taxon_ids.at(nodes[i].label);
+  }
+  parent[static_cast<std::size_t>(root)] = -1;
+}
+
+Bits taxa_bits(const std::vector<std::string>& labels,
+               const std::map<std::string, std::size_t>& ids, std::size_t words) {
+  Bits bits(words, 0);
+  for (const auto& label : labels) {
+    const std::size_t id = ids.at(label);
+    bits[id / 64] |= uint64_t(1) << (id % 64);
+  }
+  return bits;
+}
+
+CanonicalSplit display_split(const Bits& side, const Bits& coverage,
+                             const std::vector<std::string>& taxa) {
+  std::vector<std::string> left, right;
+  for (std::size_t i = 0; i < taxa.size(); ++i) {
+    const uint64_t bit = uint64_t(1) << (i % 64);
+    if (!(coverage[i / 64] & bit)) continue;
+    ((side[i / 64] & bit) ? left : right).push_back(taxa[i]);
+  }
+  return canonical_split(std::move(left), std::move(right));
+}
+
+std::size_t bit_count(uint64_t value) {
+  std::size_t result = 0;
+  while (value) { value &= value - 1; ++result; }
+  return result;
+}
+
+struct PreparedReference {
+  ReferenceHandle handle{nullptr, saf_reference_destroy};
+  saf_reference_info info{};
+  std::vector<std::string> taxa;
+  std::map<std::string, std::size_t> taxon_ids;
+  std::vector<std::size_t> native_to_r;
+  std::vector<std::size_t> r_to_native;
+  std::vector<Bits> legacy_side_a;
+  Rcpp::List species;
+};
+
 Rcpp::DataFrame diagnostic_table(int reference_lengths, int root_lengths,
                                  int internal_labels, int annotations,
                                  int multifurcations, int duplicate_aliases) {
@@ -371,10 +434,7 @@ Rcpp::DataFrame diagnostic_table(int reference_lengths, int root_lengths,
   );
 }
 
-}  // namespace
-
-// [[Rcpp::export]]
-Rcpp::List cpp_validate_species_tree(std::string newick) {
+PreparedReference prepare_reference(std::string newick) {
   NewickParser parser(std::move(newick));
   const int root_index = parser.parse();
   std::vector<Node> nodes = parser.nodes();
@@ -403,57 +463,48 @@ Rcpp::List cpp_validate_species_tree(std::string newick) {
     nodes[node_index].branch_number = ++branch_counter;
   }
 
-  std::vector<std::string> all_tips(seen_tips.begin(), seen_tips.end());
-  std::vector<EdgeRecord> edges;
-  edges.reserve(nodes.size() - 1U);
-  for (std::size_t node_index = 0; node_index < nodes.size(); ++node_index) {
-    if (static_cast<int>(node_index) == root_index) {
-      continue;
-    }
-    std::vector<std::string> left = descendant_tips(
-      nodes, static_cast<int>(node_index)
-    );
-    std::set<std::string> left_set(left.begin(), left.end());
-    std::vector<std::string> right;
-    for (const std::string& tip : all_tips) {
-      if (left_set.find(tip) == left_set.end()) {
-        right.push_back(tip);
-      }
-    }
-    const int number = nodes[node_index].branch_number;
-    edges.push_back({
-      static_cast<int>(node_index),
-      number,
-      "B" + std::to_string(number),
-      nodes[node_index].children.empty() ? "terminal" : "internal",
-      canonical_split(std::move(left), std::move(right))
-    });
+  PreparedReference prepared;
+  prepared.taxa.assign(seen_tips.begin(), seen_tips.end());
+  std::string universe = "SplitAlignerR-UTF8-dictionary-v1";
+  for (std::size_t i = 0; i < prepared.taxa.size(); ++i) {
+    prepared.taxon_ids.emplace(prepared.taxa[i], i);
+    universe += ":" + std::to_string(prepared.taxa[i].size()) + ":" + prepared.taxa[i];
   }
-
-  std::map<std::string, std::vector<std::size_t>> groups;
-  for (std::size_t i = 0; i < edges.size(); ++i) {
-    groups[edges[i].split.key].push_back(i);
-  }
-
+  std::vector<int64_t> parent, taxon;
+  node_arrays(nodes, root_index, prepared.taxon_ids, parent, taxon);
+  saf_reference* raw = nullptr;
+  fast_check(saf_reference_create(prepared.taxa.size(), universe.c_str(),
+                                 parent.data(), taxon.data(), nodes.size(), &raw));
+  prepared.handle.reset(raw);
+  fast_check(saf_reference_get_info(raw, &prepared.info));
+  const Bits whole = taxa_bits(prepared.taxa, prepared.taxon_ids, prepared.info.n_words);
   struct AxisRecord {
-    std::size_t winner;
-    std::vector<std::size_t> members;
+    std::size_t native_id;
+    std::vector<std::size_t> sources;
+    CanonicalSplit split;
   };
   std::vector<AxisRecord> axis;
   int duplicate_aliases = 0;
-  for (const auto& item : groups) {
-    std::vector<std::size_t> members = item.second;
-    std::sort(members.begin(), members.end(), [&](std::size_t a, std::size_t b) {
-      return edges[a].branch_number < edges[b].branch_number;
+  for (std::size_t a = 0; a < prepared.info.n_axes; ++a) {
+    Bits bits = fast_query<uint64_t>([&](auto x, auto n, auto c) {
+      return saf_reference_axis(raw, a, x, n, c, nullptr);
     });
-    duplicate_aliases += static_cast<int>(members.size()) - 1;
-    axis.push_back({members.front(), members});
+    auto sources = fast_query<std::size_t>([&](auto x, auto n, auto c) {
+      return saf_reference_sources(raw, a, x, n, c);
+    });
+    std::sort(sources.begin(), sources.end(), [&](std::size_t x, std::size_t y) {
+      return nodes[x].branch_number < nodes[y].branch_number;
+    });
+    if (sources.empty()) throw std::runtime_error("Reference axis has no source");
+    duplicate_aliases += static_cast<int>(sources.size()) - 1;
+    axis.push_back({a, std::move(sources), display_split(bits, whole, prepared.taxa)});
   }
-  std::sort(axis.begin(), axis.end(), [&](const AxisRecord& a,
-                                         const AxisRecord& b) {
-    return edges[a.winner].branch_number < edges[b.winner].branch_number;
+  std::sort(axis.begin(), axis.end(), [&](const AxisRecord& x, const AxisRecord& y) {
+    return nodes[x.sources.front()].branch_number < nodes[y.sources.front()].branch_number;
   });
-
+  prepared.native_to_r.resize(axis.size());
+  prepared.r_to_native.resize(axis.size());
+  prepared.legacy_side_a.resize(axis.size());
   const R_xlen_t coordinate_count = static_cast<R_xlen_t>(axis.size());
   Rcpp::CharacterVector coordinate_id(coordinate_count);
   Rcpp::CharacterVector canonical_keys(coordinate_count);
@@ -468,19 +519,23 @@ Rcpp::List cpp_validate_species_tree(std::string newick) {
 
   for (R_xlen_t i = 0; i < coordinate_count; ++i) {
     const AxisRecord& record = axis[static_cast<std::size_t>(i)];
-    const EdgeRecord& winner = edges[record.winner];
+    const Node& winner = nodes[record.sources.front()];
+    const std::size_t row = static_cast<std::size_t>(i);
+    prepared.native_to_r[record.native_id] = row;
+    prepared.r_to_native[row] = record.native_id;
+    prepared.legacy_side_a[row] = taxa_bits(record.split.side_a, prepared.taxon_ids,
+                                          prepared.info.n_words);
     std::vector<std::string> aliases;
-    for (std::size_t member : record.members) {
-      aliases.push_back(edges[member].branch_id);
-    }
-    coordinate_id[i] = winner.branch_id;
-    canonical_keys[i] = winner.split.key;
-    branch_type[i] = winner.branch_type;
+    for (std::size_t source : record.sources)
+      aliases.push_back("B" + std::to_string(nodes[source].branch_number));
+    coordinate_id[i] = "B" + std::to_string(winner.branch_number);
+    canonical_keys[i] = record.split.key;
+    branch_type[i] = winner.children.empty() ? "terminal" : "internal";
     alias_text[i] = join(aliases, "|");
-    side_a_size[i] = static_cast<int>(winner.split.side_a.size());
-    side_b_size[i] = static_cast<int>(winner.split.side_b.size());
-    side_a_taxa[i] = Rcpp::wrap(winner.split.side_a);
-    side_b_taxa[i] = Rcpp::wrap(winner.split.side_b);
+    side_a_size[i] = static_cast<int>(record.split.side_a.size());
+    side_b_size[i] = static_cast<int>(record.split.side_b.size());
+    side_a_taxa[i] = Rcpp::wrap(record.split.side_a);
+    side_b_taxa[i] = Rcpp::wrap(record.split.side_b);
     primitive_aliases[i] = Rcpp::wrap(aliases);
     note[i] = aliases.size() > 1U
       ? "lowest B alias retained for duplicate unrooted split"
@@ -523,7 +578,7 @@ Rcpp::List cpp_validate_species_tree(std::string newick) {
     Rcpp::Named("stringsAsFactors") = false
   );
 
-  return Rcpp::List::create(
+  prepared.species = Rcpp::List::create(
     Rcpp::Named("valid") = true,
     Rcpp::Named("tip_labels") = tip_labels,
     Rcpp::Named("coordinates") = coordinates,
@@ -542,6 +597,14 @@ Rcpp::List cpp_validate_species_tree(std::string newick) {
         "SplitAligner-canonical-split-key-v2"
     )
   );
+  return prepared;
+}
+
+}  // namespace
+
+// [[Rcpp::export]]
+Rcpp::List cpp_validate_species_tree(std::string newick) {
+  return prepare_reference(std::move(newick)).species;
 }
 
 namespace {
@@ -565,7 +628,7 @@ struct GeneDiagnostics {
 };
 
 struct PrimitiveResult {
-  std::string projected_split;
+  std::size_t projection_index = SAF_NONE;
   int side_a_size = 0;
   int side_b_size = 0;
   std::string state;
@@ -578,7 +641,7 @@ struct PrimitiveResult {
 
 struct CompositeResult {
   std::string coordinate_id;
-  std::string projected_split;
+  std::size_t projection_index = SAF_NONE;
   std::vector<int> member_indices;
   std::string recovery_status;
   bool numeric_available = false;
@@ -589,6 +652,9 @@ struct CompositeResult {
 struct OneGeneResult {
   std::string gene_id;
   std::vector<std::string> retained_taxa;
+  // A shallow, independently protected R vector survives coverage FIFO eviction;
+  // it does not retain PreparedCoverage or its native coverage handle.
+  Rcpp::CharacterVector projected_splits;
   std::vector<PrimitiveResult> primitive;
   std::vector<CompositeResult> composites;
   GeneDiagnostics diagnostics;
@@ -596,26 +662,13 @@ struct OneGeneResult {
 
 struct ParsedGene {
   std::set<std::string> tips;
-  std::map<std::string, GeneSplitEvidence> evidence;
+  std::vector<int64_t> parent, taxon;
+  std::vector<double> lengths;
+  std::vector<uint8_t> valid;
+  std::vector<uint8_t> numeric_kind; // 0 missing, 1 finite, 2 software failure
+  Bits coverage;
   GeneDiagnostics diagnostics;
 };
-
-std::vector<std::string> as_string_vector(const Rcpp::List& values,
-                                          R_xlen_t index) {
-  return Rcpp::as<std::vector<std::string>>(values[index]);
-}
-
-std::vector<std::string> restrict_taxa(
-    const std::vector<std::string>& taxa,
-    const std::set<std::string>& retained) {
-  std::vector<std::string> output;
-  for (const std::string& taxon : taxa) {
-    if (retained.find(taxon) != retained.end()) {
-      output.push_back(taxon);
-    }
-  }
-  return output;
-}
 
 std::string composite_id_from_members(
     const std::vector<int>& member_indices,
@@ -639,135 +692,122 @@ std::string retained_taxa_key(const std::vector<std::string>& taxa) {
 
 ParsedGene parse_gene_tree(const std::string& newick,
                            const std::string& gene_id,
-                           const std::set<std::string>& species_tips) {
+                           const PreparedReference& reference) {
   NewickParser parser(newick);
   const int root_index = parser.parse();
-  const std::vector<Node>& nodes = parser.nodes();
-
-  std::vector<int> leaf_nodes;
-  collect_leaf_nodes(nodes, root_index, leaf_nodes);
-  if (leaf_nodes.size() < 2U) {
-    Rcpp::stop("Gene tree `%s` must contain at least two terminal taxa.",
-               gene_id.c_str());
-  }
-
+  const auto& nodes = parser.nodes();
   ParsedGene output;
   output.diagnostics.annotations = parser.annotation_count();
-  for (int leaf : leaf_nodes) {
-    const std::string& label = nodes[leaf].label;
-    if (!output.tips.insert(label).second) {
+  for (const auto& node : nodes) {
+    if (!node.children.empty()) continue;
+    if (!output.tips.insert(node.label).second)
       Rcpp::stop("Gene tree `%s` contains duplicate terminal taxon `%s`.",
-                 gene_id.c_str(), label.c_str());
-    }
-    if (species_tips.find(label) == species_tips.end()) {
-      Rcpp::stop(
-        "Gene tree `%s` contains taxon `%s`, which is absent from the species tree.",
-        gene_id.c_str(), label.c_str()
-      );
-    }
+                 gene_id.c_str(), node.label.c_str());
+    if (!reference.taxon_ids.count(node.label))
+      Rcpp::stop("Gene tree `%s` contains taxon `%s`, which is absent from the species tree.",
+                 gene_id.c_str(), node.label.c_str());
   }
-
-  std::vector<std::string> all_tips(output.tips.begin(), output.tips.end());
-  struct EdgeNumeric {
-    bool available = false;
-    double value = NA_REAL;
-    std::string status;
-  };
-  std::map<std::string, std::vector<EdgeNumeric>> grouped_edges;
-
-  for (std::size_t node_index = 0; node_index < nodes.size(); ++node_index) {
-    const Node& node = nodes[node_index];
-    if (!node.children.empty() && !node.label.empty()) {
-      ++output.diagnostics.internal_labels;
-    }
-    const std::size_t graph_degree = node.children.size() +
-      (static_cast<int>(node_index) == root_index ? 0U : 1U);
-    if (!node.children.empty() && graph_degree > 3U) {
+  if (output.tips.size() < 2)
+    Rcpp::stop("Gene tree `%s` must contain at least two terminal taxa.", gene_id.c_str());
+  node_arrays(nodes, root_index, reference.taxon_ids, output.parent, output.taxon);
+  output.coverage = taxa_bits(std::vector<std::string>(output.tips.begin(), output.tips.end()),
+                              reference.taxon_ids, reference.info.n_words);
+  output.lengths.assign(nodes.size(), 0);
+  output.valid.assign(nodes.size(), 0);
+  output.numeric_kind.assign(nodes.size(), 0);
+  for (std::size_t i = 0; i < nodes.size(); ++i) {
+    const Node& node = nodes[i];
+    if (!node.children.empty() && !node.label.empty()) ++output.diagnostics.internal_labels;
+    if (!node.children.empty() && node.children.size() + (int(i) == root_index ? 0 : 1) > 3)
       ++output.diagnostics.multifurcations;
-    }
-    if (static_cast<int>(node_index) == root_index) {
-      if (node.has_length) {
-        ++output.diagnostics.root_lengths;
-      }
+    if (int(i) == root_index) {
+      if (node.has_length) ++output.diagnostics.root_lengths;
       continue;
     }
-
-    std::vector<std::string> left = descendant_tips(
-      nodes, static_cast<int>(node_index)
-    );
-    const std::set<std::string> left_set(left.begin(), left.end());
-    std::vector<std::string> right;
-    for (const std::string& tip : all_tips) {
-      if (left_set.find(tip) == left_set.end()) {
-        right.push_back(tip);
-      }
-    }
-    const CanonicalSplit split = canonical_split(
-      std::move(left), std::move(right)
-    );
-
-    EdgeNumeric numeric;
-    if (!node.has_length) {
-      numeric.status = "missing_branch_length";
-      ++output.diagnostics.missing_lengths;
+    if (!node.has_length) { ++output.diagnostics.missing_lengths; continue; }
+    const auto checked = splitaligner::validate_numeric_token(node.length_token);
+    if (checked.accepted) {
+      output.lengths[i] = checked.value;
+      output.valid[i] = 1;
+      output.numeric_kind[i] = 1;
+      if (checked.is_negative) ++output.diagnostics.negative_lengths;
+    } else if (checked.classification == "software_failure_marker" || checked.classification == "missing") {
+      output.numeric_kind[i] = 2;
+      ++output.diagnostics.failure_markers;
     } else {
-      const splitaligner::NumericResult checked =
-        splitaligner::validate_numeric_token(node.length_token);
-      if (checked.accepted) {
-        numeric.available = true;
-        numeric.value = checked.value;
-        numeric.status = "finite_numeric";
-        if (checked.is_negative) {
-          ++output.diagnostics.negative_lengths;
-        }
-      } else if (checked.classification == "software_failure_marker" ||
-                 checked.classification == "missing") {
-        numeric.status = "software_failure_marker";
-        ++output.diagnostics.failure_markers;
-      } else {
-        Rcpp::stop(
-          "Gene tree `%s` has rejected branch-length token `%s` (%s): %s.",
-          gene_id.c_str(), node.length_token.c_str(),
-          checked.classification.c_str(), checked.diagnostic.c_str()
-        );
-      }
+      Rcpp::stop("Gene tree `%s` has rejected branch-length token `%s` (%s): %s.",
+                 gene_id.c_str(), node.length_token.c_str(), checked.classification.c_str(),
+                 checked.diagnostic.c_str());
     }
-    grouped_edges[split.key].push_back(numeric);
-  }
-
-  for (const auto& item : grouped_edges) {
-    const std::vector<EdgeNumeric>& edges = item.second;
-    output.diagnostics.duplicate_split_aliases +=
-      static_cast<int>(edges.size()) - 1;
-    GeneSplitEvidence evidence;
-    evidence.numeric_available = true;
-    evidence.numeric_value = 0.0;
-    evidence.numeric_status = "finite_numeric";
-    for (const EdgeNumeric& edge : edges) {
-      if (!edge.available) {
-        evidence.numeric_available = false;
-        if (edge.status == "software_failure_marker") {
-          evidence.numeric_status = "software_failure_marker";
-        } else if (evidence.numeric_status != "software_failure_marker") {
-          evidence.numeric_status = "missing_branch_length";
-        }
-        continue;
-      }
-      evidence.numeric_value += edge.value;
-      if (!std::isfinite(evidence.numeric_value)) {
-        Rcpp::stop(
-          "Gene tree `%s` has a duplicate-split branch-length sum outside finite double range.",
-          gene_id.c_str()
-        );
-      }
-    }
-    if (!evidence.numeric_available) {
-      evidence.numeric_value = NA_REAL;
-    }
-    output.evidence[item.first] = evidence;
   }
   return output;
 }
+
+struct PreparedCoverage {
+  CoverageHandle handle{nullptr, saf_coverage_destroy};
+  saf_coverage_info info{};
+  std::vector<std::size_t> axis_to_projection;
+  std::vector<uint8_t> structural, eligible;
+  std::vector<std::vector<int>> members;
+  std::vector<std::string> display_keys;
+  Rcpp::CharacterVector display_keys_r;
+  std::vector<std::size_t> display_order;
+  std::vector<int> side_a_size, side_b_size;
+};
+
+std::shared_ptr<PreparedCoverage> prepare_coverage(const PreparedReference& reference,
+                                                  const Bits& mask) {
+  auto out = std::make_shared<PreparedCoverage>();
+  saf_coverage* raw = nullptr;
+  fast_check(saf_coverage_create(reference.handle.get(), mask.data(), mask.size(), &raw));
+  out->handle.reset(raw);
+  fast_check(saf_coverage_get_info(raw, &out->info));
+  out->display_keys_r = Rcpp::CharacterVector(
+    static_cast<R_xlen_t>(out->info.n_projections)
+  );
+  out->axis_to_projection.resize(reference.info.n_axes);
+  out->structural.resize(reference.info.n_axes);
+  out->eligible.resize(reference.info.n_axes);
+  fast_check(saf_coverage_axes(raw, out->axis_to_projection.data(), out->structural.data(),
+                              out->eligible.data(), reference.info.n_axes));
+  std::size_t retained = 0;
+  for (uint64_t word : mask) retained += bit_count(word);
+  for (const auto& side : reference.legacy_side_a) {
+    std::size_t count = 0;
+    for (std::size_t w = 0; w < mask.size(); ++w) count += bit_count(side[w] & mask[w]);
+    out->side_a_size.push_back(static_cast<int>(count));
+    out->side_b_size.push_back(static_cast<int>(retained - count));
+  }
+  for (std::size_t g = 0; g < out->info.n_projections; ++g) {
+    auto native_members = fast_query<std::size_t>([&](auto x, auto n, auto c) {
+      return saf_coverage_members(raw, g, x, n, c);
+    });
+    std::vector<int> members;
+    for (std::size_t a : native_members) members.push_back(reference.native_to_r.at(a));
+    std::sort(members.begin(), members.end());
+    out->members.push_back(std::move(members));
+    const Bits bits = fast_query<uint64_t>([&](auto x, auto n, auto c) {
+      return saf_coverage_projection(raw, g, x, n, c, nullptr);
+    });
+    out->display_keys.push_back(display_split(bits, mask, reference.taxa).key);
+    // Use the same std::string conversion as the legacy ledger assignment once
+    // per cached projection; later assignments reuse this protected CHARSXP.
+    out->display_keys_r[static_cast<R_xlen_t>(g)] = out->display_keys.back();
+    out->display_order.push_back(g);
+  }
+  // This is the legacy ledger presentation order, not a matching key.
+  std::sort(out->display_order.begin(), out->display_order.end(), [&](std::size_t a, std::size_t b) {
+    return out->display_keys[a] < out->display_keys[b];
+  });
+  return out;
+}
+
+struct NativeValues {
+  std::vector<double> values;
+  std::vector<uint8_t> valid;
+  explicit NativeValues(std::size_t count) : values(count), valid(count) {}
+  saf_value_buffer buffer() { return {values.data(), valid.data(), values.size()}; }
+};
 
 Rcpp::DataFrame gene_diagnostic_table(
     const std::vector<OneGeneResult>& genes) {
@@ -847,6 +887,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
   if (gene_newicks.size() == 0) {
     Rcpp::stop("At least one gene tree is required.");
   }
+  if (gene_newicks.size() > std::numeric_limits<int>::max())
+    Rcpp::stop("Too many gene trees for R matrix dimensions.");
   if (gene_newicks.size() != gene_ids.size()) {
     Rcpp::stop("Gene-tree text and identifier vectors must have equal length.");
   }
@@ -865,149 +907,152 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     }
   }
 
-  Rcpp::List species = cpp_validate_species_tree(species_newick);
-  const Rcpp::CharacterVector species_tip_vector = species["tip_labels"];
-  const std::vector<std::string> species_tip_order =
-    Rcpp::as<std::vector<std::string>>(species_tip_vector);
-  const std::set<std::string> species_tips(
-    species_tip_order.begin(), species_tip_order.end()
-  );
+  PreparedReference reference = prepare_reference(species_newick);
+  Rcpp::List species = reference.species;
   const Rcpp::DataFrame primitive_coordinates =
     Rcpp::as<Rcpp::DataFrame>(species["coordinates"]);
   const Rcpp::CharacterVector coordinate_id_r =
     primitive_coordinates["coordinate_id"];
-  const Rcpp::CharacterVector branch_type_r =
-    primitive_coordinates["branch_type"];
-  const Rcpp::List side_a_r = primitive_coordinates["side_a_taxa"];
-  const Rcpp::List side_b_r = primitive_coordinates["side_b_taxa"];
   const std::vector<std::string> coordinate_ids =
     Rcpp::as<std::vector<std::string>>(coordinate_id_r);
-  const std::vector<std::string> branch_types =
-    Rcpp::as<std::vector<std::string>>(branch_type_r);
   const std::size_t primitive_count = coordinate_ids.size();
-
-  std::vector<std::vector<std::string>> species_side_a(primitive_count);
-  std::vector<std::vector<std::string>> species_side_b(primitive_count);
-  for (std::size_t i = 0; i < primitive_count; ++i) {
-    species_side_a[i] = as_string_vector(side_a_r, static_cast<R_xlen_t>(i));
-    species_side_b[i] = as_string_vector(side_b_r, static_cast<R_xlen_t>(i));
-  }
+  std::map<Bits, std::shared_ptr<PreparedCoverage>> coverage_cache;
+  std::deque<Bits> coverage_fifo;
 
   std::vector<OneGeneResult> genes;
   genes.reserve(static_cast<std::size_t>(gene_newicks.size()));
   std::map<std::string, std::vector<int>> composite_definitions;
 
   for (R_xlen_t gene_index = 0; gene_index < gene_newicks.size(); ++gene_index) {
+    if (gene_index % 64 == 0) Rcpp::checkUserInterrupt();
     if (Rcpp::CharacterVector::is_na(gene_newicks[gene_index])) {
       Rcpp::stop("Gene-tree Newick strings must not be missing.");
     }
     const std::string gene_id = Rcpp::as<std::string>(gene_ids[gene_index]);
     const std::string gene_newick =
       Rcpp::as<std::string>(gene_newicks[gene_index]);
-    ParsedGene parsed = parse_gene_tree(gene_newick, gene_id, species_tips);
+    ParsedGene parsed = parse_gene_tree(gene_newick, gene_id, reference);
+    try {
+    auto cached = coverage_cache.find(parsed.coverage);
+    std::shared_ptr<PreparedCoverage> coverage;
+    if (cached != coverage_cache.end()) {
+      coverage = cached->second;
+    } else {
+      coverage = prepare_coverage(reference, parsed.coverage);
+      if (coverage_cache.size() == 64) {
+        coverage_cache.erase(coverage_fifo.front());
+        coverage_fifo.pop_front();
+      }
+      coverage_cache.emplace(parsed.coverage, coverage);
+      coverage_fifo.push_back(parsed.coverage);
+    }
+    saf_mapping* raw = nullptr;
+    fast_check(saf_mapping_create(coverage->handle.get(), parsed.parent.data(),
+                                  parsed.taxon.data(), parsed.parent.size(), &raw));
+    MappingHandle mapping(raw, saf_mapping_destroy);
+    saf_mapping_info info{};
+    fast_check(saf_mapping_get_info(raw, &info));
+    std::vector<char> states(primitive_count);
+    fast_check(saf_mapping_states(raw, states.data(), states.size()));
+    auto projection_to_gene = fast_query<std::size_t>([&](auto x, auto n, auto c) {
+      return saf_mapping_projection_to_gene(raw, x, n, c);
+    });
+    NativeValues primitive_values(primitive_count), projection_values(info.n_projections),
+                 edge_values(info.n_gene_splits);
+    // Check all gene edges, including unmatched root aliases, as the old adapter did.
+    fast_check(saf_mapping_apply(raw, parsed.lengths.data(), parsed.valid.data(),
+                                 parsed.lengths.size(), primitive_values.buffer(),
+                                 projection_values.buffer(), edge_values.buffer()));
+    std::vector<GeneSplitEvidence> evidence(info.n_gene_splits);
+    for (std::size_t e = 0; e < info.n_gene_splits; ++e) {
+      auto sources = fast_query<std::size_t>([&](auto x, auto n, auto c) {
+        return saf_mapping_gene_sources(raw, e, x, n, c);
+      });
+      parsed.diagnostics.duplicate_split_aliases += static_cast<int>(sources.size()) - 1;
+      auto& value = evidence[e];
+      value.numeric_available = edge_values.valid[e] != 0;
+      value.numeric_value = value.numeric_available ? edge_values.values[e] : NA_REAL;
+      value.numeric_status = value.numeric_available ? "finite_numeric" : "missing_branch_length";
+      if (!value.numeric_available)
+        for (std::size_t source : sources)
+          if (parsed.numeric_kind.at(source) == 2) value.numeric_status = "software_failure_marker";
+    }
 
     OneGeneResult gene;
     gene.gene_id = gene_id;
     gene.retained_taxa.assign(parsed.tips.begin(), parsed.tips.end());
+    gene.projected_splits = coverage->display_keys_r;
     gene.diagnostics = parsed.diagnostics;
     gene.primitive.resize(primitive_count);
-
-    std::map<std::string, std::vector<int>> projected_groups;
     for (std::size_t i = 0; i < primitive_count; ++i) {
-      PrimitiveResult& result = gene.primitive[i];
-      const std::vector<std::string> left = restrict_taxa(
-        species_side_a[i], parsed.tips
-      );
-      const std::vector<std::string> right = restrict_taxa(
-        species_side_b[i], parsed.tips
-      );
-      result.side_a_size = static_cast<int>(left.size());
-      result.side_b_size = static_cast<int>(right.size());
-      if (left.empty() || right.empty()) {
+      auto& result = gene.primitive[i];
+      result.side_a_size = coverage->side_a_size[i];
+      result.side_b_size = coverage->side_b_size[i];
+      const std::size_t a = reference.r_to_native[i];
+      if (states[a] == 'S') {
         result.state = "NA_struct";
         result.reason_code = "PROJECTED_SIDE_EMPTY";
-        continue;
+      } else {
+        result.projection_index = coverage->axis_to_projection[a];
+        // Preserve the existing bounds check without copying the display key.
+        (void)coverage->display_keys.at(result.projection_index);
       }
-      const CanonicalSplit split = canonical_split(left, right);
-      result.projected_split = split.key;
-      projected_groups[split.key].push_back(static_cast<int>(i));
     }
-
-    for (const auto& item : projected_groups) {
-      const std::string& projected_key = item.first;
-      std::vector<int> members = item.second;
-      std::sort(members.begin(), members.end());
-      const auto evidence_it = parsed.evidence.find(projected_key);
-      const bool recovered = evidence_it != parsed.evidence.end();
-
-      if (members.size() > 1U) {
-        const std::string composite_id = composite_id_from_members(
-          members, coordinate_ids
-        );
+    for (std::size_t g : coverage->display_order) {
+      const auto& members = coverage->members[g];
+      const std::size_t edge = projection_to_gene[g];
+      const bool recovered = edge != SAF_NONE;
+      if (!recovered && mode == "fixed") ++gene.diagnostics.fixed_topology_mismatches;
+      if (members.size() > 1) {
+        const std::string composite_id = composite_id_from_members(members, coordinate_ids);
         composite_definitions[composite_id] = members;
         CompositeResult composite;
         composite.coordinate_id = composite_id;
-        composite.projected_split = projected_key;
+        composite.projection_index = g;
         composite.member_indices = members;
         if (!recovered) {
           composite.recovery_status = "unrecovered";
           composite.numeric_status = "not_recovered";
-          if (mode == "fixed") {
-            ++gene.diagnostics.fixed_topology_mismatches;
-          }
         } else {
-          const GeneSplitEvidence& evidence = evidence_it->second;
-          composite.numeric_available = evidence.numeric_available;
-          composite.numeric_value = evidence.numeric_value;
-          composite.numeric_status = evidence.numeric_status;
-          composite.recovery_status = evidence.numeric_available
-            ? "recovered_numeric"
-            : "recovered_numeric_unavailable";
+          composite.numeric_available = projection_values.valid[g] != 0;
+          composite.numeric_value = composite.numeric_available ? projection_values.values[g] : NA_REAL;
+          composite.numeric_status = evidence.at(edge).numeric_status;
+          composite.recovery_status = composite.numeric_available
+            ? "recovered_numeric" : "recovered_numeric_unavailable";
         }
-        gene.composites.push_back(composite);
-
+        gene.composites.push_back(std::move(composite));
         for (int member : members) {
-          PrimitiveResult& result =
-            gene.primitive[static_cast<std::size_t>(member)];
+          if (states[reference.r_to_native[member]] != 'F')
+            throw std::runtime_error("Fast composite state/member inconsistency");
+          auto& result = gene.primitive[member];
           result.composite_id = composite_id;
           result.state = "NA_fuse";
           result.reason_code = "COMPOSITE_COORDINATE";
           result.numeric_status = "composite_coordinate_only";
         }
-        continue;
-      }
-
-      const int member = members.front();
-      PrimitiveResult& result =
-        gene.primitive[static_cast<std::size_t>(member)];
-      const bool eligible = branch_types[static_cast<std::size_t>(member)] ==
-          "terminal" ||
-        (result.side_a_size >= 2 && result.side_b_size >= 2);
-      if (!eligible) {
-        Rcpp::stop(
-          "Internal invariant failure for gene `%s`, coordinate `%s`: "
-          "a nonempty singleton projected side survived without fusion.",
-          gene_id.c_str(),
-          coordinate_ids[static_cast<std::size_t>(member)].c_str()
-        );
-      }
-      if (!recovered) {
-        result.state = "NA_topo";
-        result.reason_code = "PROJECTED_SPLIT_NOT_RECOVERED";
-        result.numeric_status = "not_recovered";
-        if (mode == "fixed") {
-          ++gene.diagnostics.fixed_topology_mismatches;
+      } else {
+        const std::size_t member = members.at(0);
+        const std::size_t a = reference.r_to_native[member];
+        auto& result = gene.primitive[member];
+        if (!recovered) {
+          if (states[a] != 'U') throw std::runtime_error("Fast absent singleton state inconsistency");
+          result.state = "NA_topo";
+          result.reason_code = "PROJECTED_SPLIT_NOT_RECOVERED";
+          result.numeric_status = "not_recovered";
+        } else {
+          if (states[a] != 'D') throw std::runtime_error("Fast recovered singleton state inconsistency");
+          result.state = "mapped";
+          result.reason_code = "PROJECTED_SPLIT_RECOVERED";
+          result.numeric_available = primitive_values.valid[a] != 0;
+          result.numeric_value = result.numeric_available ? primitive_values.values[a] : NA_REAL;
+          result.numeric_status = evidence.at(edge).numeric_status;
         }
-        continue;
       }
-      const GeneSplitEvidence& evidence = evidence_it->second;
-      result.state = "mapped";
-      result.reason_code = "PROJECTED_SPLIT_RECOVERED";
-      result.numeric_available = evidence.numeric_available;
-      result.numeric_value = evidence.numeric_value;
-      result.numeric_status = evidence.numeric_status;
     }
     genes.push_back(std::move(gene));
+    } catch (const std::exception& error) {
+      throw std::runtime_error("Gene tree `" + gene_id + "`: " + error.what());
+    }
   }
 
   std::vector<std::pair<std::string, std::vector<int>>> composites(
@@ -1090,8 +1135,9 @@ Rcpp::List cpp_align_branches(std::string species_newick,
       const PrimitiveResult& result = gene.primitive[i];
       ledger_gene[ledger_row] = gene.gene_id;
       ledger_coordinate[ledger_row] = coordinate_ids[i];
-      if (!result.projected_split.empty()) {
-        ledger_split[ledger_row] = result.projected_split;
+      if (result.projection_index != SAF_NONE) {
+        ledger_split[ledger_row] =
+          gene.projected_splits[static_cast<R_xlen_t>(result.projection_index)];
       }
       ledger_a[ledger_row] = result.side_a_size;
       ledger_b[ledger_row] = result.side_b_size;
@@ -1141,7 +1187,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     for (const CompositeResult& result : gene.composites) {
       composite_gene[composite_row] = gene.gene_id;
       composite_id[composite_row] = result.coordinate_id;
-      composite_split[composite_row] = result.projected_split;
+      composite_split[composite_row] =
+        gene.projected_splits[static_cast<R_xlen_t>(result.projection_index)];
       composite_recovery[composite_row] = result.recovery_status;
       composite_numeric_available[composite_row] = result.numeric_available;
       if (result.numeric_available) {
@@ -1234,7 +1281,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
         "length-prefixed-UTF8-bytes-RT1"
     ),
     Rcpp::Named("metadata") = Rcpp::List::create(
-      Rcpp::Named("core_version") = "0.1.0",
+      Rcpp::Named("core_version") = SAF_R_CORE_VERSION,
       Rcpp::Named("schema_version") = "1.0.0",
       Rcpp::Named("mode") = mode,
       Rcpp::Named("gene_count") = static_cast<int>(genes.size()),
@@ -1248,7 +1295,10 @@ Rcpp::List cpp_align_branches(std::string species_newick,
         "SplitAligner-canonical-split-key-v2",
       Rcpp::Named("retained_taxa_key_schema") =
         "length-prefixed-UTF8-bytes-RT1",
-      Rcpp::Named("production_core") = "C++17 graph-first mapper"
+      Rcpp::Named("production_core") = "SplitAlignerFast exact-bitset C ABI 2",
+      Rcpp::Named("backend_name") = "SplitAlignerFast",
+      Rcpp::Named("backend_abi") = 2,
+      Rcpp::Named("backend_source_commit") = SAF_R_SOURCE_COMMIT
     )
   );
 }
