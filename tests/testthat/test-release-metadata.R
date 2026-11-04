@@ -1,5 +1,5 @@
 test_that("runtime package, core, general schema, and paired schema are consistent", {
-  expect_identical(as.character(packageVersion("SplitAlignerR")), "0.1.0.9004")
+  expect_identical(as.character(packageVersion("SplitAlignerR")), "0.1.0.9005")
   core <- splitaligner_core_info()
   expect_identical(core$core_version, "0.2.0-fast-abi2")
   expect_identical(core$schema_version, "1.0.0")
@@ -10,7 +10,7 @@ test_that("runtime package, core, general schema, and paired schema are consiste
   paired <- pair_alignment_results(fixed, free)
   expect_identical(paired$metadata$core_version, "0.2.0-fast-abi2")
   expect_identical(paired$metadata$schema_version, "1.0.0")
-  expect_identical(paired$metadata$paired_schema, "1.0.0")
+  expect_identical(paired$metadata$paired_schema, "2.0.0")
 })
 
 test_that("development identity preserves the certified v0.1.0 boundary", {
@@ -26,10 +26,10 @@ test_that("development identity preserves the certified v0.1.0 boundary", {
     '"certified_release_commit": "17a0927095c7a067817bf598a2556cbe7348a6d0"',
     fixed = TRUE
   )
-  expect_match(identity, '"development_version": "0.1.0.9004"', fixed = TRUE)
+  expect_match(identity, '"development_version": "0.1.0.9005"', fixed = TRUE)
   expect_match(
     identity,
-    '"development_status": "Fast C ABI2 adapter; scoped Linux compatibility validation"',
+    '"development_status": "Layered fusion-group classification on Fast C ABI 2"',
     fixed = TRUE
   )
   expect_match(

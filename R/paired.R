@@ -91,6 +91,14 @@ validate_paired_fiber_invariance <- function(fixed, free) {
   )
   invalid <- (fixed_state == "NA_fuse") != (free_state == "NA_fuse") |
     (fixed_state == "NA_struct") != (free_state == "NA_struct")
+  fused <- fixed_state == "NA_fuse" & free_state == "NA_fuse"
+  if (!identical(fixed$state_ledger$composite_id[fused],
+                 free$state_ledger$composite_id[fused]) ||
+      !identical(fixed$state_ledger$projected_split[fused],
+                 free$state_ledger$projected_split[fused])) {
+    stop("Paired fused coordinates have different members or projected splits.",
+         call. = FALSE)
+  }
   if (any(invalid)) {
     i <- which(invalid)[[1L]]
     stop(
@@ -220,7 +228,8 @@ finalize_paired_cells <- function(fixed_state,
                                   fixed_fused_numeric,
                                   free_state,
                                   free_primitive_numeric,
-                                  free_fused_numeric) {
+                                  free_fused_numeric,
+                                  structural_fusion = FALSE) {
   recycled <- recycle_paired_finalize_inputs(
     fixed_state,
     fixed_primitive_numeric,
@@ -284,6 +293,10 @@ finalize_paired_cells <- function(fixed_state,
   topo <- free_state == "NA_topo" & fixed_state == "mapped" &
     fixed_primitive_available
   final_token[topo] <- "NA_topo"
+  if (structural_fusion) {
+    fixed_output[fixed_state == "NA_fuse"] <- "NA_fuse"
+    final_token[free_state == "NA_fuse"] <- "NA_fuse"
+  }
 
   data.frame(
     fixed_output_token = fixed_output,
@@ -325,7 +338,7 @@ validate_finalized_token_matrix <- function(matrix) {
   invisible(TRUE)
 }
 
-#' Apply the frozen paired finalized-matrix bookkeeping layer
+#' Finalize paired fixed and free branch alignments
 #'
 #' Pair fixed-topology and free-topology single-tree results without modifying
 #' either graph-state ledger. The finalized matrix is computed separately from
@@ -334,17 +347,22 @@ validate_finalized_token_matrix <- function(matrix) {
 #'
 #' @param fixed A `splitaligner_result` generated with `mode = "fixed"`.
 #' @param free A `splitaligner_result` generated with `mode = "free"`.
+#' @param rule Use the default `"layered"` rule (paired schema 2.0.0) or
+#'   `"legacy"` to reproduce the frozen schema 1.0.0 final matrix.
 #' @return A `splitaligner_paired_result` containing graph states, fixed and
 #'   free pre-promotion matrices, the finalized free matrix, a per-cell ledger,
 #'   literal-`NA` summary rows, conventions, and versioned metadata. The input
-#'   single-tree results are not modified.
+#'   single-tree results are not modified. In layered mode, `free_fusion_groups`
+#'   reports free-tree recovery once per gene and composite.
 #' @details The free pre-promotion layer contains a numeric token only for a
 #'   mapped primitive with finite evidence, `NA_fuse` only for a fused state
 #'   with finite composite evidence, and literal `NA` otherwise. Paired
 #'   finalization then promotes graph-state `NA_struct` to `NA_struct`, and
 #'   promotes graph-state `NA_topo` to `NA_topo` only when the fixed primitive
 #'   is mapped with finite evidence. Finite evidence on a fixed fused
-#'   coordinate never satisfies that primitive gate. A literal finalized `NA`
+#'   coordinate never satisfies that primitive gate. In layered mode, every fused
+#'   primitive remains `NA_fuse`. The group carries the recovered length or, when
+#'   the projected split is absent, `NA_fuse_topo`. A literal finalized `NA`
 #'   remains `NA` on serialization and is summarized as `residual_NA`.
 #' @examples
 #' species <- "(((A,B),C),((D,E),F));"
@@ -355,9 +373,10 @@ validate_finalized_token_matrix <- function(matrix) {
 #'   species, c(g = "((A:1,D:1):1,(B:1,E:1):1);"), mode = "free"
 #' )
 #' paired <- pair_alignment_results(fixed, free)
-#' paired$residual_NA
+#' paired$free_fusion_groups
 #' @export
-pair_alignment_results <- function(fixed, free) {
+pair_alignment_results <- function(fixed, free, rule = c("layered", "legacy")) {
+  rule <- match.arg(rule)
   validate_paired_axes(fixed, free)
   genes <- rownames(free$state_matrix)
   coordinates <- colnames(free$state_matrix)
@@ -393,13 +412,15 @@ pair_alignment_results <- function(fixed, free) {
     free, free_composite
   )
 
+  layered <- rule == "layered"
   finalized <- finalize_paired_cells(
     fixed_state = fixed_state,
     fixed_primitive_numeric = fixed_numeric,
     fixed_fused_numeric = fixed_composite_evidence$value,
     free_state = free_state,
     free_primitive_numeric = free_numeric,
-    free_fused_numeric = free_composite_evidence$value
+    free_fused_numeric = free_composite_evidence$value,
+    structural_fusion = layered
   )
   fixed_final_value <- finalized$fixed_output_token
   free_pre_value <- finalized$free_pre_promotion_token
@@ -491,6 +512,13 @@ pair_alignment_results <- function(fixed, free) {
       residual_NA_fixed_fusion_event_count = fixed_fusion_event_count
     )
   )
+  if (layered) {
+    out$free_fusion_groups <- classify_free_groups(free)
+    out$conventions$paired_finalize_rule <- "layered_fused_split_v2"
+    out$conventions$NA_fuse_topo_requires_absent_free_composite <- TRUE
+    out$conventions$finalized_perl_matrices_are_authoritative <- NULL
+    out$metadata$paired_schema <- "2.0.0"
+  }
   class(out) <- c("splitaligner_paired_result", "list")
   out
 }

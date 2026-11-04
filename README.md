@@ -14,7 +14,7 @@ The package checks branch-length tokens before using them as numeric evidence.
 
 `v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
 the post-release development line. This source candidate has package version
-`0.1.0.9004` and is not covered by the `v0.1.0` RECERT decision. The frozen
+`0.1.0.9005` and is not covered by the `v0.1.0` RECERT decision. The frozen
 `v0.1.0-rc1`, `v0.1.0-rc2`, and `v0.1.0-rc3` tags are retained as historical
 release candidates.
 
@@ -67,7 +67,7 @@ aligned$numeric_matrix
 ## Fast-backed development package
 
 Build the candidate with a C++17 compiler and the Rcpp, ape and digest packages.
-Install the source archive using `R CMD INSTALL SplitAlignerR_0.1.0.9004.tar.gz`.
+Install the source archive using `R CMD INSTALL SplitAlignerR_0.1.0.9005.tar.gz`.
 Use `splitaligner_core_info()` to inspect the active backend and source version.
 
 The mapper uses exact taxon bitsets. It caches coverage projections within an
@@ -75,6 +75,35 @@ alignment while preserving the R result's branch order, source indices and
 fusion memberships. The fixed and free outputs retain separate graph states
 and numeric evidence. Pair them with `pair_alignment_results()` to produce
 the finalized matrix. Full result objects include per-cell provenance ledgers.
+
+### Fusion members and their shared split
+
+For each gene, missing taxa can cause two or more reference branches to project
+onto one split. Each primitive member keeps `NA_fuse` in its own cell. Inspect
+the group once to find its length or see why the length is unavailable:
+
+```r
+species <- "((A,B),C,(D,(E,F)));"
+genes <- c(g1 = "((A,B):0.31,D,(E,F):0.17);",
+           g2 = "((A,B):0.26,E,(D,F));",
+           g3 = "((A,D),B,(E,F):0.23);")
+free <- align_branches(species, genes, mode = "free")
+groups <- free_fusion_groups(free)
+groups[, c("gene_id", "primitive_members", "projected_split", "recovery_status",
+           "graph_class", "final_token")]
+```
+
+For these three genes, the same two reference branches form a fusion group.
+The shared split is present at length 0.31 in g1 and 0.26 in g2. The g3 tree
+lacks the split, so its group token is `NA_fuse_topo`. Both members still
+carry `NA_fuse` in all three genes. A displayed group with no finite length
+has graph class `Mapped` and a literal `NA` value. An unresolved free tree
+can also lack the split. Count each group once in group summaries and count
+each member once on the primitive axis.
+
+The default `pair_alignment_results(fixed, free)` exposes the same group
+table as `$free_fusion_groups`. Use `rule = "legacy"` for frozen paired
+schema 1.0.0 matrices, including their historical residual `NA` tokens.
 
 Use `export_splitaligner_exchange()` for fixed-mode exchange and
 `validate_splitaligner_exchange()` to verify an exchange object's structure
@@ -120,7 +149,7 @@ The production mapper lives in the C++ core. R converts inputs and wraps the
 result; the Catnip10 Oracle remains a separate pure R node-edge implementation
 that never calls the core or uses projected splits for structural states.
 
-The contract field `finalized_perl_matrices_are_authoritative` is intentionally
+The legacy contract field `finalized_perl_matrices_are_authoritative` is intentionally
 named. Here, Perl refers to the frozen SplitAligner reference implementation;
 SplitAlignerR does not require Perl at runtime.
 

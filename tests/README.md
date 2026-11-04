@@ -14,7 +14,7 @@ tests or vignettes. The restored suite is not represented as a recovered
 complete 9002 suite. Its original scientific, numeric, oracle, input/error,
 and persistence expectations are retained.
 
-Only package/core/development metadata assertions were adapted in
+For 0.1.0.9004, only package/core/development metadata assertions were adapted in
 `test-core.R` and `test-release-metadata.R` for package 0.1.0.9004 and
 core 0.2.0-fast-abi2. The existing core metadata block additionally verifies
 the backend name, ABI, and exact source commit. No runtime version is mocked.
@@ -55,3 +55,9 @@ does not redefine which malformed native outputs the original helper accepted.
 Long coverage-cache eviction and gctorture cases remain in the separate
 0.1.0.9003 stress suite; they are not duplicated by this bounded package
 test file. No passing result is asserted by adding these source tests.
+
+## Layered fusion groups
+
+Version 0.1.0.9005 tests the Figure 4 three-gene example and edge cases in
+`testthat/test-fusion-groups.R`. Frozen comparisons in the original paired
+tests and external mammal tests explicitly select `rule = "legacy"`.

@@ -2,20 +2,24 @@
 % Please edit documentation in R/paired.R
 \name{pair_alignment_results}
 \alias{pair_alignment_results}
-\title{Apply the frozen paired finalized-matrix bookkeeping layer}
+\title{Finalize paired fixed and free branch alignments}
 \usage{
-pair_alignment_results(fixed, free)
+pair_alignment_results(fixed, free, rule = c("layered", "legacy"))
 }
 \arguments{
 \item{fixed}{A \code{splitaligner_result} generated with \code{mode = "fixed"}.}
 
 \item{free}{A \code{splitaligner_result} generated with \code{mode = "free"}.}
+
+\item{rule}{Use the default \code{"layered"} rule (paired schema 2.0.0) or
+\code{"legacy"} to reproduce the frozen schema 1.0.0 final matrix.}
 }
 \value{
 A \code{splitaligner_paired_result} containing graph states, fixed and
 free pre-promotion matrices, the finalized free matrix, a per-cell ledger,
 literal-\code{NA} summary rows, conventions, and versioned metadata. The input
-single-tree results are not modified.
+single-tree results are not modified. In layered mode, \code{free_fusion_groups}
+reports free-tree recovery once per gene and composite.
 }
 \description{
 Pair fixed-topology and free-topology single-tree results without modifying
@@ -30,7 +34,9 @@ with finite composite evidence, and literal \code{NA} otherwise. Paired
 finalization then promotes graph-state \code{NA_struct} to \code{NA_struct}, and
 promotes graph-state \code{NA_topo} to \code{NA_topo} only when the fixed primitive
 is mapped with finite evidence. Finite evidence on a fixed fused
-coordinate never satisfies that primitive gate. A literal finalized \code{NA}
+coordinate never satisfies that primitive gate. In layered mode, every fused
+primitive remains \code{NA_fuse}. The group carries the recovered length or, when
+the projected split is absent, \code{NA_fuse_topo}. A literal finalized \code{NA}
 remains \code{NA} on serialization and is summarized as \code{residual_NA}.
 }
 \examples{
@@ -42,5 +48,5 @@ free <- align_branches(
   species, c(g = "((A:1,D:1):1,(B:1,E:1):1);"), mode = "free"
 )
 paired <- pair_alignment_results(fixed, free)
-paired$residual_NA
+paired$free_fusion_groups
 }

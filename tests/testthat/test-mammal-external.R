@@ -40,7 +40,7 @@ test_that("frozen 302-mammal example matches legacy cell classes", {
     mode = "free",
     gene_ids = common_genes
   )
-  paired <- pair_alignment_results(fixed, free)
+  paired <- pair_alignment_results(fixed, free, rule = "legacy")
 
   read_expected <- function(path) {
     table <- utils::read.delim(
@@ -149,7 +149,7 @@ test_that("full authority recovers the frozen 407 literal-NA ledger", {
     required[[1L]], free_input$newicks,
     mode = "free", gene_ids = free_input$ids
   )
-  paired <- pair_alignment_results(fixed, free)
+  paired <- pair_alignment_results(fixed, free, rule = "legacy")
   authority <- utils::read.delim(
     required[[4L]], quote = "", na.strings = character(0),
     stringsAsFactors = FALSE, check.names = FALSE

@@ -1,6 +1,10 @@
-SplitAlignerR 0.1.0.9004: Fast C ABI 2 integration candidate
+Fast C ABI 2 integration in SplitAlignerR
 
-This development version replaces the align_branches/validate_species_tree
+The native integration described below originated in 0.1.0.9004.
+Development 0.1.0.9005 adds layered fusion groups in R and supports the
+original paired finalizer through rule = "legacy".
+
+Version 0.1.0.9004 replaced the align_branches/validate_species_tree
 native matching path with the accepted SplitAlignerFast exact uint64 bitset
 core. The public R functions, graph states, paired finalizer, label registry,
 and fixed-only exchange schema retain their 9002 contracts.

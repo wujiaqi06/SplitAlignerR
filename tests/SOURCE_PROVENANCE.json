@@ -91,12 +91,15 @@
       "git_blob": "341a6fada50a67d617a815e25e917b505e5d9dd5"
     }
   ],
-  "candidate_package_version": "0.1.0.9004",
+  "candidate_package_version": "0.1.0.9005",
   "candidate_core_version": "0.2.0-fast-abi2",
   "backend_source_commit": "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
   "adapted_files": {
     "tests/testthat/test-core.R": "Core version assertion; exact Fast backend name, ABI and source-commit assertions in the existing metadata block.",
-    "tests/testthat/test-release-metadata.R": "Package/core/development version and status assertions only."
+    "tests/testthat/test-release-metadata.R": "Package/core/development version and status assertions only.",
+    "tests/testthat/test-paired.R": "Select rule=legacy explicitly for the frozen residual and canonical paired comparisons.",
+    "tests/testthat/test-mammal-external.R": "Select rule=legacy for the frozen authority matrix and ledger; no expected counts changed.",
+    "vignettes/quick-start.Rmd": "Introduce default layered group recovery and legacy replay."
   },
   "unchanged_expectations": "Scientific, numeric, oracle, input/error, persistence and external-fixture assertions are unchanged.",
   "authoritative_9002": {
@@ -133,6 +136,12 @@
         "gctorture stress",
         "Exchange API and ENGINE002 storage qualification"
       ]
+    },
+    {
+      "path": "tests/testthat/test-fusion-groups.R",
+      "test_blocks": 2,
+      "sha256": "66dfc1a535d95f4a507abdb92ea8eddfed18713519679c78858c6a0b2c6a4bc0",
+      "origin": "Development 9005 layered composite reporting and paired regression."
     }
   ]
 }
