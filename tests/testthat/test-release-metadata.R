@@ -49,9 +49,11 @@ test_that("development identity preserves the certified v0.1.0 boundary", {
   )
   expect_match(
     identity,
-    '"development_release_authorized": false',
+    '"development_release_authorized": true',
     fixed = TRUE
   )
+
+  expect_match(identity, '"authorized_development_prerelease_tag": "v0.1.0.9005"', fixed = TRUE)
 
   legacy_authorization_fields <- c(
     paste0("final_release_tag_", "authorized"),

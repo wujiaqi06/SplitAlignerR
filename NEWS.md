@@ -1,4 +1,4 @@
-# SplitAlignerR 0.1.0.9005 (development)
+# SplitAlignerR 0.1.0.9005 (development prerelease)
 
 * `free_fusion_groups()` reports the exact projected split, primitive members
   and recovered length or `NA_fuse_topo` once per gene and fusion group.

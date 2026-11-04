@@ -23,7 +23,7 @@ expected <- list(
   recert_status = "not covered by v0.1.0 Pro PASS; Fast core acceptance is separate from R integration acceptance",
   certified_release_tag_created = TRUE,
   certified_github_release_published = TRUE,
-  development_release_authorized = FALSE,
+  development_release_authorized = TRUE,
   doi = "10.64898/2026.02.24.707838",
   software_title = paste(
     "SplitAlignerR: R Interface and Independent Graph Oracle for SplitAligner"
@@ -255,12 +255,19 @@ add_check(
   identity_certified_release_published
 )
 add_check(
-  "release_identity_development_release_not_authorized",
+  "release_identity_development_prerelease_authorized",
   identical(
     identity_development_release_authorized,
     expected$development_release_authorized
   ),
   identity_development_release_authorized
+)
+
+development_tag <- json_string(release_identity, "authorized_development_prerelease_tag")
+add_check(
+  "release_identity_authorized_development_tag",
+  identical(development_tag, paste0("v", expected$package)),
+  development_tag
 )
 
 legacy_authorization_fields <- c(
@@ -368,13 +375,13 @@ add_check(
   "stable install uses @v0.1.0"
 )
 add_check(
-  "readme_development_install_targets_default_branch",
+  "readme_development_install_targets_prerelease_tag",
   grepl(
-    'remotes::install_github("wujiaqi06/SplitAlignerR")',
+    sprintf('remotes::install_github("wujiaqi06/SplitAlignerR@%s")', development_tag),
     readme,
     fixed = TRUE
   ),
-  "development install uses the default branch"
+  paste("development install uses", development_tag)
 )
 stale_readme_phrases <- c(
   "release-candidate line",

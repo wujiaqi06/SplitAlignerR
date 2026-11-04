@@ -13,7 +13,7 @@ pure R implementation independently recomputes the Catnip10 graph-oracle benchma
 The package checks branch-length tokens before using them as numeric evidence.
 
 `v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
-the post-release development line. This source candidate has package version
+the post-release development line. The Fast-backed prerelease has package version
 `0.1.0.9005` and is not covered by the `v0.1.0` RECERT decision. The frozen
 `v0.1.0-rc1`, `v0.1.0-rc2`, and `v0.1.0-rc3` tags are retained as historical
 release candidates.
@@ -28,8 +28,8 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 # Stable, Pro-RECERT-certified release:
 remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0")
 
-# Post-release development line (not covered by the v0.1.0 RECERT decision):
-remotes::install_github("wujiaqi06/SplitAlignerR")
+# Fast-backed prerelease
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0.9005")
 ```
 
 ## Minimal Example
@@ -66,7 +66,7 @@ aligned$numeric_matrix
 
 ## Fast-backed development package
 
-Build the candidate with a C++17 compiler and the Rcpp, ape and digest packages.
+Build the prerelease with a C++17 compiler and the Rcpp, ape and digest packages.
 Install the source archive using `R CMD INSTALL SplitAlignerR_0.1.0.9005.tar.gz`.
 Use `splitaligner_core_info()` to inspect the active backend and source version.
 

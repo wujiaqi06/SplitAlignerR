@@ -29,7 +29,8 @@
   },
   "certified_release_tag_created": true,
   "certified_github_release_published": true,
-  "development_release_authorized": false,
+  "development_release_authorized": true,
+  "authorized_development_prerelease_tag": "v0.1.0.9005",
   "backend_source_commit": "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
   "r_interface_baseline_tar_sha256": "c4fcc16cce3aaf90189a686b57dd0eadba2d20fccfd246d42deeef353f83522f",
   "legacy_development_identity": "LEGACY9002_RELEASE_IDENTITY.json"
