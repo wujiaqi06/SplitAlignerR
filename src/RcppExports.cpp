@@ -362,6 +362,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_support_newick
+std::string cpp_support_newick(std::string reference_newick, Rcpp::NumericVector support_percent);
+RcppExport SEXP _SplitAlignerR_cpp_support_newick(SEXP reference_newickSEXP, SEXP support_percentSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type reference_newick(reference_newickSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type support_percent(support_percentSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_support_newick(reference_newick, support_percent));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_validate_species_tree
 Rcpp::List cpp_validate_species_tree(std::string newick);
 RcppExport SEXP _SplitAlignerR_cpp_validate_species_tree(SEXP newickSEXP) {
@@ -417,6 +429,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_set_io_faultpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_io_faultpoint, 1},
     {"_SplitAlignerR_cpp_splitaligner_core_info", (DL_FUNC) &_SplitAlignerR_cpp_splitaligner_core_info, 0},
     {"_SplitAlignerR_cpp_validate_branch_length_tokens", (DL_FUNC) &_SplitAlignerR_cpp_validate_branch_length_tokens, 1},
+    {"_SplitAlignerR_cpp_support_newick", (DL_FUNC) &_SplitAlignerR_cpp_support_newick, 2},
     {"_SplitAlignerR_cpp_validate_species_tree", (DL_FUNC) &_SplitAlignerR_cpp_validate_species_tree, 1},
     {"_SplitAlignerR_cpp_align_branches", (DL_FUNC) &_SplitAlignerR_cpp_align_branches, 4},
     {NULL, NULL, 0}

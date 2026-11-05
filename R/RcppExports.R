@@ -113,6 +113,10 @@ cpp_validate_branch_length_tokens <- function(tokens) {
     .Call(`_SplitAlignerR_cpp_validate_branch_length_tokens`, tokens)
 }
 
+cpp_support_newick <- function(reference_newick, support_percent) {
+    .Call(`_SplitAlignerR_cpp_support_newick`, reference_newick, support_percent)
+}
+
 cpp_validate_species_tree <- function(newick) {
     .Call(`_SplitAlignerR_cpp_validate_species_tree`, newick)
 }

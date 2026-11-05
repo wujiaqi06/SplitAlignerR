@@ -281,7 +281,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #' @return A `splitaligner_result` list containing the primitive `state_matrix`,
 #'   primitive-plus-composite `numeric_matrix`, long state and composite
 #'   ledgers, coordinate provenance, structured diagnostics, validated species
-#'   tree, and versioned metadata.
+#'   tree, and versioned metadata. Both modes return `support_table` with one row
+#'   per original reference branch and `support_newick` with percentages on
+#'   internal branches. Use [write_branch_support()] to export both.
 #' @details The single-tree state alphabet is exactly `mapped`, `NA_struct`,
 #'   `NA_fuse`, and `NA_topo`. Legacy paired-workflow `residual_NA` is not a
 #'   fifth state. Failure markers are never converted to zero.
@@ -310,6 +312,7 @@ align_branches <- function(species_tree, gene_trees,
   result$coordinate_table <- build_coordinate_table(result)
   result$input <- list(
     species_source = species$source,
+    reference_newick = species$text,
     gene_source = genes$source,
     gene_ids = genes$ids
   )

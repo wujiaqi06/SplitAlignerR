@@ -57,6 +57,17 @@ data.frame(state = aligned$state_matrix[, "B5"],
 divides that branch into two pieces of length 1. In the second tree A is paired
 with C, so there is no length for the reference split.
 
+The development version also returns branch support in both fixed and free mode.
+Here one of the two gene trees contains the reference split, giving 50% support.
+The display root divides that split, so the tree shows 50 on both sides.
+
+```r
+aligned$support_table[aligned$support_table$branch_type == "internal",
+                      c("coordinate_id", "n_rec", "n_dec", "support_percent")]
+aligned$support_newick  # "((A,B)50,(C,D)50);"
+write_branch_support(aligned, "quartet-support")  # choose a new directory
+```
+
 ## Fast-backed development package
 
 Build the prerelease with a C++17 compiler and the Rcpp, ape and digest packages.

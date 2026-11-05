@@ -1,5 +1,8 @@
 # Development changes since v0.1.0.9005
 
+* Fixed and free alignments now return a branch support table and an annotated
+  Newick reference tree. `write_branch_support()` exports both.
+
 * Catnip10 functions can be called with `SplitAlignerR::` without attaching
   the package. Source installations work with Rcpp 1.0.12.
 * `phylo` inputs retain literal labels and double-precision branch lengths.

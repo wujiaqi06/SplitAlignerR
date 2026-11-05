@@ -18,8 +18,9 @@ canonical_ape_write_tree <- function(tree) {
   }
   nodes[is.na(nodes)] <- ""
   labels <- enc2utf8(c(tips, nodes))
-  present <- nzchar(labels)
-  labels[present] <- paste0("'", gsub("'", "''", labels[present], fixed = TRUE), "'")
+  # Quote only labels that need it so ordinary tip names round-trip through ape.
+  quoted <- grepl("[][(),:;'\"[:space:]]", labels)
+  labels[quoted] <- paste0("'", gsub("'", "''", labels[quoted], fixed = TRUE), "'")
 
   if (!is.null(tree$edge.length) && length(tree$edge.length) != nrow(tree$edge)) {
     stop("The phylo edge lengths must match the edges.", call. = FALSE)

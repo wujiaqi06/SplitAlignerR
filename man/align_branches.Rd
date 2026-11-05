@@ -31,8 +31,8 @@ fixed-mode topology mismatches are additionally diagnosed.}
 \item{gene_ids}{Optional character vector overriding inferred/file IDs.
 Explicit IDs must be non-missing, nonempty, unique, free of control
 characters, and have no leading or trailing whitespace. Unicode IDs are
-supported. Existing names on character vectors, \code{multiPhylo} objects,
-and lists follow the same content rules; only missing or empty object names
+supported. Existing names on character vectors, \code{multiPhylo} objects, and
+lists follow the same content rules; only missing or empty object names
 receive deterministic automatic IDs.}
 
 \item{...}{Reserved; additional arguments currently signal an error.}
@@ -41,7 +41,9 @@ receive deterministic automatic IDs.}
 A \code{splitaligner_result} list containing the primitive \code{state_matrix},
 primitive-plus-composite \code{numeric_matrix}, long state and composite
 ledgers, coordinate provenance, structured diagnostics, validated species
-tree, and versioned metadata.
+tree, and versioned metadata. Both modes return \code{support_table} with one row
+per original reference branch and \code{support_newick} with percentages on
+internal branches. Use \code{\link[=write_branch_support]{write_branch_support()}} to export both.
 }
 \description{
 Restrict the reference tree to each gene's retained taxa, classify every

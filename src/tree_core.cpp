@@ -14,6 +14,7 @@
 #include <cctype>
 #include <cmath>
 #include <iomanip>
+#include <locale>
 #include <map>
 #include <set>
 #include <sstream>
@@ -28,6 +29,7 @@ namespace {
 struct Node {
   std::vector<int> children;
   std::string label;
+  bool tip_was_quoted = false;
   bool has_length = false;
   std::string length_token;
   int branch_number = 0;
@@ -222,6 +224,7 @@ class NewickParser {
       skip_trivia();
       node.label = parse_label(false);
     } else {
+      node.tip_was_quoted = peek() == '\'' || peek() == '"';
       node.label = parse_label(true);
     }
 
@@ -336,6 +339,7 @@ CanonicalSplit canonical_split(std::vector<std::string> left,
 
 using Bits = std::vector<uint64_t>;
 using ReferenceHandle = std::unique_ptr<saf_reference, decltype(&saf_reference_destroy)>;
+using SupportHandle = std::unique_ptr<saf_support, decltype(&saf_support_destroy)>;
 using CoverageHandle = std::unique_ptr<saf_coverage, decltype(&saf_coverage_destroy)>;
 using MappingHandle = std::unique_ptr<saf_mapping, decltype(&saf_mapping_destroy)>;
 
@@ -403,6 +407,11 @@ struct PreparedReference {
   std::vector<std::size_t> native_to_r;
   std::vector<std::size_t> r_to_native;
   std::vector<Bits> legacy_side_a;
+  // Only internal display edges get a support label. Aliases at a binary
+  // representation root point to the same primitive row.
+  std::vector<int> display_row;
+  std::vector<Node> display_nodes;
+  int display_root = -1;
   Rcpp::List species;
 };
 
@@ -508,6 +517,7 @@ PreparedReference prepare_reference(std::string newick) {
   prepared.native_to_r.resize(axis.size());
   prepared.r_to_native.resize(axis.size());
   prepared.legacy_side_a.resize(axis.size());
+  prepared.display_row.assign(nodes.size(), -1);
   const R_xlen_t coordinate_count = static_cast<R_xlen_t>(axis.size());
   Rcpp::CharacterVector coordinate_id(coordinate_count);
   Rcpp::CharacterVector canonical_keys(coordinate_count);
@@ -529,8 +539,11 @@ PreparedReference prepare_reference(std::string newick) {
     prepared.legacy_side_a[row] = taxa_bits(record.split.side_a, prepared.taxon_ids,
                                           prepared.info.n_words);
     std::vector<std::string> aliases;
-    for (std::size_t source : record.sources)
+    for (std::size_t source : record.sources) {
       aliases.push_back("B" + std::to_string(nodes[source].branch_number));
+      if (!winner.children.empty())
+        prepared.display_row[source] = static_cast<int>(row);
+    }
     coordinate_id[i] = "B" + std::to_string(winner.branch_number);
     canonical_keys[i] = record.split.key;
     branch_type[i] = winner.children.empty() ? "terminal" : "internal";
@@ -600,10 +613,115 @@ PreparedReference prepare_reference(std::string newick) {
         "SplitAligner-canonical-split-key-v2"
     )
   );
+  prepared.display_nodes = std::move(nodes);
+  prepared.display_root = root_index;
   return prepared;
 }
 
+// Render against the actual reference display nodes, retaining tip quoting,
+// original numeric length tokens (including the root length), and child order.
+// Input support labels and comments were never part of the coordinate identity.
+std::string render_support_newick(const PreparedReference& ref,
+                                  const Rcpp::NumericVector& percent) {
+  std::ostringstream out;
+  out.imbue(std::locale::classic());
+  out << std::setprecision(std::numeric_limits<double>::max_digits10);
+  struct Frame { int node; std::size_t next_child; };
+  std::vector<Frame> stack{{ref.display_root, 0}};
+  while (!stack.empty()) {
+    auto& frame = stack.back();
+    const Node& node = ref.display_nodes[frame.node];
+    if (frame.next_child < node.children.size()) {
+      out << (frame.next_child == 0 ? '(' : ',');
+      const int child = node.children[frame.next_child++];
+      stack.push_back({child, 0});
+      continue;
+    }
+    if (node.children.empty()) {
+      if (!node.tip_was_quoted && node.label.find('\'') == std::string::npos) {
+        out << node.label;
+      } else {
+        out << '\'';
+        for (const char ch : node.label) {
+          if (ch == '\'') out << '\'';
+          out << ch;
+        }
+        out << '\'';
+      }
+    } else {
+      out << ')';
+      const int row = ref.display_row[frame.node];
+      if (row >= 0 && !R_IsNA(percent[row])) out << percent[row];
+    }
+    if (node.has_length && splitaligner::validate_numeric_token(node.length_token).accepted)
+      out << ':' << node.length_token;
+    stack.pop_back();
+  }
+  out << ';';
+  return out.str();
+}
+
+Rcpp::DataFrame reference_support_table(const PreparedReference& ref,
+                                        saf_support* support) {
+  auto counts = fast_query<saf_support_count>([&](auto out, auto cap, auto n) {
+    return saf_support_read(support, out, cap, n);
+  });
+  if (counts.size() != ref.r_to_native.size())
+    throw std::runtime_error("SplitAlignerFast support count/coordinate mismatch");
+  const auto n = static_cast<R_xlen_t>(counts.size());
+  // The entry point already restricts gene_count to INT_MAX, so every
+  // observation count here fits exactly in an R integer.
+  Rcpp::IntegerVector valid(n), structural(n), fused(n), dec(n), rec(n), absent(n);
+  Rcpp::NumericVector fraction(n, NA_REAL), percent(n, NA_REAL);
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const auto& c = counts[ref.r_to_native[i]];
+    valid[i] = static_cast<int>(c.n_valid_topologies);
+    structural[i] = static_cast<int>(c.n_struct);
+    fused[i] = static_cast<int>(c.n_fused);
+    dec[i] = static_cast<int>(c.n_dec);
+    rec[i] = static_cast<int>(c.n_rec);
+    absent[i] = static_cast<int>(c.n_not_recovered);
+    if (c.n_dec > 0) {
+      fraction[i] = static_cast<double>(c.n_rec) / c.n_dec;
+      percent[i] = 100.0 * static_cast<double>(c.n_rec) / c.n_dec;
+    }
+  }
+  const Rcpp::DataFrame coordinates = Rcpp::as<Rcpp::DataFrame>(ref.species["coordinates"]);
+  return Rcpp::DataFrame::create(
+    Rcpp::Named("coordinate_id") = coordinates["coordinate_id"],
+    Rcpp::Named("branch_type") = coordinates["branch_type"],
+    Rcpp::Named("n_valid_topologies") = valid,
+    Rcpp::Named("n_struct") = structural,
+    Rcpp::Named("n_fused") = fused,
+    Rcpp::Named("n_dec") = dec,
+    Rcpp::Named("n_rec") = rec,
+    Rcpp::Named("n_not_recovered") = absent,
+    Rcpp::Named("support_fraction") = fraction,
+    Rcpp::Named("support_percent") = percent,
+    Rcpp::Named("stringsAsFactors") = false
+  );
+}
+
 }  // namespace
+
+// [[Rcpp::export]]
+std::string cpp_support_newick(std::string reference_newick,
+                               Rcpp::NumericVector support_percent) {
+  const auto ref = prepare_reference(std::move(reference_newick));
+  const Rcpp::DataFrame coordinates = Rcpp::as<Rcpp::DataFrame>(ref.species["coordinates"]);
+  const Rcpp::CharacterVector ids = coordinates["coordinate_id"];
+  if (support_percent.size() != ids.size() || Rf_isNull(support_percent.attr("names")))
+    Rcpp::stop("support_percent must be named and aligned to the primitive coordinates.");
+  const Rcpp::CharacterVector names = support_percent.names();
+  for (R_xlen_t i = 0; i < ids.size(); ++i) {
+    if (names[i] != ids[i])
+      Rcpp::stop("support_percent names must match reference coordinate_id in order.");
+    const double p = support_percent[i];
+    if (!R_IsNA(p) && (!std::isfinite(p) || p < 0.0 || p > 100.0))
+      Rcpp::stop("support_percent must be between 0 and 100 or NA.");
+  }
+  return render_support_newick(ref, support_percent);
+}
 
 // [[Rcpp::export]]
 Rcpp::List cpp_validate_species_tree(std::string newick) {
@@ -911,6 +1029,9 @@ Rcpp::List cpp_align_branches(std::string species_newick,
   }
 
   PreparedReference reference = prepare_reference(species_newick);
+  saf_support* raw_support = nullptr;
+  fast_check(saf_support_create(reference.handle.get(), "gene", "alignment", &raw_support));
+  SupportHandle support(raw_support, saf_support_destroy);
   Rcpp::List species = reference.species;
   const Rcpp::DataFrame primitive_coordinates =
     Rcpp::as<Rcpp::DataFrame>(species["coordinates"]);
@@ -953,6 +1074,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     fast_check(saf_mapping_create(coverage->handle.get(), parsed.parent.data(),
                                   parsed.taxon.data(), parsed.parent.size(), &raw));
     MappingHandle mapping(raw, saf_mapping_destroy);
+    fast_check(saf_support_update(support.get(), raw));
     saf_mapping_info info{};
     fast_check(saf_mapping_get_info(raw, &info));
     std::vector<char> states(primitive_count);
@@ -1260,6 +1382,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     Rcpp::Named("stringsAsFactors") = false
   );
 
+  const auto support_table = reference_support_table(reference, support.get());
+  const Rcpp::NumericVector support_percent = support_table["support_percent"];
   return Rcpp::List::create(
     Rcpp::Named("state_matrix") = state_matrix,
     Rcpp::Named("numeric_matrix") = numeric_matrix,
@@ -1302,6 +1426,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
       Rcpp::Named("backend_name") = "SplitAlignerFast",
       Rcpp::Named("backend_abi") = 2,
       Rcpp::Named("backend_source_commit") = SAF_R_SOURCE_COMMIT
-    )
+    ),
+    Rcpp::Named("support_table") = support_table,
+    Rcpp::Named("support_newick") = render_support_newick(reference, support_percent)
   );
 }
