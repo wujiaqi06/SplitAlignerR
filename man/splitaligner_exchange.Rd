@@ -31,7 +31,7 @@ migrate_splitaligner_labels(x, migration, allow_synthetic = FALSE)
 \item{migration}{A migration bound to exact tree and ledgers.}
 }
 \value{An envelope, schema, registry, migration, or edge annotation table as named by the function. Validation returns the input invisibly.}
-\details{Schema 0.1.0-development. Unknown mode, payload, alias scope or provenance and non-bijective root/edge representations are rejected. No rerooting, pruning or composite expansion is performed. Tree geometry is separate from gene values. See exchange_handoff/S1/API.md in the development checkout for the full profile. La Terra reader and plotting compatibility remain untested.}
+\details{Schema 0.2.0-development. Unknown mode, payload, alias scope or provenance and non-bijective root/edge representations are rejected. No rerooting, pruning or composite expansion is performed. Tree geometry is separate from gene values. Use splitaligner_exchange_schema() for the profile and its required fields. La Terra reader and plotting compatibility remain untested.}
 \alias{splitaligner_label_registry}
 \alias{export_splitaligner_exchange}
 \alias{validate_splitaligner_exchange}
@@ -41,3 +41,21 @@ migrate_splitaligner_labels(x, migration, allow_synthetic = FALSE)
 \alias{new_splitaligner_label_migration}
 \alias{migrate_splitaligner_labels}
 \alias{splitaligner_exchange_schema}
+\examples{
+# Synthetic provenance for a toy example; supply real source identities for real data.
+ref <- ape::read.tree(text = "(A,B,C);")
+result <- align_branches(ref, c(g1 = "(A:1,B:2,C:3);"), mode = "fixed")
+producer <- list(source_commit = strrep("a", 40), source_tree = strrep("b", 40),
+  source_parent = strrep("c", 40), dirty_scope = character(),
+  source_files = c(toy = digest::digest("toy", algo = "sha256", serialize = FALSE)),
+  provenance_status = "synthetic_fixture")
+payload <- list(type = "branch_length", name = "length", units = "substitutions/site",
+  scale = "identity", origin = "toy gene tree", spec_id = "toy-example")
+path <- tempfile(fileext = ".rds")
+x <- export_splitaligner_exchange(result, ref, list(kind = "provided_phylo", id = "toy"),
+  producer, splitaligner_label_registry()$native$scheme, payload, file = path)
+read_back <- read_splitaligner_exchange(path)
+validate_splitaligner_exchange(read_back)
+transpose_splitaligner_exchange(read_back)$axes$orientation
+unlink(path)
+}

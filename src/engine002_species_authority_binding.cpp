@@ -130,6 +130,18 @@ SpeciesAuthorityPtr make_species_authority(
   authority->terminal_taxon_ids = terminal_taxon_ids;
   authority->primitive_splits = primitive_splits;
 
+  // Compare the exact split bytes without making another copy of every bitset.
+  std::vector<const std::vector<std::uint8_t>*> ordered_splits;
+  ordered_splits.reserve(primitive_splits.size());
+  for (const auto& split : primitive_splits) ordered_splits.push_back(&split);
+  std::sort(ordered_splits.begin(), ordered_splits.end(),
+            [](const auto* a, const auto* b) { return *a < *b; });
+  if (std::adjacent_find(ordered_splits.begin(), ordered_splits.end(),
+            [](const auto* a, const auto* b) { return *a == *b; }) !=
+      ordered_splits.end()) {
+    fail(ErrorCode::scientific_invariant, "species authority has duplicate primitive splits");
+  }
+
   const auto all = full_retained(authority->global_taxon_count);
   for (std::uint32_t primitive = 0; primitive < authority->primitive_count;
        ++primitive) {

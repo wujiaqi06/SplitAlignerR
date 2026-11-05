@@ -516,7 +516,8 @@ save_splitaligner_result <- function(result, file, compress = TRUE,
 #'
 #' @param file Existing RDS path.
 #' @param check_version Logical; require the stored core and schema versions to
-#'   match the currently loaded package.
+#'   match the currently loaded package. Fast results always require the same
+#'   backend name, ABI, and source commit, even when this is FALSE.
 #' @return A validated `splitaligner_result`.
 #' @examples
 #' species <- "((A,B),(C,D));"

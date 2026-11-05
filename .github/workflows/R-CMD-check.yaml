@@ -10,6 +10,26 @@ name: R-CMD-check.yaml
 permissions: read-all
 
 jobs:
+  distro-rcpp:
+    name: Ubuntu 24.04 distro Rcpp and concurrent cache
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install using the distro R packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends r-base-dev r-cran-rcpp r-cran-ape r-cran-digest
+          mkdir -p "$RUNNER_TEMP/r-lib"
+          export R_LIBS_USER="$RUNNER_TEMP/r-lib"
+          /usr/bin/Rscript --vanilla -e 'print(packageVersion("Rcpp"))'
+          /usr/bin/R CMD INSTALL --library="$R_LIBS_USER" .
+          /usr/bin/Rscript --vanilla tests/namespace-oracle.R
+      - name: Exercise concurrent loads under the hard cache budget
+        run: |
+          c++ -std=c++17 -pthread -Isrc .github/recert/engine002_lru_overlap.cpp \
+            src/engine002_{lru,fast_hash,hash}.cpp -o "$RUNNER_TEMP/test-lru"
+          "$RUNNER_TEMP/test-lru"
+
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
@@ -42,6 +62,10 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+
+      - name: Install a comma-decimal locale for the parser test
+        if: runner.os == 'Linux'
+        run: sudo locale-gen de_DE.UTF-8
 
       - uses: r-lib/actions/check-r-package@v2
         with:
