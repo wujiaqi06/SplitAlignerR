@@ -44,6 +44,11 @@
   complete <- FALSE
   on.exit(if (!complete) unlink(output_dir, recursive = TRUE, expand = FALSE), add = TRUE)
   paths <- c(table = file.path(output_dir, "support.tsv"), tree = file.path(output_dir, "support.nwk"))
+  # Disk panels accumulate in doubles. Keep their TSV counters in integer
+  # notation even when the panel is large enough for R to choose exponents.
+  for (col in c("n_valid_topologies", "n_struct", "n_fused", "n_dec", "n_rec", "n_not_recovered")) {
+    table[[col]] <- sprintf("%.0f", table[[col]])
+  }
   for (col in c("support_fraction", "support_percent")) {
     table[[col]] <- legacy_numeric_text(table[[col]])
   }
