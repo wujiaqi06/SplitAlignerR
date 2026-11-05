@@ -231,11 +231,13 @@ License](https://wujiaqi06.github.io/SplitAlignerR/inst/fast-backend/LICENSE).
 
 ## Acknowledgments
 
-We are especially grateful to Chao Zhang (张超) for his generous
-technical help and for sharing his fastSplitAligner.py implementation.
-His implementation provided an important reference for efficient
-split-based branch mapping and a comparison baseline during the
-development and validation of SplitAlignerFast.
+We are especially grateful to Chao Zhang (张超;
+[@chaoszhang](https://github.com/chaoszhang)) of the School of Life
+Sciences, Peking University, for his generous technical help and for
+sharing his `fastSplitAligner.py` implementation. His implementation
+provided an important reference for efficient split-based branch mapping
+and a comparison baseline during the development and validation of
+SplitAlignerFast.
 
 SplitAlignerR also benefits from this contribution through its shared
 SplitAlignerFast core.
