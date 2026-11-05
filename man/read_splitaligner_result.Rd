@@ -10,7 +10,8 @@ read_splitaligner_result(file, check_version = TRUE)
 \item{file}{Existing RDS path.}
 
 \item{check_version}{Logical; require the stored core and schema versions to
-match the currently loaded package.}
+match the currently loaded package. Fast results always require the same
+backend name, ABI, and source commit, even when this is FALSE.}
 }
 \value{
 A validated \code{splitaligner_result}.

@@ -1,3 +1,14 @@
+# Development changes since v0.1.0.9005
+
+* Catnip10 functions can be called with `SplitAlignerR::` without attaching
+  the package. Source installations work with Rcpp 1.0.12.
+* `phylo` inputs retain literal labels and double-precision branch lengths.
+  Named `gene_ids` and Unicode gene-file prefixes are accepted. Newick decimal
+  points and output tokens are independent of the host numeric locale.
+* Fixed-mode exchange now has a runnable example and a round-trip test.
+  Internal storage rejects duplicate authority splits early and handles
+  concurrent cache loads and interrupted publication.
+
 # SplitAlignerR 0.1.0.9005 (development prerelease)
 
 * `free_fusion_groups()` reports the exact projected split, primitive members

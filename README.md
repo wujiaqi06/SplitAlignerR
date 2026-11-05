@@ -7,10 +7,12 @@
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
 
-SplitAlignerR aligns gene-tree branches to species-tree coordinates. The C++17
-SplitAlignerFast backend maps exact taxon bitsets through C ABI 2. A separate
-pure R implementation independently recomputes the Catnip10 graph-oracle benchmark.
-The package checks branch-length tokens before using them as numeric evidence.
+SplitAlignerR compares each gene tree with a reference species tree. For every
+reference branch, you can see whether the gene tree contains the same split
+and, if it does, its branch length. When species are missing, the result also
+tells you which branches disappeared or merged. The package includes the
+[SplitAlignerFast core](https://github.com/wujiaqi06/SplitAligner/tree/main/fast)
+and returns ordinary R matrices and data frames.
 
 `v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
 the post-release development line. The Fast-backed prerelease has package version
@@ -28,41 +30,32 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 # Stable, Pro-RECERT-certified release:
 remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0")
 
-# Fast-backed prerelease
+# Tagged Fast-backed prerelease
 remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0.9005")
 ```
 
-## Minimal Example
+For the latest development fixes, use `remotes::install_github("wujiaqi06/SplitAlignerR@main")`.
+The tagged `v0.1.0.9005` source needs Rcpp 1.0.13 or newer to compile.
+
+## First example
 
 ```r
 library(SplitAlignerR)
 
-catnip10_expected()
-catnip10_summary_counts()
-validate_catnip10_oracle()
-
-# Independently rebuild all Catnip10 graph states in pure R.
-rebuilt <- recompute_catnip10_oracle("global")
-identical(rebuilt$matrix, catnip10_matrix("global"))
-
-# Inspect the compiled core and its numeric input policy.
-splitaligner_core_info()
-validate_branch_length_tokens(c("0", "1e-8", "NaN", "1e9999"))
-
-# Parse and canonicalize a reference tree in the C++ core.
-validate_species_tree("((A:1,B:1),(C:1,D:1));")
-
-# Align empirical trees. State and finite numeric evidence stay separate.
-species <- "((A:1,B:1):1,(C:1,D:1):1);"
-genes <- c(
-  concordant = "((A:1,B:1):1,(C:1,D:1):1);",
-  discordant = "((A:1,C:1):1,(B:1,D:1):1);",
-  marker = "((A:NaN,B:1):1,(C:1,D:1):1);"
-)
+species <- "((A,B),(C,D));"
+genes <- c(concordant = "((A:1,B:1):1,(C:1,D:1):1);",
+           discordant = "((A:1,C:1):1,(B:1,D:1):1);")
 aligned <- align_branches(species, genes, mode = "free")
-aligned$state_matrix
-aligned$numeric_matrix
+data.frame(state = aligned$state_matrix[, "B5"],
+           length = aligned$numeric_matrix[, "B5"])
+#                state length
+# concordant    mapped      2
+# discordant   NA_topo     NA
 ```
+
+`B5` is the branch separating {A, B} from {C, D}. In the first tree, the root
+divides that branch into two pieces of length 1. In the second tree A is paired
+with C, so there is no length for the reference split.
 
 ## Fast-backed development package
 
@@ -93,26 +86,25 @@ groups[, c("gene_id", "primitive_members", "projected_split", "recovery_status",
            "graph_class", "final_token")]
 ```
 
-For these three genes, the same two reference branches form a fusion group.
-The shared split is present at length 0.31 in g1 and 0.26 in g2. The g3 tree
-lacks the split, so its group token is `NA_fuse_topo`. Both members still
-carry `NA_fuse` in all three genes. A displayed group with no finite length
-has graph class `Mapped` and a literal `NA` value. An unresolved free tree
-can also lack the split.
+The two members keep `NA_fuse` in all three genes. Their shared split has
+length 0.31 in g1 and 0.26 in g2. The g3 tree lacks the split, so the group
+gets `NA_fuse_topo`. A shared split that is present but has no length gets
+`Mapped` and a literal `NA` value. The text token for 0.26 may print as
+`0.26000000000000001` to preserve the stored double; use the numeric matrix
+for calculations.
 
-Choose the counting unit when tabulating the five outcomes.
+The identity for the **original reference branches** is
+`Total = Mapped + NA_struct + NA_fuse + NA_topo`. To inspect group recovery
+separately, choose how to count the members of a fused group:
 
 ```r
 count_free_topology(free, unit = "primitive")
 count_free_topology(free, unit = "coordinate")
 ```
 
-Each row satisfies `Total = Mapped + NA_struct + NA_fuse + NA_topo + NA_fuse_topo`.
-For g3, the absent shared split contributes two to `NA_fuse_topo` in primitive
-accounting (Total = 9) and one in coordinate accounting (Total = 8).
-`Mapped` counts displayed singletons, including those with missing lengths.
-Both units count each structurally lost primitive once. The accounting weights
-leave the two primitive cells for the absent split labeled `NA_fuse`.
+For g3, the missing shared split contributes two to `NA_fuse_topo` in the
+member-weighted summary (Total = 9) and one in the coordinate summary
+(Total = 8). Neither summary changes the two `NA_fuse` cells in the raw matrix.
 
 Primitive branch recovery uses only eligible reference branches. In g3, each
 member of the absent group is already `NA_fuse` in the reference layer and
@@ -131,7 +123,7 @@ and seals. See `?splitaligner_exchange` for its reference-tree requirements.
 ## V1 Scope
 
 The certified V1 release combines the production mapper with the independent
-Catnip10 benchmark track. It includes:
+Catnip10 graph-oracle benchmark. It includes:
 
 - `catnip10_expected()` / `catnip10_matrix()` for the wide primitive-coordinate
   oracle matrix;

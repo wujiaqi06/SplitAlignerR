@@ -61,3 +61,9 @@ test file. No passing result is asserted by adding these source tests.
 Version 0.1.0.9005 tests the Figure 4 three-gene example and edge cases in
 `testthat/test-fusion-groups.R`. Frozen comparisons in the original paired
 tests and external mammal tests explicitly select `rule = "legacy"`.
+
+The development suite additionally checks fixed-mode exchange export, readback,
+transposition, edge annotation and tamper rejection in
+`testthat/test-exchange-roundtrip.R`. This is a synthetic round trip; it does
+not certify historical label migration. `namespace-oracle.R` runs separately
+without attaching the package, as a downstream caller using `::` would.

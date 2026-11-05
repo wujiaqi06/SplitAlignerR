@@ -205,8 +205,11 @@ class NewickParser {
       node.children.push_back(parse_subtree());
       while (true) {
         skip_trivia();
+        if (peek() == ')') break;
         if (peek() != ',') {
-          break;
+          const std::string actual = at_end() ? "end of input" :
+            std::string("'") + peek() + "'";
+          fail("expected ',' or ')' but found " + actual);
         }
         ++position_;
         node.children.push_back(parse_subtree());

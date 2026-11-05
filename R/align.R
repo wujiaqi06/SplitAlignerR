@@ -23,7 +23,7 @@ gene_records_from_lines <- function(lines) {
       )
     }
     prefix <- trimws(substr(record, 1L, open - 1L))
-    if (!grepl("^[A-Za-z0-9_.-]+$", prefix)) {
+    if (!grepl("^[\\p{L}\\p{M}\\p{N}_.-]+$", prefix, perl = TRUE)) {
       stop(
         sprintf(
           "Gene-tree record %d has an invalid ID prefix `%s`; use letters, digits, dot, underscore, or hyphen.",
@@ -81,7 +81,7 @@ validate_explicit_gene_ids <- function(ids, count) {
     stop("User-supplied `gene_ids` must not contain empty strings.",
          call. = FALSE)
   }
-  ids <- validate_present_gene_ids(ids)
+  ids <- validate_present_gene_ids(as.vector(ids))
   if (anyDuplicated(ids)) {
     duplicate <- ids[duplicated(ids)][[1L]]
     stop(sprintf("Duplicate gene identifier `%s`.", duplicate), call. = FALSE)
@@ -221,6 +221,7 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
       newicks <- records$newicks
       inferred_ids <- records$ids
     } else {
+      if (length(gene_trees) == 1L) check_missing_tree_path(gene_trees)
       newicks <- enc2utf8(gene_trees)
       inferred_ids <- names(gene_trees)
       source <- if (length(gene_trees) == 1L) {
@@ -264,7 +265,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #' @param gene_trees One or more empirical gene trees supplied as Newick text,
 #'   a SplitAligner line-based file, one `ape::phylo`, an `ape::multiPhylo`, or
 #'   a list of `phylo` objects. A line-based record may be `gene_id(tree);` or a
-#'   plain Newick tree.
+#'   plain Newick tree. A file ID may contain Unicode letters, marks, numbers,
+#'   dots, underscores, and hyphens. For `phylo` objects, tip labels are taken
+#'   literally and numeric edge lengths are preserved at double precision.
 #' @param mode Character; `"free"` for free-topology trees or `"fixed"` for
 #'   topology-constrained trees. Both modes use the same state semantics;
 #'   fixed-mode topology mismatches are additionally diagnosed.

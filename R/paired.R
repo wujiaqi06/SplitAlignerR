@@ -1,10 +1,20 @@
+# sprintf and formatC both follow LC_NUMERIC on some hosts, even when
+# formatC is given decimal.mark = ".". Inspect the formatter without changing
+# the host locale; only the decimal separator can occur between these digits.
+.dot_decimal <- function(text) {
+  probe <- sprintf("%.1f", 1.5)
+  if (identical(probe, "1.5")) return(text)
+  decimal <- substr(probe, 2L, nchar(probe) - 1L)
+  sub(decimal, ".", text, fixed = TRUE)
+}
+
 legacy_numeric_text <- function(value) {
   output <- rep("NA", length(value))
   finite <- is.finite(value)
   if (any(finite)) {
-    output[finite] <- trimws(formatC(
+    output[finite] <- .dot_decimal(trimws(formatC(
       value[finite], digits = 17L, format = "g", decimal.mark = "."
-    ))
+    )))
   }
   output
 }

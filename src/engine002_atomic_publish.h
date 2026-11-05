@@ -51,7 +51,8 @@ Sha256 sha256_file(const std::filesystem::path& path);
 void write_text_exclusive(const std::filesystem::path& path,
                           const std::string& text);
 void publish_no_replace(const std::filesystem::path& temporary,
-                        const std::filesystem::path& final_path);
+                        const std::filesystem::path& final_path,
+                        bool& published);
 void sync_directory(const std::filesystem::path& directory);
 void remove_recognized_temp(const std::filesystem::path& path) noexcept;
 void set_publication_failpoint(int stage) noexcept;

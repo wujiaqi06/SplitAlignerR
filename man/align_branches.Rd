@@ -20,7 +20,9 @@ annotation blocks are ignored with diagnostics.}
 \item{gene_trees}{One or more empirical gene trees supplied as Newick text,
 a SplitAligner line-based file, one \code{ape::phylo}, an \code{ape::multiPhylo}, or
 a list of \code{phylo} objects. A line-based record may be \code{gene_id(tree);} or a
-plain Newick tree.}
+plain Newick tree. A file ID may contain Unicode letters, marks, numbers,
+dots, underscores, and hyphens. For \code{phylo} objects, tip labels are taken
+literally and numeric edge lengths are preserved at double precision.}
 
 \item{mode}{Character; \code{"free"} for free-topology trees or \code{"fixed"} for
 topology-constrained trees. Both modes use the same state semantics;

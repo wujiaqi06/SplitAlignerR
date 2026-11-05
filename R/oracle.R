@@ -323,7 +323,8 @@
 #' @export
 recompute_catnip10_oracle <- function(regime = c("global", "local")) {
   regime <- match.arg(regime)
-  tree <- ape::read.tree(text = catnip10_oracle$species_tree)
+  data <- .catnip10_data()
+  tree <- ape::read.tree(text = data$species_tree)
   if (inherits(tree, "multiPhylo") || !inherits(tree, "phylo")) {
     stop("Bundled Catnip10 input must contain exactly one tree.", call. = FALSE)
   }
@@ -333,7 +334,7 @@ recompute_catnip10_oracle <- function(regime = c("global", "local")) {
   state <- .oracle_init_state(identity, frozen$root_label)
   axis <- as.character(identity$branch_id)
   deletion_order <- as.character(
-    catnip10_oracle[[regime]]$deletion_order
+    data[[regime]]$deletion_order
   )
 
   matrix_rows <- list()
