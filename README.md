@@ -86,27 +86,25 @@ groups[, c("gene_id", "primitive_members", "projected_split", "recovery_status",
            "graph_class", "final_token")]
 ```
 
-For these three genes, the same two reference branches form a fusion group.
-The shared split is present at length 0.31 in g1 and 0.26 in g2. The g3 tree
-lacks the split, so its group token is `NA_fuse_topo`. The text token may print as `0.26000000000000001` because it preserves the
-exact stored double; use the numeric matrix for calculations. Both members still
-carry `NA_fuse` in all three genes. A displayed group with no finite length
-has graph class `Mapped` and a literal `NA` value. An unresolved free tree
-can also lack the split.
+The two members keep `NA_fuse` in all three genes. Their shared split has
+length 0.31 in g1 and 0.26 in g2. The g3 tree lacks the split, so the group
+gets `NA_fuse_topo`. A shared split that is present but has no length gets
+`Mapped` and a literal `NA` value. The text token for 0.26 may print as
+`0.26000000000000001` to preserve the stored double; use the numeric matrix
+for calculations.
 
-Choose the counting unit when tabulating the five outcomes.
+The identity for the **original reference branches** is
+`Total = Mapped + NA_struct + NA_fuse + NA_topo`. To inspect group recovery
+separately, choose how to count the members of a fused group:
 
 ```r
 count_free_topology(free, unit = "primitive")
 count_free_topology(free, unit = "coordinate")
 ```
 
-Each row satisfies `Total = Mapped + NA_struct + NA_fuse + NA_topo + NA_fuse_topo`.
-For g3, the absent shared split contributes two to `NA_fuse_topo` in primitive
-accounting (Total = 9) and one in coordinate accounting (Total = 8).
-`Mapped` counts displayed singletons, including those with missing lengths.
-Both units count each structurally lost primitive once. The accounting weights
-leave the two primitive cells for the absent split labeled `NA_fuse`.
+For g3, the missing shared split contributes two to `NA_fuse_topo` in the
+member-weighted summary (Total = 9) and one in the coordinate summary
+(Total = 8). Neither summary changes the two `NA_fuse` cells in the raw matrix.
 
 Primitive branch recovery uses only eligible reference branches. In g3, each
 member of the absent group is already `NA_fuse` in the reference layer and
