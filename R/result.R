@@ -493,6 +493,7 @@ coordinate_provenance <- function(result, coordinate_id = NULL) {
 save_splitaligner_result <- function(result, file, compress = TRUE,
                                      overwrite = FALSE) {
   validate_splitaligner_result_object(result)
+  .validate_branch_support(result)
   if (!is.character(file) || length(file) != 1L || is.na(file) ||
       !nzchar(file)) {
     stop("`file` must be one nonempty path.", call. = FALSE)
@@ -535,6 +536,7 @@ read_splitaligner_result <- function(file, check_version = TRUE) {
   validate_splitaligner_result_object(
     result, check_version = check_version
   )
+  .validate_branch_support(result)
   result
 }
 
