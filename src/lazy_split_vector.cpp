@@ -3,6 +3,7 @@
 #include <R_ext/Altrep.h>
 #include <R_ext/Print.h>
 #include <R_ext/Utils.h>
+#include <Rversion.h>
 
 #include <algorithm>
 #include <cmath>
@@ -219,7 +220,14 @@ SEXP materialize(SEXP x) {
   return out;
 }
 
-void* dataptr(SEXP x, Rboolean) { return DATAPTR(materialize(x)); }
+void* dataptr(SEXP x, Rboolean) {
+  // R 4.6 exposes writable pointers for ALTREP Dataptr methods via DATAPTR_RW.
+#if R_VERSION >= R_Version(4, 6, 0)
+  return DATAPTR_RW(materialize(x));
+#else
+  return DATAPTR(materialize(x));
+#endif
+}
 const void* dataptr_or_null(SEXP x) {
   SEXP cached = R_altrep_data2(x);
   return cached == R_NilValue ? nullptr : DATAPTR_RO(cached);

@@ -3,6 +3,8 @@
 * Native compact-vector initialization is retained when Rcpp attributes are
   regenerated. CI checks generated registration on all three platforms and
   with the distribution's Rcpp package.
+* The compact-vector data-pointer callback supports R 4.6's public API while
+  retaining compatibility with earlier R headers.
 * Release metadata checks and software citations identify the current
   development prerelease. Historical release identities remain unchanged.
 * The panel cleanup diagnostic test compares normalized paths on Windows.
