@@ -1,0 +1,127 @@
+{
+  "provenance": "Byte-identical copies of existing frozen benchmark artifacts; four matrix filenames shortened for portable tar paths. No truth or root-policy changes.",
+  "source_repository": "https://github.com/wujiaqi06/SplitAligner",
+  "source_path_basis": "Paths in files[].source are relative to the SplitAligner repository root.",
+  "files": [
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_rooted/benchmark.species_tree.nwk",
+      "fixture": "global-rooted/benchmark.species_tree.nwk",
+      "bytes": 322,
+      "sha256": "b7d3fe2aa74b442ee4b6d12dff4fcbc72569ff3c17a7f32880d9c99bb034a99e"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_rooted/benchmark.schedule.tsv",
+      "fixture": "global-rooted/benchmark.schedule.tsv",
+      "bytes": 673,
+      "sha256": "1a15826c3eb8ec8d2518d48db404dd52f28d1e44542daa505e6de3a61fb71867"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_rooted/oracle_gene_by_original_branch_matrix.tsv",
+      "fixture": "global-rooted/original_matrix.tsv",
+      "bytes": 1843,
+      "sha256": "51c0f9cd2e843fc44a31630e959990b1c949b28603025e0da00e4dc6a58f8706"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_rooted/oracle_fusion_groups.tsv",
+      "fixture": "global-rooted/oracle_fusion_groups.tsv",
+      "bytes": 438,
+      "sha256": "865f56e4345c07a347384d49957943b0da37f9e613aebe160e362c190bfdd4a0"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/branch_label_map.tsv",
+      "fixture": "global-rooted/branch_label_map.tsv",
+      "bytes": 608,
+      "sha256": "b62f67492b2d6bea34ee719b61b9d8c286d4e0f662af2690ce48d29699b9603f"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_unrooted/benchmark.species_tree.nwk",
+      "fixture": "global-unrooted/benchmark.species_tree.nwk",
+      "bytes": 302,
+      "sha256": "465605db14f3b3bc9bc8dce6b04409e187aaaaaa90041c5ad710f8778adb0eef"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_unrooted/benchmark.schedule.tsv",
+      "fixture": "global-unrooted/benchmark.schedule.tsv",
+      "bytes": 673,
+      "sha256": "1a15826c3eb8ec8d2518d48db404dd52f28d1e44542daa505e6de3a61fb71867"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_unrooted/oracle_gene_by_original_branch_matrix.tsv",
+      "fixture": "global-unrooted/original_matrix.tsv",
+      "bytes": 1698,
+      "sha256": "1bc40f49e78e46ae29e2d08d90e08b3a74f645c0b65fbcb95680435b5b329fe0"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/benchmark_unrooted/oracle_fusion_groups.tsv",
+      "fixture": "global-unrooted/oracle_fusion_groups.tsv",
+      "bytes": 469,
+      "sha256": "609d4956c9f938bfe13a2089e7032d66bdcc29a67e7f3d81b8a76048e84ebaa7"
+    },
+    {
+      "source": "benchmark/outputs/t10_global_deletion/branch_label_map.tsv",
+      "fixture": "global-unrooted/branch_label_map.tsv",
+      "bytes": 608,
+      "sha256": "b62f67492b2d6bea34ee719b61b9d8c286d4e0f662af2690ce48d29699b9603f"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_rooted/benchmark.species_tree.nwk",
+      "fixture": "local-rooted/benchmark.species_tree.nwk",
+      "bytes": 322,
+      "sha256": "b7d3fe2aa74b442ee4b6d12dff4fcbc72569ff3c17a7f32880d9c99bb034a99e"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_rooted/benchmark.schedule.tsv",
+      "fixture": "local-rooted/benchmark.schedule.tsv",
+      "bytes": 664,
+      "sha256": "00f504179e0dbdf2ef5f05366a0e307bae1422230df112135cbcd4e86bfc96a8"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_rooted/oracle_gene_by_original_branch_matrix.tsv",
+      "fixture": "local-rooted/original_matrix.tsv",
+      "bytes": 1803,
+      "sha256": "5612656a108408ce940740e25f3617110369e0a6a3cdff677c63641fff25c2dd"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_rooted/oracle_fusion_groups.tsv",
+      "fixture": "local-rooted/oracle_fusion_groups.tsv",
+      "bytes": 548,
+      "sha256": "29553f8a913f56e670a7cff6e9549bd1ecdbee46fd84ef99a5e3a6600c96f04d"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/branch_label_map.tsv",
+      "fixture": "local-rooted/branch_label_map.tsv",
+      "bytes": 608,
+      "sha256": "b62f67492b2d6bea34ee719b61b9d8c286d4e0f662af2690ce48d29699b9603f"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_unrooted/benchmark.species_tree.nwk",
+      "fixture": "local-unrooted/benchmark.species_tree.nwk",
+      "bytes": 302,
+      "sha256": "465605db14f3b3bc9bc8dce6b04409e187aaaaaa90041c5ad710f8778adb0eef"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_unrooted/benchmark.schedule.tsv",
+      "fixture": "local-unrooted/benchmark.schedule.tsv",
+      "bytes": 664,
+      "sha256": "00f504179e0dbdf2ef5f05366a0e307bae1422230df112135cbcd4e86bfc96a8"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_unrooted/oracle_gene_by_original_branch_matrix.tsv",
+      "fixture": "local-unrooted/original_matrix.tsv",
+      "bytes": 1686,
+      "sha256": "c5057f8566fb71724bc1bcfc2fc7ef9166e9297bc963b99eced1ec59ee3b9601"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/benchmark_unrooted/oracle_fusion_groups.tsv",
+      "fixture": "local-unrooted/oracle_fusion_groups.tsv",
+      "bytes": 550,
+      "sha256": "82bbfd7684806cc169ce9cda4f8be170f9b4327e8c36bd7cc847aacea84b1194"
+    },
+    {
+      "source": "benchmark/outputs/t8_to_t3_local_deletion/branch_label_map.tsv",
+      "fixture": "local-unrooted/branch_label_map.tsv",
+      "bytes": 608,
+      "sha256": "b62f67492b2d6bea34ee719b61b9d8c286d4e0f662af2690ce48d29699b9603f"
+    }
+  ]
+}

@@ -184,5 +184,8 @@ test_that("R wrapper preserves every production-core component", {
   )
   wrapped <- align_branches(species, genes, mode = "free")
   raw <- cpp_align_branches(species, unname(genes), names(genes), "free")
+  expect_identical(wrapped$metadata$fusion_view, "whole")
+  expect_identical(wrapped$metadata$fusion_schema, "whole-component-v1")
+  wrapped$metadata <- wrapped$metadata[names(raw$metadata)]
   expect_identical(wrapped[names(raw)], raw)
 })

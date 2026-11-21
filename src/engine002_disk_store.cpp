@@ -746,11 +746,10 @@ std::filesystem::path PackedDiskStore::finalize_publish(
             .count();
     publication_failpoint(10);
     const auto component_publication_started = Clock::now();
-    publish_no_replace(component_temp_, component_final_);
+    publish_no_replace(component_temp_, component_final_, component_published);
     atomic_publication_seconds_ +=
         std::chrono::duration<double>(
             Clock::now() - component_publication_started).count();
-    component_published = true;
     publication_failpoint(11);
     const auto published_validation_started = Clock::now();
     const auto final_validated = validate_disk_store(
@@ -761,8 +760,7 @@ std::filesystem::path PackedDiskStore::finalize_publish(
             Clock::now() - published_validation_started).count();
     publication_failpoint(12);
     const auto manifest_publication_started = Clock::now();
-    publish_no_replace(validated_temp_, manifest_final_);
-    manifest_published = true;
+    publish_no_replace(validated_temp_, manifest_final_, manifest_published);
     publication_failpoint(13);
     sync_directory(directory_);
     atomic_publication_seconds_ +=

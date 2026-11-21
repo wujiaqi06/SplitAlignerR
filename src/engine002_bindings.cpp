@@ -580,7 +580,7 @@ Rcpp::List cpp_engine002_build_authority_scale_store(
     const auto finalize_finished = Clock::now();
     const auto stats = store->stats();
     store->close();
-    return Rcpp::List::create(
+    Rcpp::List result = Rcpp::List::create(
         Rcpp::_["manifest"] = manifest.string(),
         Rcpp::_["pattern_count"] = static_cast<double>(count),
         Rcpp::_["total_record_bytes"] =
@@ -619,11 +619,12 @@ Rcpp::List cpp_engine002_build_authority_scale_store(
         Rcpp::_["manifest_prepare_seconds"] =
             stats.manifest_prepare_seconds,
         Rcpp::_["atomic_publication_seconds"] =
-            stats.atomic_publication_seconds,
-        Rcpp::_["published_validation_seconds"] =
-            stats.published_validation_seconds,
-        Rcpp::_["index_charged_bytes"] =
-            static_cast<double>(stats.index_charged_bytes));
+            stats.atomic_publication_seconds);
+    result["published_validation_seconds"] =
+        stats.published_validation_seconds;
+    result["index_charged_bytes"] =
+        static_cast<double>(stats.index_charged_bytes);
+    return result;
   });
 }
 
@@ -909,7 +910,7 @@ Rcpp::List cpp_engine002_store_stats(SEXP store_pointer) {
     }
     const auto stats = handle.disk->stats();
     const auto& lru = stats.lru;
-    return Rcpp::List::create(
+    Rcpp::List result = Rcpp::List::create(
         Rcpp::_["backend"] = "disk",
         Rcpp::_["state"] = store_state_name(handle.disk->state()),
         Rcpp::_["generation"] = static_cast<double>(stats.generation),
@@ -940,21 +941,22 @@ Rcpp::List cpp_engine002_store_stats(SEXP store_pointer) {
         Rcpp::_["atomic_publication_seconds"] =
             stats.atomic_publication_seconds,
         Rcpp::_["published_validation_seconds"] =
-            stats.published_validation_seconds,
-        Rcpp::_["hits"] = static_cast<double>(lru.hits),
-        Rcpp::_["misses"] = static_cast<double>(lru.misses),
-        Rcpp::_["insertions"] = static_cast<double>(lru.insertions),
-        Rcpp::_["evictions"] = static_cast<double>(lru.evictions),
-        Rcpp::_["oversized_bypasses"] =
-            static_cast<double>(lru.oversized_bypasses),
-        Rcpp::_["pin_failures"] = static_cast<double>(lru.pin_failures),
-        Rcpp::_["cache_high_water"] = static_cast<double>(lru.cache_high_water),
-        Rcpp::_["scratch_high_water"] =
-            static_cast<double>(lru.scratch_high_water),
-        Rcpp::_["charged_cache_bytes"] =
-            static_cast<double>(lru.charged_cache_bytes),
-        Rcpp::_["active_scratch_bytes"] =
-            static_cast<double>(lru.active_scratch_bytes));
+            stats.published_validation_seconds);
+    result["hits"] = static_cast<double>(lru.hits);
+    result["misses"] = static_cast<double>(lru.misses);
+    result["insertions"] = static_cast<double>(lru.insertions);
+    result["evictions"] = static_cast<double>(lru.evictions);
+    result["oversized_bypasses"] =
+        static_cast<double>(lru.oversized_bypasses);
+    result["pin_failures"] = static_cast<double>(lru.pin_failures);
+    result["cache_high_water"] = static_cast<double>(lru.cache_high_water);
+    result["scratch_high_water"] =
+        static_cast<double>(lru.scratch_high_water);
+    result["charged_cache_bytes"] =
+        static_cast<double>(lru.charged_cache_bytes);
+    result["active_scratch_bytes"] =
+        static_cast<double>(lru.active_scratch_bytes);
+    return result;
   });
 }
 
@@ -986,9 +988,9 @@ bool cpp_engine002_store_close(SEXP store_pointer) {
 // [[Rcpp::export]]
 bool cpp_engine002_set_publication_failpoint(int stage) {
   return translate_engine_errors([&]() {
-    if (stage < 0 || stage > 15) {
+    if (stage < 0 || stage > 16) {
       splitaligner::engine002::fail(ErrorCode::invalid_argument,
-                                    "publication failpoint must be 0..15");
+                                    "publication failpoint must be 0..16");
     }
     splitaligner::engine002::set_publication_failpoint(stage);
     return true;

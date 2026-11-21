@@ -105,6 +105,14 @@ cpp_engine002_set_io_faultpoint <- function(fault) {
     .Call(`_SplitAlignerR_cpp_engine002_set_io_faultpoint`, fault)
 }
 
+cpp_fusion_cells <- function(owners, sizes, recovered, lengths, primitive_count, gene_rows, target_members, whole, details) {
+    .Call(`_SplitAlignerR_cpp_fusion_cells`, owners, sizes, recovered, lengths, primitive_count, gene_rows, target_members, whole, details)
+}
+
+cpp_unlink_literal <- function(paths, recursive, force) {
+    .Call(`_SplitAlignerR_cpp_unlink_literal`, paths, recursive, force)
+}
+
 cpp_splitaligner_core_info <- function() {
     .Call(`_SplitAlignerR_cpp_splitaligner_core_info`)
 }
@@ -113,10 +121,19 @@ cpp_validate_branch_length_tokens <- function(tokens) {
     .Call(`_SplitAlignerR_cpp_validate_branch_length_tokens`, tokens)
 }
 
+cpp_support_newick <- function(reference_newick, support_percent) {
+    .Call(`_SplitAlignerR_cpp_support_newick`, reference_newick, support_percent)
+}
+
 cpp_validate_species_tree <- function(newick) {
     .Call(`_SplitAlignerR_cpp_validate_species_tree`, newick)
+}
+
+cpp_s4_parse_tree <- function(newick, reference) {
+    .Call(`_SplitAlignerR_cpp_s4_parse_tree`, newick, reference)
 }
 
 cpp_align_branches <- function(species_newick, gene_newicks, gene_ids, mode) {
     .Call(`_SplitAlignerR_cpp_align_branches`, species_newick, gene_newicks, gene_ids, mode)
 }
+

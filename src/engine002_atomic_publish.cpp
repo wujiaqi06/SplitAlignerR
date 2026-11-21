@@ -269,7 +269,8 @@ void write_text_exclusive(const std::filesystem::path& path,
 }
 
 void publish_no_replace(const std::filesystem::path& temporary,
-                        const std::filesystem::path& final_path) {
+                        const std::filesystem::path& final_path,
+                        bool& published) {
   std::error_code error;
   if (std::filesystem::is_symlink(
           std::filesystem::symlink_status(final_path, error))) {
@@ -284,12 +285,17 @@ void publish_no_replace(const std::filesystem::path& temporary,
              : ErrorCode::unsupported_atomicity,
          "Windows no-replace publication failed");
   }
+  published = true;
 #else
   if (::link(temporary.c_str(), final_path.c_str()) != 0) {
     fail(errno == EEXIST ? ErrorCode::io_failure
                          : ErrorCode::unsupported_atomicity,
          system_message("POSIX no-replace publication failed"));
   }
+  // A final link now exists, even if removal of the temporary link fails.
+  // Record ownership for the caller's rollback before any further failure.
+  published = true;
+  publication_failpoint(16);
   if (::unlink(temporary.c_str()) != 0) {
     fail(ErrorCode::io_failure,
          system_message("published temporary unlink failed"));

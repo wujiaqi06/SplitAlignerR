@@ -1,12 +1,14 @@
 Package: SplitAlignerR
 Title: R Interface and Independent Graph Oracle for SplitAligner
-Version: 0.1.0.9005
+Version: 0.1.0.9015
 Authors@R:
     person("Jiaqi", "Wu", email = "wujiaqi@hiroshima-u.ac.jp", role = c("aut", "cre"))
 Description: R interface and independent benchmark track for the SplitAligner
     branch-coordinate framework. The package ships deterministic Catnip10
     graph-oracle data, a pure R node-edge oracle that recomputes the benchmark,
-    and the C++17 SplitAlignerFast exact-bitset mapper with strict finite-range branch-length
+    general rooted and unrooted reference-truth tables from retained taxon sets,
+    an independent graph-based fixed-topology alignment path, and the C++17
+    SplitAlignerFast exact-bitset mapper with strict finite-range branch-length
     parsing, explicit structural/topological states, and composite-coordinate
     provenance. The R paired finalizer reports fusion-group recovery separately
     from primitive-member states and supports the legacy token rules. See the
@@ -26,8 +28,8 @@ URL: https://github.com/wujiaqi06/SplitAlignerR,
 BugReports: https://github.com/wujiaqi06/SplitAlignerR/issues
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 SystemRequirements: C++17
 NeedsCompilation: yes
 Author: Jiaqi Wu [aut, cre]
 Maintainer: Jiaqi Wu <wujiaqi@hiroshima-u.ac.jp>
+Config/roxygen2/version: 8.1.1

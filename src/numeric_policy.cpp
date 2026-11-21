@@ -3,11 +3,39 @@
 #include <cerrno>
 #include <cmath>
 #include <cstdlib>
+#include <locale.h>
+#include <stdexcept>
+#ifdef __APPLE__
+#include <xlocale.h>
+#endif
 #include <cctype>
 #include <unordered_set>
 
 namespace splitaligner {
 namespace {
+
+// Parse Newick decimal points without changing the host process's locale.
+double parse_c_decimal(const char* token, char** end) {
+#ifdef _WIN32
+  struct NumericLocale {
+    _locale_t value = _create_locale(LC_NUMERIC, "C");
+    ~NumericLocale() { if (value) _free_locale(value); }
+  };
+#else
+  struct NumericLocale {
+    locale_t value = newlocale(LC_NUMERIC_MASK, "C", nullptr);
+    ~NumericLocale() { if (value) freelocale(value); }
+  };
+#endif
+  static const NumericLocale locale;
+  if (!locale.value) throw std::runtime_error("cannot create C numeric locale");
+  errno = 0;
+#ifdef _WIN32
+  return _strtod_l(token, end, locale.value);
+#else
+  return strtod_l(token, end, locale.value);
+#endif
+}
 
 std::string ascii_lower(std::string input) {
   for (char& ch : input) {
@@ -123,9 +151,8 @@ NumericResult validate_numeric_token(const std::string& input) {
     return result;
   }
 
-  errno = 0;
   char* end = nullptr;
-  const double parsed = std::strtod(token.c_str(), &end);
+  const double parsed = parse_c_decimal(token.c_str(), &end);
   const bool consumed_all = end != nullptr &&
     static_cast<std::size_t>(end - token.c_str()) == token.size();
 

@@ -1,3 +1,6 @@
+# LazyData belongs to this package even when the caller has not attached it.
+.catnip10_data <- function() getExportedValue("SplitAlignerR", "catnip10_oracle")
+
 #' Catnip10 benchmark status counts
 #'
 #' Summarize the bundled Catnip10 graph-oracle benchmark by deletion regime and
@@ -61,9 +64,8 @@ validate_catnip10_oracle <- function() {
     )
   }
 
-  data_loaded <- exists("catnip10_oracle", inherits = TRUE) &&
-    is.list(catnip10_oracle) &&
-    all(c("global", "local") %in% names(catnip10_oracle))
+  data <- tryCatch(.catnip10_data(), error = function(e) NULL)
+  data_loaded <- is.list(data) && all(c("global", "local") %in% names(data))
   add(
     "package_data_loads",
     if (data_loaded) "PASS" else "FAIL",
@@ -115,7 +117,7 @@ validate_catnip10_oracle <- function() {
   )
 
   dims_ok <- data_loaded && all(vapply(c("global", "local"), function(one_regime) {
-    m <- catnip10_oracle[[one_regime]]$matrix
+    m <- data[[one_regime]]$matrix
     is.data.frame(m) && identical(dim(m), c(8L, 18L))
   }, logical(1)))
   add(
@@ -129,7 +131,7 @@ validate_catnip10_oracle <- function() {
       recompute_catnip10_oracle(regime),
       error = function(e) e
     )
-    frozen <- if (data_loaded) catnip10_oracle[[regime]] else NULL
+    frozen <- if (data_loaded) data[[regime]] else NULL
     exact <- is.list(rebuilt) && is.list(frozen) &&
       identical(rebuilt$matrix, frozen$matrix) &&
       identical(rebuilt$status_long, frozen$status_long) &&
@@ -168,7 +170,7 @@ catnip10_fusion_groups <- function(regime = c("all", "global", "local")) {
   regimes <- if (identical(regime, "all")) c("global", "local") else regime
 
   rows <- lapply(regimes, function(one_regime) {
-    groups <- catnip10_oracle[[one_regime]]$fusion_groups
+    groups <- .catnip10_data()[[one_regime]]$fusion_groups
     if (!is.data.frame(groups)) {
       stop(
         "Required fusion-group data are unavailable; the installed package is incomplete.",
@@ -203,7 +205,7 @@ catnip10_fusion_groups <- function(regime = c("all", "global", "local")) {
 #' @export
 catnip10_matrix <- function(regime = c("global", "local")) {
   regime <- match.arg(regime)
-  matrix <- catnip10_oracle[[regime]]$matrix
+  matrix <- .catnip10_data()[[regime]]$matrix
   if (!is.data.frame(matrix)) {
     stop(
       "Required Catnip10 matrix data are unavailable; the installed package is incomplete.",
@@ -214,14 +216,14 @@ catnip10_matrix <- function(regime = c("global", "local")) {
 }
 
 catnip10_status_values <- function(regime) {
-  status_long <- catnip10_oracle[[regime]]$status_long
+  status_long <- .catnip10_data()[[regime]]$status_long
   if (is.data.frame(status_long) && "status" %in% names(status_long)) {
     status <- as.character(status_long$status)
     status[status == "observed"] <- "observed"
     return(status)
   }
 
-  matrix <- catnip10_oracle[[regime]]$matrix
+  matrix <- .catnip10_data()[[regime]]$matrix
   if (!is.data.frame(matrix)) {
     return(character())
   }

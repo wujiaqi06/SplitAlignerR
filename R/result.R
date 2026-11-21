@@ -68,7 +68,8 @@ retained_taxa_key <- function(taxa) {
 }
 
 validate_splitaligner_result_object <- function(result,
-                                                check_version = TRUE) {
+                                                check_version = TRUE,
+                                                check_fusion_matrix = TRUE) {
   if (!inherits(result, "splitaligner_result") || !is.list(result)) {
     stop("Object must inherit from `splitaligner_result`.", call. = FALSE)
   }
@@ -284,26 +285,30 @@ validate_splitaligner_result_object <- function(result,
       "composite ledger numeric availability and values disagree."
     )
   }
-  expected_composite_numeric <- matrix(
-    NA_real_, length(genes), length(composite_ids),
-    dimnames = list(genes, composite_ids)
-  )
-  if (nrow(composite_ledger)) {
-    available <- as.logical(composite_ledger$numeric_available)
-    if (any(available)) {
-      expected_composite_numeric[cbind(
-        match(composite_ledger$gene_id[available], genes),
-        match(composite_ledger$composite_id[available], composite_ids)
-      )] <- composite_ledger$numeric_value[available]
-    }
+  active_indices <- cbind(match(composite_ledger$gene_id, genes),
+                          match(composite_ledger$composite_id, numeric_axis))
+  if (!numeric_vectors_equal(composite_ledger$numeric_value,
+                             result$numeric_matrix[active_indices]))
+    result_invariant_error("active fusion evidence disagrees with `numeric_matrix`.")
+
+  view <- result$metadata$fusion_view
+  if (!is.null(view) || !is.null(result$metadata$fusion_schema)) {
+    if (!identical(result$metadata$fusion_schema, "whole-component-v1") ||
+        (!identical(view, "whole") && !identical(view, "direct")))
+      result_invariant_error("unknown fusion view or fusion schema.")
+    require_result_columns(result$state_ledger, "source_nodes", "state_ledger")
+    require_result_columns(composite_ledger, "source_nodes", "composite_ledger")
   }
-  if (!numeric_vectors_equal(
-    expected_composite_numeric,
-    result$numeric_matrix[, composite_ids, drop = FALSE]
-  )) {
-    result_invariant_error(
-      "composite ledger numeric evidence disagrees with `numeric_matrix`."
-    )
+  if (isTRUE(check_fusion_matrix) && length(composite_ids)) {
+    observed <- result$numeric_matrix[, composite_ids, drop = FALSE]
+    if (identical(view, "whole")) {
+      expected <- .fusion_assemble(result, .fusion_definitions(result), view)
+      matches <- numeric_vectors_equal(expected, observed)
+    } else {
+      matches <- sum(is.finite(observed)) == sum(composite_ledger$numeric_available)
+    }
+    if (!matches)
+      result_invariant_error("composite ledger numeric evidence disagrees with `numeric_matrix`.")
   }
 
   require_result_columns(
@@ -493,6 +498,7 @@ coordinate_provenance <- function(result, coordinate_id = NULL) {
 save_splitaligner_result <- function(result, file, compress = TRUE,
                                      overwrite = FALSE) {
   validate_splitaligner_result_object(result)
+  .validate_branch_support(result)
   if (!is.character(file) || length(file) != 1L || is.na(file) ||
       !nzchar(file)) {
     stop("`file` must be one nonempty path.", call. = FALSE)
@@ -516,7 +522,8 @@ save_splitaligner_result <- function(result, file, compress = TRUE,
 #'
 #' @param file Existing RDS path.
 #' @param check_version Logical; require the stored core and schema versions to
-#'   match the currently loaded package.
+#'   match the currently loaded package. Fast results always require the same
+#'   backend name, ABI, and source commit, even when this is FALSE.
 #' @return A validated `splitaligner_result`.
 #' @examples
 #' species <- "((A,B),(C,D));"
@@ -534,6 +541,7 @@ read_splitaligner_result <- function(file, check_version = TRUE) {
   validate_splitaligner_result_object(
     result, check_version = check_version
   )
+  .validate_branch_support(result)
   result
 }
 

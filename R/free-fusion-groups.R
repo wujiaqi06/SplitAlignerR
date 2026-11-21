@@ -20,7 +20,7 @@ free_fusion_groups <- function(free) {
 }
 
 validate_free_result <- function(free) {
-  validate_splitaligner_result_object(free)
+  validate_splitaligner_result_object(free, check_fusion_matrix = FALSE)
   if (!identical(free$metadata$mode, "free")) {
     stop("Supply a free-mode alignment result.", call. = FALSE)
   }
@@ -53,7 +53,7 @@ validated_free_composites <- function(free) {
         anyNA(composites$projected_split) ||
         !identical(primitive$projected_split[fused],
                    composites$projected_split[row])) {
-      stop("Free projected split or composite membership is inconsistent.",
+      stop("The projected split or composite membership is inconsistent.",
            call. = FALSE)
     }
     status <- composites$recovery_status
@@ -61,7 +61,7 @@ validated_free_composites <- function(free) {
                            "unrecovered")) ||
         !identical(status == "recovered_numeric", composites$numeric_available) ||
         !identical(status == "unrecovered", composites$numeric_status == "not_recovered")) {
-      stop("Free composite recovery evidence is missing or inconsistent.",
+      stop("Composite recovery evidence is missing or inconsistent.",
            call. = FALSE)
     }
   }
