@@ -341,6 +341,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_fusion_cells
+Rcpp::List cpp_fusion_cells(Rcpp::IntegerVector owners, Rcpp::IntegerVector sizes, Rcpp::LogicalVector recovered, Rcpp::NumericVector lengths, int primitive_count, Rcpp::IntegerVector gene_rows, Rcpp::List target_members, bool whole, bool details);
+RcppExport SEXP _SplitAlignerR_cpp_fusion_cells(SEXP ownersSEXP, SEXP sizesSEXP, SEXP recoveredSEXP, SEXP lengthsSEXP, SEXP primitive_countSEXP, SEXP gene_rowsSEXP, SEXP target_membersSEXP, SEXP wholeSEXP, SEXP detailsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type owners(ownersSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type sizes(sizesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type recovered(recoveredSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type lengths(lengthsSEXP);
+    Rcpp::traits::input_parameter< int >::type primitive_count(primitive_countSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type gene_rows(gene_rowsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type target_members(target_membersSEXP);
+    Rcpp::traits::input_parameter< bool >::type whole(wholeSEXP);
+    Rcpp::traits::input_parameter< bool >::type details(detailsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_fusion_cells(owners, sizes, recovered, lengths, primitive_count, gene_rows, target_members, whole, details));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_unlink_literal
+int cpp_unlink_literal(Rcpp::CharacterVector paths, bool recursive, bool force);
+RcppExport SEXP _SplitAlignerR_cpp_unlink_literal(SEXP pathsSEXP, SEXP recursiveSEXP, SEXP forceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type paths(pathsSEXP);
+    Rcpp::traits::input_parameter< bool >::type recursive(recursiveSEXP);
+    Rcpp::traits::input_parameter< bool >::type force(forceSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_unlink_literal(paths, recursive, force));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_splitaligner_core_info
 Rcpp::List cpp_splitaligner_core_info();
 RcppExport SEXP _SplitAlignerR_cpp_splitaligner_core_info() {
@@ -362,6 +394,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_support_newick
+std::string cpp_support_newick(std::string reference_newick, Rcpp::NumericVector support_percent);
+RcppExport SEXP _SplitAlignerR_cpp_support_newick(SEXP reference_newickSEXP, SEXP support_percentSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type reference_newick(reference_newickSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type support_percent(support_percentSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_support_newick(reference_newick, support_percent));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_validate_species_tree
 Rcpp::List cpp_validate_species_tree(std::string newick);
 RcppExport SEXP _SplitAlignerR_cpp_validate_species_tree(SEXP newickSEXP) {
@@ -370,6 +414,18 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type newick(newickSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_validate_species_tree(newick));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_s4_parse_tree
+Rcpp::List cpp_s4_parse_tree(std::string newick, bool reference);
+RcppExport SEXP _SplitAlignerR_cpp_s4_parse_tree(SEXP newickSEXP, SEXP referenceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type newick(newickSEXP);
+    Rcpp::traits::input_parameter< bool >::type reference(referenceSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_s4_parse_tree(newick, reference));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -415,14 +471,20 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SplitAlignerR_cpp_engine002_store_close", (DL_FUNC) &_SplitAlignerR_cpp_engine002_store_close, 1},
     {"_SplitAlignerR_cpp_engine002_set_publication_failpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_publication_failpoint, 1},
     {"_SplitAlignerR_cpp_engine002_set_io_faultpoint", (DL_FUNC) &_SplitAlignerR_cpp_engine002_set_io_faultpoint, 1},
+    {"_SplitAlignerR_cpp_fusion_cells", (DL_FUNC) &_SplitAlignerR_cpp_fusion_cells, 9},
+    {"_SplitAlignerR_cpp_unlink_literal", (DL_FUNC) &_SplitAlignerR_cpp_unlink_literal, 3},
     {"_SplitAlignerR_cpp_splitaligner_core_info", (DL_FUNC) &_SplitAlignerR_cpp_splitaligner_core_info, 0},
     {"_SplitAlignerR_cpp_validate_branch_length_tokens", (DL_FUNC) &_SplitAlignerR_cpp_validate_branch_length_tokens, 1},
+    {"_SplitAlignerR_cpp_support_newick", (DL_FUNC) &_SplitAlignerR_cpp_support_newick, 2},
     {"_SplitAlignerR_cpp_validate_species_tree", (DL_FUNC) &_SplitAlignerR_cpp_validate_species_tree, 1},
+    {"_SplitAlignerR_cpp_s4_parse_tree", (DL_FUNC) &_SplitAlignerR_cpp_s4_parse_tree, 2},
     {"_SplitAlignerR_cpp_align_branches", (DL_FUNC) &_SplitAlignerR_cpp_align_branches, 4},
     {NULL, NULL, 0}
 };
 
+void splitaligner_init(DllInfo* dll);
 RcppExport void R_init_SplitAlignerR(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
+    splitaligner_init(dll);
 }

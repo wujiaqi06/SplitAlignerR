@@ -8,6 +8,8 @@ reference:
     desc: C++ graph-first alignment, result inspection, and persistence.
     contents:
       - align_branches
+      - align_panel_to_disk
+      - write_branch_support
       - count_free_topology
       - free_fusion_groups
       - coordinate_provenance

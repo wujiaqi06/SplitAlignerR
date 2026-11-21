@@ -76,6 +76,7 @@ class HardBoundedLru : public std::enable_shared_from_this<HardBoundedLru> {
   std::uint64_t scratch_budget_;
   bool constant_fast_hash_;
   std::uint64_t sequence_;
+  std::uint64_t pending_cache_loads_ = 0;
   std::uint64_t lru_head_;
   std::uint64_t lru_tail_;
   std::map<std::uint64_t, Entry> entries_;

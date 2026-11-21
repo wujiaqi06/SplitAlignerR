@@ -23,7 +23,7 @@ gene_records_from_lines <- function(lines) {
       )
     }
     prefix <- trimws(substr(record, 1L, open - 1L))
-    if (!grepl("^[A-Za-z0-9_.-]+$", prefix)) {
+    if (!grepl("^[\\p{L}\\p{M}\\p{N}_.-]+$", prefix, perl = TRUE)) {
       stop(
         sprintf(
           "Gene-tree record %d has an invalid ID prefix `%s`; use letters, digits, dot, underscore, or hyphen.",
@@ -81,7 +81,7 @@ validate_explicit_gene_ids <- function(ids, count) {
     stop("User-supplied `gene_ids` must not contain empty strings.",
          call. = FALSE)
   }
-  ids <- validate_present_gene_ids(ids)
+  ids <- validate_present_gene_ids(as.vector(ids))
   if (anyDuplicated(ids)) {
     duplicate <- ids[duplicated(ids)][[1L]]
     stop(sprintf("Duplicate gene identifier `%s`.", duplicate), call. = FALSE)
@@ -221,6 +221,7 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
       newicks <- records$newicks
       inferred_ids <- records$ids
     } else {
+      if (length(gene_trees) == 1L) check_missing_tree_path(gene_trees)
       newicks <- enc2utf8(gene_trees)
       inferred_ids <- names(gene_trees)
       source <- if (length(gene_trees) == 1L) {
@@ -252,6 +253,11 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 
 #' Align gene trees to the species-tree branch-coordinate system
 #'
+#' The default mapping entry uses the split-based Fast backend in both free
+#' and fixed modes. Fixed input does not automatically select another algorithm.
+#' Use [align_fixed_topology()] explicitly for the independent graph-based
+#' fixed-topology path; the Catnip10 oracle is a separate validation entry.
+#'
 #' Restrict the reference tree to each gene's retained taxa, classify every
 #' primitive coordinate by graph-first semantics, and then query the empirical
 #' gene-tree splits. Structural state is kept separate from finite numeric
@@ -264,7 +270,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #' @param gene_trees One or more empirical gene trees supplied as Newick text,
 #'   a SplitAligner line-based file, one `ape::phylo`, an `ape::multiPhylo`, or
 #'   a list of `phylo` objects. A line-based record may be `gene_id(tree);` or a
-#'   plain Newick tree.
+#'   plain Newick tree. A file ID may contain Unicode letters, marks, numbers,
+#'   dots, underscores, and hyphens. For `phylo` objects, tip labels are taken
+#'   literally and numeric edge lengths are preserved at double precision.
 #' @param mode Character; `"free"` for free-topology trees or `"fixed"` for
 #'   topology-constrained trees. Both modes use the same state semantics;
 #'   fixed-mode topology mismatches are additionally diagnosed.
@@ -274,11 +282,17 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #'   supported. Existing names on character vectors, `multiPhylo` objects, and
 #'   lists follow the same content rules; only missing or empty object names
 #'   receive deterministic automatic IDs.
+#' @param fusion_view `"whole"` (default) sums complete recovered components
+#'   in shared fusion columns when all lengths are available. `"direct"` fills
+#'   only fusion groups represented by a single current branch in that gene.
+#'   Use [fusion_cells()] to inspect component membership and source edges.
 #' @param ... Reserved; additional arguments currently signal an error.
 #' @return A `splitaligner_result` list containing the primitive `state_matrix`,
 #'   primitive-plus-composite `numeric_matrix`, long state and composite
 #'   ledgers, coordinate provenance, structured diagnostics, validated species
-#'   tree, and versioned metadata.
+#'   tree, and versioned metadata. Both modes return `support_table` with one row
+#'   per original reference branch and `support_newick` with percentages on
+#'   internal branches. Use [write_branch_support()] to export both.
 #' @details The single-tree state alphabet is exactly `mapped`, `NA_struct`,
 #'   `NA_fuse`, and `NA_topo`. Legacy paired-workflow `residual_NA` is not a
 #'   fifth state. Failure markers are never converted to zero.
@@ -290,7 +304,9 @@ as_gene_newicks <- function(gene_trees, gene_ids = NULL) {
 #' aligned$state_matrix
 #' @export
 align_branches <- function(species_tree, gene_trees,
-                           mode = c("free", "fixed"), gene_ids = NULL, ...) {
+                           mode = c("free", "fixed"), gene_ids = NULL, ...,
+                           fusion_view = c("whole", "direct")) {
+  fusion_view <- match.arg(fusion_view)
   mode <- match.arg(mode)
   dots <- list(...)
   if (length(dots)) {
@@ -304,9 +320,16 @@ align_branches <- function(species_tree, gene_trees,
     species$text, genes$newicks, genes$ids, mode
   )
   result <- restore_gene_id_encodings(result, genes$ids)
+  result$metadata$fusion_view <- fusion_view
+  result$metadata$fusion_schema <- "whole-component-v1"
+  if (fusion_view == "whole" && nrow(result$composite_coordinates)) {
+    defs <- .fusion_definitions(result)
+    result$numeric_matrix[, names(defs)] <- .fusion_assemble(result, defs, fusion_view)
+  }
   result$coordinate_table <- build_coordinate_table(result)
   result$input <- list(
     species_source = species$source,
+    reference_newick = species$text,
     gene_source = genes$source,
     gene_ids = genes$ids
   )

@@ -9,7 +9,7 @@ if (length(args) != 2L) {
 source_root <- normalizePath(args[[1L]], mustWork = TRUE)
 output_report <- args[[2L]]
 expected <- list(
-  package = "0.1.0.9005",
+  package = "0.1.0.9015",
   core = "0.2.0-fast-abi2",
   historical_convention_core = "0.1.0",
   backend_commit = "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
@@ -19,7 +19,7 @@ expected <- list(
   candidate = "v0.1.0-rc3",
   certified_release = "v0.1.0",
   certified_commit = "17a0927095c7a067817bf598a2556cbe7348a6d0",
-  development_status = "Layered fusion-group classification on Fast C ABI 2",
+  development_status = "Reference-root identity and normalized observations for S4; split-based default",
   recert_status = "not covered by v0.1.0 Pro PASS; Fast core acceptance is separate from R integration acceptance",
   certified_release_tag_created = TRUE,
   certified_github_release_published = TRUE,
@@ -263,10 +263,10 @@ add_check(
   identity_development_release_authorized
 )
 
-development_tag <- json_string(release_identity, "authorized_development_prerelease_tag")
+development_tag <- json_string(release_identity, "last_public_development_tag")
 add_check(
-  "release_identity_authorized_development_tag",
-  identical(development_tag, paste0("v", expected$package)),
+  "release_identity_last_public_development_tag",
+  identical(development_tag, "v0.1.0.9015"),
   development_tag
 )
 
@@ -343,9 +343,9 @@ documentation_text <- c(
 )
 add_check(
   "documentation_package_version",
-  grepl("0.1.0.9005", documentation_text[[1L]], fixed = TRUE) &&
-    grepl("package version 0.1.0.9005", documentation_text[[2L]], fixed = TRUE),
-  "README.md and inst/CITATION declare development version 0.1.0.9005"
+  grepl(expected$package, documentation_text[[1L]], fixed = TRUE) &&
+    grepl(paste("package version", expected$package), documentation_text[[2L]], fixed = TRUE),
+  paste("README.md and inst/CITATION declare development version", expected$package)
 )
 add_check(
   "documentation_certified_release_boundary",

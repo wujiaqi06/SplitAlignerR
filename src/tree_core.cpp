@@ -3,6 +3,7 @@
 #include "numeric_policy.h"
 #include "splitaligner/fast_c_api.h"
 #include "fast_backend_identity.h"
+#include "lazy_split_vector.h"
 
 #include <cstdint>
 #include <deque>
@@ -14,6 +15,7 @@
 #include <cctype>
 #include <cmath>
 #include <iomanip>
+#include <locale>
 #include <map>
 #include <set>
 #include <sstream>
@@ -28,6 +30,7 @@ namespace {
 struct Node {
   std::vector<int> children;
   std::string label;
+  bool tip_was_quoted = false;
   bool has_length = false;
   std::string length_token;
   int branch_number = 0;
@@ -41,7 +44,8 @@ struct CanonicalSplit {
 
 class NewickParser {
  public:
-  explicit NewickParser(std::string text) : text_(std::move(text)) {}
+  explicit NewickParser(std::string text, bool allow_unary = false)
+    : text_(std::move(text)), allow_unary_(allow_unary) {}
 
   int parse() {
     skip_trivia();
@@ -72,6 +76,7 @@ class NewickParser {
   std::vector<Node> nodes_;
   int annotation_count_ = 0;
   std::size_t depth_ = 0;
+  bool allow_unary_ = false;
 
   bool at_end() const {
     return position_ >= text_.size();
@@ -205,13 +210,16 @@ class NewickParser {
       node.children.push_back(parse_subtree());
       while (true) {
         skip_trivia();
+        if (peek() == ')') break;
         if (peek() != ',') {
-          break;
+          const std::string actual = at_end() ? "end of input" :
+            std::string("'") + peek() + "'";
+          fail("expected ',' or ')' but found " + actual);
         }
         ++position_;
         node.children.push_back(parse_subtree());
       }
-      if (node.children.size() < 2U) {
+      if (!allow_unary_ && node.children.size() < 2U) {
         fail("an internal node must contain at least two children");
       }
       skip_trivia();
@@ -219,6 +227,7 @@ class NewickParser {
       skip_trivia();
       node.label = parse_label(false);
     } else {
+      node.tip_was_quoted = peek() == '\'' || peek() == '"';
       node.label = parse_label(true);
     }
 
@@ -333,6 +342,7 @@ CanonicalSplit canonical_split(std::vector<std::string> left,
 
 using Bits = std::vector<uint64_t>;
 using ReferenceHandle = std::unique_ptr<saf_reference, decltype(&saf_reference_destroy)>;
+using SupportHandle = std::unique_ptr<saf_support, decltype(&saf_support_destroy)>;
 using CoverageHandle = std::unique_ptr<saf_coverage, decltype(&saf_coverage_destroy)>;
 using MappingHandle = std::unique_ptr<saf_mapping, decltype(&saf_mapping_destroy)>;
 
@@ -400,6 +410,11 @@ struct PreparedReference {
   std::vector<std::size_t> native_to_r;
   std::vector<std::size_t> r_to_native;
   std::vector<Bits> legacy_side_a;
+  // Only internal display edges get a support label. Aliases at a binary
+  // representation root point to the same primitive row.
+  std::vector<int> display_row;
+  std::vector<Node> display_nodes;
+  int display_root = -1;
   Rcpp::List species;
 };
 
@@ -505,6 +520,7 @@ PreparedReference prepare_reference(std::string newick) {
   prepared.native_to_r.resize(axis.size());
   prepared.r_to_native.resize(axis.size());
   prepared.legacy_side_a.resize(axis.size());
+  prepared.display_row.assign(nodes.size(), -1);
   const R_xlen_t coordinate_count = static_cast<R_xlen_t>(axis.size());
   Rcpp::CharacterVector coordinate_id(coordinate_count);
   Rcpp::CharacterVector canonical_keys(coordinate_count);
@@ -526,8 +542,11 @@ PreparedReference prepare_reference(std::string newick) {
     prepared.legacy_side_a[row] = taxa_bits(record.split.side_a, prepared.taxon_ids,
                                           prepared.info.n_words);
     std::vector<std::string> aliases;
-    for (std::size_t source : record.sources)
+    for (std::size_t source : record.sources) {
       aliases.push_back("B" + std::to_string(nodes[source].branch_number));
+      if (!winner.children.empty())
+        prepared.display_row[source] = static_cast<int>(row);
+    }
     coordinate_id[i] = "B" + std::to_string(winner.branch_number);
     canonical_keys[i] = record.split.key;
     branch_type[i] = winner.children.empty() ? "terminal" : "internal";
@@ -597,19 +616,181 @@ PreparedReference prepare_reference(std::string newick) {
         "SplitAligner-canonical-split-key-v2"
     )
   );
+  prepared.display_nodes = std::move(nodes);
+  prepared.display_root = root_index;
   return prepared;
 }
 
+// Render against the actual reference display nodes, retaining tip quoting,
+// original numeric length tokens (including the root length), and child order.
+// Input support labels and comments were never part of the coordinate identity.
+std::string render_support_newick(const PreparedReference& ref,
+                                  const Rcpp::NumericVector& percent) {
+  std::ostringstream out;
+  out.imbue(std::locale::classic());
+  out << std::setprecision(std::numeric_limits<double>::max_digits10);
+  struct Frame { int node; std::size_t next_child; };
+  std::vector<Frame> stack{{ref.display_root, 0}};
+  while (!stack.empty()) {
+    auto& frame = stack.back();
+    const Node& node = ref.display_nodes[frame.node];
+    if (frame.next_child < node.children.size()) {
+      out << (frame.next_child == 0 ? '(' : ',');
+      const int child = node.children[frame.next_child++];
+      stack.push_back({child, 0});
+      continue;
+    }
+    if (node.children.empty()) {
+      if (!node.tip_was_quoted && node.label.find('\'') == std::string::npos) {
+        out << node.label;
+      } else {
+        out << '\'';
+        for (const char ch : node.label) {
+          if (ch == '\'') out << '\'';
+          out << ch;
+        }
+        out << '\'';
+      }
+    } else {
+      out << ')';
+      const int row = ref.display_row[frame.node];
+      if (row >= 0 && !R_IsNA(percent[row])) out << percent[row];
+    }
+    if (node.has_length && splitaligner::validate_numeric_token(node.length_token).accepted)
+      out << ':' << node.length_token;
+    stack.pop_back();
+  }
+  out << ';';
+  return out.str();
+}
+
+Rcpp::DataFrame reference_support_table(const PreparedReference& ref,
+                                        saf_support* support) {
+  auto counts = fast_query<saf_support_count>([&](auto out, auto cap, auto n) {
+    return saf_support_read(support, out, cap, n);
+  });
+  if (counts.size() != ref.r_to_native.size())
+    throw std::runtime_error("SplitAlignerFast support count/coordinate mismatch");
+  const auto n = static_cast<R_xlen_t>(counts.size());
+  // The entry point already restricts gene_count to INT_MAX, so every
+  // observation count here fits exactly in an R integer.
+  Rcpp::IntegerVector valid(n), structural(n), fused(n), dec(n), rec(n), absent(n);
+  Rcpp::NumericVector fraction(n, NA_REAL), percent(n, NA_REAL);
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const auto& c = counts[ref.r_to_native[i]];
+    valid[i] = static_cast<int>(c.n_valid_topologies);
+    structural[i] = static_cast<int>(c.n_struct);
+    fused[i] = static_cast<int>(c.n_fused);
+    dec[i] = static_cast<int>(c.n_dec);
+    rec[i] = static_cast<int>(c.n_rec);
+    absent[i] = static_cast<int>(c.n_not_recovered);
+    if (c.n_dec > 0) {
+      fraction[i] = static_cast<double>(c.n_rec) / c.n_dec;
+      percent[i] = 100.0 * static_cast<double>(c.n_rec) / c.n_dec;
+    }
+  }
+  const Rcpp::DataFrame coordinates = Rcpp::as<Rcpp::DataFrame>(ref.species["coordinates"]);
+  return Rcpp::DataFrame::create(
+    Rcpp::Named("coordinate_id") = coordinates["coordinate_id"],
+    Rcpp::Named("branch_type") = coordinates["branch_type"],
+    Rcpp::Named("n_valid_topologies") = valid,
+    Rcpp::Named("n_struct") = structural,
+    Rcpp::Named("n_fused") = fused,
+    Rcpp::Named("n_dec") = dec,
+    Rcpp::Named("n_rec") = rec,
+    Rcpp::Named("n_not_recovered") = absent,
+    Rcpp::Named("support_fraction") = fraction,
+    Rcpp::Named("support_percent") = percent,
+    Rcpp::Named("stringsAsFactors") = false
+  );
+}
+
 }  // namespace
+
+// [[Rcpp::export]]
+std::string cpp_support_newick(std::string reference_newick,
+                               Rcpp::NumericVector support_percent) {
+  const auto ref = prepare_reference(std::move(reference_newick));
+  const Rcpp::DataFrame coordinates = Rcpp::as<Rcpp::DataFrame>(ref.species["coordinates"]);
+  const Rcpp::CharacterVector ids = coordinates["coordinate_id"];
+  if (support_percent.size() != ids.size() || Rf_isNull(support_percent.attr("names")))
+    Rcpp::stop("support_percent must be named and aligned to the primitive coordinates.");
+  const Rcpp::CharacterVector names = support_percent.names();
+  for (R_xlen_t i = 0; i < ids.size(); ++i) {
+    if (names[i] != ids[i])
+      Rcpp::stop("support_percent names must match reference coordinate_id in order.");
+    const double p = support_percent[i];
+    if (!R_IsNA(p) && (!std::isfinite(p) || p < 0.0 || p > 100.0))
+      Rcpp::stop("support_percent must be between 0 and 100 or NA.");
+  }
+  return render_support_newick(ref, support_percent);
+}
 
 // [[Rcpp::export]]
 Rcpp::List cpp_validate_species_tree(std::string newick) {
   return prepare_reference(std::move(newick)).species;
 }
 
+// Parsing and input-local B labels only. S4 deliberately does not call
+// prepare_reference(), saf_reference_create(), or any split mapping operation.
+// [[Rcpp::export]]
+Rcpp::List cpp_s4_parse_tree(std::string newick, bool reference) {
+  // An explicitly retained original root can be unary after pruning. S3/S4
+  // need that real stem edge; the split-mapper parser remains strict.
+  NewickParser parser(std::move(newick), true);
+  const int root = parser.parse();
+  auto nodes = parser.nodes();
+  std::vector<int> leaves, internal;
+  collect_leaf_nodes(nodes, root, leaves);
+  collect_internal_postorder(nodes, root, root, internal);
+  if (leaves.size() < 2U) Rcpp::stop("S4 trees require at least two terminal taxa.");
+  std::set<std::string> seen;
+  int branch = 0;
+  for (int leaf : leaves) {
+    if (!seen.insert(nodes[leaf].label).second)
+      Rcpp::stop("Duplicate terminal taxon `%s`.", nodes[leaf].label.c_str());
+    nodes[leaf].branch_number = ++branch;
+  }
+  for (int node : internal) nodes[node].branch_number = ++branch;
+  const auto n = static_cast<R_xlen_t>(nodes.size());
+  Rcpp::IntegerVector parent(n, 0), source(n);
+  Rcpp::CharacterVector labels(n), ids(n), status(n, "missing_branch_length");
+  Rcpp::LogicalVector tip(n);
+  Rcpp::NumericVector lengths(n, NA_REAL);
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const auto& node = nodes[static_cast<std::size_t>(i)];
+    labels[i] = node.label;
+    tip[i] = node.children.empty();
+    source[i] = static_cast<int>(i);
+    ids[i] = i == root ? "" : "B" + std::to_string(node.branch_number);
+    for (int child : node.children) parent[child] = static_cast<int>(i) + 1;
+    // Reference lengths and the display-root length do not define edges.
+    if (reference || i == root || !node.has_length) continue;
+    const auto checked = splitaligner::validate_numeric_token(node.length_token);
+    if (checked.accepted) {
+      lengths[i] = checked.value;
+      status[i] = "finite_numeric";
+    } else if (checked.classification == "software_failure_marker" ||
+               checked.classification == "missing") {
+      status[i] = "software_failure_marker";
+    } else {
+      Rcpp::stop("Rejected branch-length token `%s` (%s): %s.",
+                 node.length_token.c_str(), checked.classification.c_str(),
+                 checked.diagnostic.c_str());
+    }
+  }
+  return Rcpp::List::create(
+    Rcpp::Named("parent") = parent, Rcpp::Named("labels") = labels,
+    Rcpp::Named("tip") = tip, Rcpp::Named("branch_id") = ids,
+    Rcpp::Named("lengths") = lengths, Rcpp::Named("numeric_status") = status,
+    Rcpp::Named("root") = root + 1, Rcpp::Named("source_nodes") = source
+  );
+}
+
 namespace {
 
 struct GeneSplitEvidence {
+  std::string source_nodes;
   bool numeric_available = false;
   double numeric_value = NA_REAL;
   std::string numeric_status = "missing_branch_length";
@@ -628,6 +809,7 @@ struct GeneDiagnostics {
 };
 
 struct PrimitiveResult {
+  std::string source_nodes;
   std::size_t projection_index = SAF_NONE;
   int side_a_size = 0;
   int side_b_size = 0;
@@ -640,6 +822,7 @@ struct PrimitiveResult {
 };
 
 struct CompositeResult {
+  std::string source_nodes;
   std::string coordinate_id;
   std::size_t projection_index = SAF_NONE;
   std::vector<int> member_indices;
@@ -652,9 +835,9 @@ struct CompositeResult {
 struct OneGeneResult {
   std::string gene_id;
   std::vector<std::string> retained_taxa;
-  // A shallow, independently protected R vector survives coverage FIFO eviction;
-  // it does not retain PreparedCoverage or its native coverage handle.
-  Rcpp::CharacterVector projected_splits;
+  // Keep compact taxon membership, not all projected taxon-name strings.
+  // Ledger text is reconstructed on demand from this mask and the reference.
+  Bits coverage;
   std::vector<PrimitiveResult> primitive;
   std::vector<CompositeResult> composites;
   GeneDiagnostics diagnostics;
@@ -749,8 +932,6 @@ struct PreparedCoverage {
   std::vector<std::size_t> axis_to_projection;
   std::vector<uint8_t> structural, eligible;
   std::vector<std::vector<int>> members;
-  std::vector<std::string> display_keys;
-  Rcpp::CharacterVector display_keys_r;
   std::vector<std::size_t> display_order;
   std::vector<int> side_a_size, side_b_size;
 };
@@ -762,9 +943,6 @@ std::shared_ptr<PreparedCoverage> prepare_coverage(const PreparedReference& refe
   fast_check(saf_coverage_create(reference.handle.get(), mask.data(), mask.size(), &raw));
   out->handle.reset(raw);
   fast_check(saf_coverage_get_info(raw, &out->info));
-  out->display_keys_r = Rcpp::CharacterVector(
-    static_cast<R_xlen_t>(out->info.n_projections)
-  );
   out->axis_to_projection.resize(reference.info.n_axes);
   out->structural.resize(reference.info.n_axes);
   out->eligible.resize(reference.info.n_axes);
@@ -778,6 +956,7 @@ std::shared_ptr<PreparedCoverage> prepare_coverage(const PreparedReference& refe
     out->side_a_size.push_back(static_cast<int>(count));
     out->side_b_size.push_back(static_cast<int>(retained - count));
   }
+  std::vector<std::pair<std::string, std::size_t>> fused_display_order;
   for (std::size_t g = 0; g < out->info.n_projections; ++g) {
     auto native_members = fast_query<std::size_t>([&](auto x, auto n, auto c) {
       return saf_coverage_members(raw, g, x, n, c);
@@ -786,20 +965,78 @@ std::shared_ptr<PreparedCoverage> prepare_coverage(const PreparedReference& refe
     for (std::size_t a : native_members) members.push_back(reference.native_to_r.at(a));
     std::sort(members.begin(), members.end());
     out->members.push_back(std::move(members));
-    const Bits bits = fast_query<uint64_t>([&](auto x, auto n, auto c) {
-      return saf_coverage_projection(raw, g, x, n, c, nullptr);
-    });
-    out->display_keys.push_back(display_split(bits, mask, reference.taxa).key);
-    // Use the same std::string conversion as the legacy ledger assignment once
-    // per cached projection; later assignments reuse this protected CHARSXP.
-    out->display_keys_r[static_cast<R_xlen_t>(g)] = out->display_keys.back();
-    out->display_order.push_back(g);
+    if (out->members.back().size() == 1) {
+      // Primitive results are emitted later in the fixed B-axis order.
+      out->display_order.push_back(g);
+    } else {
+      const Bits bits = fast_query<uint64_t>([&](auto x, auto n, auto c) {
+        return saf_coverage_projection(raw, g, x, n, c, nullptr);
+      });
+      // Only the active-composite ledger exposes this presentation order.
+      // Expand these few keys temporarily, never every singleton projection.
+      fused_display_order.emplace_back(display_split(bits, mask, reference.taxa).key, g);
+    }
   }
-  // This is the legacy ledger presentation order, not a matching key.
-  std::sort(out->display_order.begin(), out->display_order.end(), [&](std::size_t a, std::size_t b) {
-    return out->display_keys[a] < out->display_keys[b];
-  });
+  std::sort(fused_display_order.begin(), fused_display_order.end());
+  for (const auto& item : fused_display_order) out->display_order.push_back(item.second);
   return out;
+}
+
+R_xlen_t split_backing_bytes(std::size_t rows, std::size_t words) {
+  const auto limit = static_cast<std::size_t>(R_XLEN_T_MAX);
+  if (words > static_cast<std::size_t>(std::numeric_limits<int>::max()) ||
+      (words != 0 && rows > limit / 8 / words)) {
+    throw std::runtime_error("Compact projected-split backing exceeds the R vector limit");
+  }
+  return static_cast<R_xlen_t>(rows * words * 8);
+}
+
+void pack_split_bits(Rcpp::RawVector& output, std::size_t row,
+                     const Bits& bits, std::size_t words) {
+  if (bits.size() != words) {
+    throw std::runtime_error("Inconsistent compact projected-split word count");
+  }
+  const std::size_t start = row * words * 8;
+  for (std::size_t w = 0; w < words; ++w) {
+    for (unsigned int b = 0; b < 8; ++b) {
+      output[static_cast<R_xlen_t>(start + w * 8 + b)] =
+        static_cast<Rbyte>((bits[w] >> (8 * b)) & uint64_t(0xff));
+    }
+  }
+}
+
+Rcpp::List split_backing(const PreparedReference& reference,
+                        const std::vector<OneGeneResult>& genes) {
+  const std::size_t primitive_count = reference.legacy_side_a.size();
+  if (primitive_count > static_cast<std::size_t>(std::numeric_limits<int>::max()) ||
+      genes.size() > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
+    throw std::runtime_error("Compact projected-split dimensions exceed the R integer limit");
+  }
+  const std::size_t words = (reference.taxa.size() + 63) / 64;
+  Rcpp::RawVector sides(split_backing_bytes(primitive_count, words));
+  Rcpp::RawVector coverage(split_backing_bytes(genes.size(), words));
+  Rcpp::CharacterVector taxa(static_cast<R_xlen_t>(reference.taxa.size()));
+  for (std::size_t i = 0; i < reference.taxa.size(); ++i) {
+    const auto& label = reference.taxa[i];
+    if (label.size() > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+      throw std::runtime_error("Taxon label exceeds the R string length limit");
+    // The private serialized dictionary records the parser's UTF-8 bytes
+    // explicitly, independent of the native encoding on a later reader host.
+    taxa[static_cast<R_xlen_t>(i)] = Rf_mkCharLenCE(
+      label.data(), static_cast<int>(label.size()), CE_UTF8);
+  }
+  for (std::size_t i = 0; i < primitive_count; ++i)
+    pack_split_bits(sides, i, reference.legacy_side_a[i], words);
+  for (std::size_t i = 0; i < genes.size(); ++i)
+    pack_split_bits(coverage, i, genes[i].coverage, words);
+  return Rcpp::List::create(
+    Rcpp::Named("taxa") = taxa,
+    Rcpp::Named("reference_bits") = sides,
+    Rcpp::Named("coverage_bits") = coverage,
+    Rcpp::Named("words") = static_cast<int>(words),
+    Rcpp::Named("n_primitives") = static_cast<int>(primitive_count),
+    Rcpp::Named("n_genes") = static_cast<int>(genes.size())
+  );
 }
 
 struct NativeValues {
@@ -908,6 +1145,9 @@ Rcpp::List cpp_align_branches(std::string species_newick,
   }
 
   PreparedReference reference = prepare_reference(species_newick);
+  saf_support* raw_support = nullptr;
+  fast_check(saf_support_create(reference.handle.get(), "gene", "alignment", &raw_support));
+  SupportHandle support(raw_support, saf_support_destroy);
   Rcpp::List species = reference.species;
   const Rcpp::DataFrame primitive_coordinates =
     Rcpp::as<Rcpp::DataFrame>(species["coordinates"]);
@@ -950,6 +1190,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     fast_check(saf_mapping_create(coverage->handle.get(), parsed.parent.data(),
                                   parsed.taxon.data(), parsed.parent.size(), &raw));
     MappingHandle mapping(raw, saf_mapping_destroy);
+    fast_check(saf_support_update(support.get(), raw));
     saf_mapping_info info{};
     fast_check(saf_mapping_get_info(raw, &info));
     std::vector<char> states(primitive_count);
@@ -970,6 +1211,10 @@ Rcpp::List cpp_align_branches(std::string species_newick,
       });
       parsed.diagnostics.duplicate_split_aliases += static_cast<int>(sources.size()) - 1;
       auto& value = evidence[e];
+      for (const auto source : sources) {
+        if (!value.source_nodes.empty()) value.source_nodes += ",";
+        value.source_nodes += std::to_string(source);
+      }
       value.numeric_available = edge_values.valid[e] != 0;
       value.numeric_value = value.numeric_available ? edge_values.values[e] : NA_REAL;
       value.numeric_status = value.numeric_available ? "finite_numeric" : "missing_branch_length";
@@ -981,7 +1226,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     OneGeneResult gene;
     gene.gene_id = gene_id;
     gene.retained_taxa.assign(parsed.tips.begin(), parsed.tips.end());
-    gene.projected_splits = coverage->display_keys_r;
+    gene.coverage = parsed.coverage;
     gene.diagnostics = parsed.diagnostics;
     gene.primitive.resize(primitive_count);
     for (std::size_t i = 0; i < primitive_count; ++i) {
@@ -994,8 +1239,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
         result.reason_code = "PROJECTED_SIDE_EMPTY";
       } else {
         result.projection_index = coverage->axis_to_projection[a];
-        // Preserve the existing bounds check without copying the display key.
-        (void)coverage->display_keys.at(result.projection_index);
+        (void)coverage->members.at(result.projection_index);
       }
     }
     for (std::size_t g : coverage->display_order) {
@@ -1016,6 +1260,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
         } else {
           composite.numeric_available = projection_values.valid[g] != 0;
           composite.numeric_value = composite.numeric_available ? projection_values.values[g] : NA_REAL;
+          composite.source_nodes = evidence.at(edge).source_nodes;
           composite.numeric_status = evidence.at(edge).numeric_status;
           composite.recovery_status = composite.numeric_available
             ? "recovered_numeric" : "recovered_numeric_unavailable";
@@ -1045,6 +1290,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
           result.reason_code = "PROJECTED_SPLIT_RECOVERED";
           result.numeric_available = primitive_values.valid[a] != 0;
           result.numeric_value = result.numeric_available ? primitive_values.values[a] : NA_REAL;
+          result.source_nodes = evidence.at(edge).source_nodes;
           result.numeric_status = evidence.at(edge).numeric_status;
         }
       }
@@ -1118,9 +1364,11 @@ Rcpp::List cpp_align_branches(std::string species_newick,
   const R_xlen_t ledger_rows = static_cast<R_xlen_t>(
     genes.size() * primitive_count
   );
+  Rcpp::List compact_splits = split_backing(reference, genes);
   Rcpp::CharacterVector ledger_gene(ledger_rows);
   Rcpp::CharacterVector ledger_coordinate(ledger_rows);
-  Rcpp::CharacterVector ledger_split(ledger_rows, NA_STRING);
+  Rcpp::IntegerVector ledger_split_gene(ledger_rows);
+  Rcpp::IntegerVector ledger_split_primitive(ledger_rows, NA_INTEGER);
   Rcpp::IntegerVector ledger_a(ledger_rows);
   Rcpp::IntegerVector ledger_b(ledger_rows);
   Rcpp::CharacterVector ledger_state(ledger_rows);
@@ -1129,15 +1377,17 @@ Rcpp::List cpp_align_branches(std::string species_newick,
   Rcpp::LogicalVector ledger_numeric_available(ledger_rows);
   Rcpp::NumericVector ledger_numeric_value(ledger_rows, NA_REAL);
   Rcpp::CharacterVector ledger_numeric_status(ledger_rows);
+  Rcpp::CharacterVector ledger_sources(ledger_rows, NA_STRING);
   R_xlen_t ledger_row = 0;
-  for (const OneGeneResult& gene : genes) {
+  for (std::size_t gi = 0; gi < genes.size(); ++gi) {
+    const OneGeneResult& gene = genes[gi];
     for (std::size_t i = 0; i < primitive_count; ++i, ++ledger_row) {
       const PrimitiveResult& result = gene.primitive[i];
       ledger_gene[ledger_row] = gene.gene_id;
       ledger_coordinate[ledger_row] = coordinate_ids[i];
+      ledger_split_gene[ledger_row] = static_cast<int>(gi);
       if (result.projection_index != SAF_NONE) {
-        ledger_split[ledger_row] =
-          gene.projected_splits[static_cast<R_xlen_t>(result.projection_index)];
+        ledger_split_primitive[ledger_row] = static_cast<int>(i);
       }
       ledger_a[ledger_row] = result.side_a_size;
       ledger_b[ledger_row] = result.side_b_size;
@@ -1151,8 +1401,11 @@ Rcpp::List cpp_align_branches(std::string species_newick,
         ledger_numeric_value[ledger_row] = result.numeric_value;
       }
       ledger_numeric_status[ledger_row] = result.numeric_status;
+      if (!result.source_nodes.empty()) ledger_sources[ledger_row] = result.source_nodes;
     }
   }
+  Rcpp::CharacterVector ledger_split(splitaligner_lazy::make(
+    compact_splits, ledger_split_gene, ledger_split_primitive));
   Rcpp::DataFrame state_ledger = Rcpp::DataFrame::create(
     Rcpp::Named("gene_id") = ledger_gene,
     Rcpp::Named("coordinate_id") = ledger_coordinate,
@@ -1165,6 +1418,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     Rcpp::Named("numeric_available") = ledger_numeric_available,
     Rcpp::Named("numeric_value") = ledger_numeric_value,
     Rcpp::Named("numeric_status") = ledger_numeric_status,
+    Rcpp::Named("source_nodes") = ledger_sources,
     Rcpp::Named("stringsAsFactors") = false
   );
 
@@ -1177,27 +1431,35 @@ Rcpp::List cpp_align_branches(std::string species_newick,
   );
   Rcpp::CharacterVector composite_gene(composite_rows);
   Rcpp::CharacterVector composite_id(composite_rows);
-  Rcpp::CharacterVector composite_split(composite_rows);
+  Rcpp::IntegerVector composite_split_gene(composite_rows);
+  Rcpp::IntegerVector composite_split_primitive(composite_rows);
   Rcpp::CharacterVector composite_recovery(composite_rows);
   Rcpp::LogicalVector composite_numeric_available(composite_rows);
   Rcpp::NumericVector composite_numeric_value(composite_rows, NA_REAL);
   Rcpp::CharacterVector composite_numeric_status(composite_rows);
+  Rcpp::CharacterVector composite_sources(composite_rows, NA_STRING);
   R_xlen_t composite_row = 0;
-  for (const OneGeneResult& gene : genes) {
+  for (std::size_t gi = 0; gi < genes.size(); ++gi) {
+    const OneGeneResult& gene = genes[gi];
     for (const CompositeResult& result : gene.composites) {
       composite_gene[composite_row] = gene.gene_id;
       composite_id[composite_row] = result.coordinate_id;
-      composite_split[composite_row] =
-        gene.projected_splits[static_cast<R_xlen_t>(result.projection_index)];
+      if (result.member_indices.empty())
+        throw std::runtime_error("Composite has no original member for projected-split evidence");
+      composite_split_gene[composite_row] = static_cast<int>(gi);
+      composite_split_primitive[composite_row] = result.member_indices.front();
       composite_recovery[composite_row] = result.recovery_status;
       composite_numeric_available[composite_row] = result.numeric_available;
       if (result.numeric_available) {
         composite_numeric_value[composite_row] = result.numeric_value;
       }
       composite_numeric_status[composite_row] = result.numeric_status;
+      if (!result.source_nodes.empty()) composite_sources[composite_row] = result.source_nodes;
       ++composite_row;
     }
   }
+  Rcpp::CharacterVector composite_split(splitaligner_lazy::make(
+    compact_splits, composite_split_gene, composite_split_primitive));
   Rcpp::DataFrame composite_ledger = Rcpp::DataFrame::create(
     Rcpp::Named("gene_id") = composite_gene,
     Rcpp::Named("composite_id") = composite_id,
@@ -1206,6 +1468,7 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     Rcpp::Named("numeric_available") = composite_numeric_available,
     Rcpp::Named("numeric_value") = composite_numeric_value,
     Rcpp::Named("numeric_status") = composite_numeric_status,
+    Rcpp::Named("source_nodes") = composite_sources,
     Rcpp::Named("stringsAsFactors") = false
   );
 
@@ -1257,6 +1520,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
     Rcpp::Named("stringsAsFactors") = false
   );
 
+  const auto support_table = reference_support_table(reference, support.get());
+  const Rcpp::NumericVector support_percent = support_table["support_percent"];
   return Rcpp::List::create(
     Rcpp::Named("state_matrix") = state_matrix,
     Rcpp::Named("numeric_matrix") = numeric_matrix,
@@ -1299,6 +1564,8 @@ Rcpp::List cpp_align_branches(std::string species_newick,
       Rcpp::Named("backend_name") = "SplitAlignerFast",
       Rcpp::Named("backend_abi") = 2,
       Rcpp::Named("backend_source_commit") = SAF_R_SOURCE_COMMIT
-    )
+    ),
+    Rcpp::Named("support_table") = support_table,
+    Rcpp::Named("support_newick") = render_support_newick(reference, support_percent)
   );
 }

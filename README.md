@@ -12,9 +12,21 @@ SplitAlignerFast backend maps exact taxon bitsets through C ABI 2. A separate
 pure R implementation independently recomputes the Catnip10 graph-oracle benchmark.
 The package checks branch-length tokens before using them as numeric evidence.
 
+**For everyday use, start with `align_branches()`.** It uses the split-based
+Fast backend for both free and fixed inputs. Setting `mode = "fixed"` does
+not switch algorithms. Choose `align_fixed_topology()` explicitly if you want
+the independent graph path for fixed-topology data. The Catnip10 oracle is a
+separate validation tool; you do not need to select an algorithm to run it.
+
+In the manuscript's current numbering, reference truth is Algorithm S1,
+the Perl workflow is S2, the Fast mapper used by `align_branches()` is S3,
+and `align_fixed_topology()` is S4. Older software records and filenames
+retain their original identifiers: S3 for reference truth and S2 for the
+Fast-backed R result. Those identifiers do not select a different algorithm.
+
 `v0.1.0` is the immutable Pro-RECERT-certified release. The default branch is
 the post-release development line. The Fast-backed prerelease has package version
-`0.1.0.9005` and is not covered by the `v0.1.0` RECERT decision. The frozen
+`0.1.0.9015` and is not covered by the `v0.1.0` RECERT decision. The frozen
 `v0.1.0-rc1`, `v0.1.0-rc2`, and `v0.1.0-rc3` tags are retained as historical
 release candidates.
 
@@ -29,7 +41,7 @@ Documentation site: <https://wujiaqi06.github.io/SplitAlignerR/>
 remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0")
 
 # Fast-backed prerelease
-remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0.9005")
+remotes::install_github("wujiaqi06/SplitAlignerR@v0.1.0.9015")
 ```
 
 ## Minimal Example
@@ -67,7 +79,7 @@ aligned$numeric_matrix
 ## Fast-backed development package
 
 Build the prerelease with a C++17 compiler and the Rcpp, ape and digest packages.
-Install the source archive using `R CMD INSTALL SplitAlignerR_0.1.0.9005.tar.gz`.
+Install this prerelease using `R CMD INSTALL SplitAlignerR_0.1.0.9015.tar.gz`.
 Use `splitaligner_core_info()` to inspect the active backend and source version.
 
 The mapper uses exact taxon bitsets. It caches coverage projections within an
@@ -75,6 +87,177 @@ alignment while preserving the R result's branch order, source indices and
 fusion memberships. The fixed and free outputs retain separate graph states
 and numeric evidence. Pair them with `pair_alignment_results()` to produce
 the finalized matrix. Full result objects include per-cell provenance ledgers.
+
+Projected split text in these ledgers is stored compactly and rendered on
+request. It remains a character column: selecting a few records does not
+expand every split in the panel. Use the package's result writer or
+`saveRDS(result, file, version = 3)` to retain compact storage. Reading such
+a file requires SplitAlignerR 0.1.0.9014 or later. To save ordinary character
+columns for older installations, use `saveRDS(result, file, version = 2)`;
+expanding the strings can increase memory use and file size. Operations that
+request a full character buffer or edit the text column can also expand it.
+For panels larger than available memory, use the batched disk interface below.
+
+The result includes its per-branch Support table and the labeled reference
+tree in `aligned$support_table` and `aligned$support_newick`. To export the
+pair into a new directory, call `write_branch_support(aligned, "support")`.
+
+### Fixed-topology alignment with Algorithm S4
+
+For an explicit alternative to the default split mapper, when each gene tree
+has the topology of the reference restricted to that gene's taxa, use:
+
+```r
+fixed <- align_fixed_topology(
+  "((A,B),C);",
+  c(full = "(C:4,(B:2,A:1):3);", reduced = "(B:5,C:4);"),
+  reference_semantics = "unrooted",
+  gene_semantics = "unrooted"
+)
+fixed$reference_state_matrix # S3 states for every input gene's retained taxa
+fixed$numeric_matrix         # Successful genes: original and fusion columns
+fixed$observation_ledger     # Actual measurements and their input-edge sources
+fixed$component_observations # Includes components absent from the input
+fixed$fusion_ledger          # Construction and sources of each fusion-column value
+fixed$gene_outcomes          # Successes and skipped genes, with reasons
+```
+
+S4 carries original branch members through graph pruning and contraction,
+then matches labeled tree structures before reading gene lengths. It does not
+call the Fast split mapper. A topology mismatch skips that gene and records
+its ID and reason; it does not become `NA_topo`. Other invalid inputs still
+raise errors. Check `fixed$metadata$n_input`, `n_success` and
+`n_skipped_topology` before using a result. If every gene is skipped, the
+result contains the full log and zero-row numeric matrices.
+
+Reference identity and input measurements are separate. With
+`reference_semantics = "rooted"`, S4 preserves the original reference root
+and ancestral stem exactly as S3 does. Gene trees still default to
+`gene_semantics = "unrooted"`. If forgetting the root combines two reference
+components into one observed edge, its length is recorded once as a joint
+observation; it is never copied or divided into two original-branch values.
+An ancestral stem absent from the gene input remains in reference truth but
+has no measurement. This is distinct from an input edge whose length is missing.
+Use `gene_semantics = "reference_rooted"` only for inputs explicitly declared
+to preserve the reference root and its structure; a root-length annotation
+does not create a missing edge. The declaration does not
+establish that a model can estimate each root-adjacent length independently.
+
+`reference_state_matrix` has all input rows and only `observed`, `NA_struct`
+and `NA_fuse`; `observed` describes reference identity, not empirical recovery.
+`primitive_matrix`, `fusion_matrix` and their combined `numeric_matrix` have
+successful genes only, in input order. Reference components and deletion-fusion
+columns keep their S3 definitions. Joint observations caused by input
+normalization are kept separately and do not create deletion fusions or
+change Support. `primitive_observation_matrix` reports individual, joint or
+unrepresented correspondence, alongside `NA_struct` for deleted originals.
+
+The default `fusion_view = "whole"` constructs values only from complete
+reference components and complete available observation units. `"direct"`
+retains a value only when the complete target corresponds to one normalized
+observation unit, even when its reference state is decomposable. Such a unit can itself sum multiple input edges
+when an unrooted display root is suppressed; its provenance records
+`single_input_edge` or `input_edge_sum`. Sources are counted once per target
+value. Different target columns can share sources and are not independent
+measurements. Input-edge IDs and hashes are provenance, not portable identities.
+
+This candidate introduces result schema `s4-observation-v1`, without the old
+ambiguous `state_matrix` and `component_ledger` aliases. The old
+`tree_semantics = "unrooted"` argument is a deprecated alias and cannot be mixed
+with the new arguments. The old rooted spelling raises a migration error:
+choose the two new semantics explicitly, since the former rooted/MRCA result
+used a different reference definition. Historical results are unchanged.
+
+This entry returns a separate `splitaligner_fixed_result`; read its matrices
+and ledgers directly. Existing support, paired, exchange and disk-panel
+accessors accept the S2 result type, not this type. S4 retains ordinary per-cell
+source tables and assembles the full result in memory. Reduced temporary
+assembly allocations do not make it disk-backed; large provenance-rich
+results can still require substantial memory. The batched disk interface
+applies to `align_branches()`, not `align_fixed_topology()`. Version
+0.1.0.9015 is a development prerelease.
+
+### Reference truth tables, including rooted trees
+
+To ask what happens to the original branches when taxa are removed, supply
+only the reference tree and retained taxa. No empirical gene tree is needed:
+
+```r
+truth <- reference_truth(
+  "((A:1,B:2):3,C:4);",
+  list(full = c("A", "B", "C"), without_C = c("A", "B"),
+       only_A = "A", empty = character(0)),
+  tree_semantics = "rooted"
+)
+truth$state_matrix       # observed / NA_struct / NA_fuse on original branches
+truth$original_matrix    # Separately retained original-branch lengths
+truth$fusion_matrix      # Expected lengths in shared fusion coordinates
+truth$component_ledger   # Complete original members and reference-edge sources
+```
+
+This S3 entry preserves the **original root and the path to the retained taxa**.
+The original root is exempt from degree-two contraction. Its convention
+matches the historical rooted benchmark, including the root-to-MRCA stem.
+S4 uses the same reference identity and separately records which components
+its gene input can measure. Missing input representation does not change S3 truth.
+
+In a truth table, `observed` means that an original reference branch remains
+separately represented; it does not assert recovery in a gene tree. Expected
+lengths come only from the reference. If a required reference length is missing,
+the expected total stays missing. States and complete fusion membership still
+remain available. `fusion_view = "whole"` and `"direct"` follow the same complete-
+component rule as the mapping outputs, with reference sources clearly labeled.
+
+An empty retained set has no edges. A single retained taxon keeps its original
+root-to-tip path in rooted mode; zero or one retained taxon has no edges in
+unrooted mode. The existing `recompute_catnip10_oracle()` entry and frozen
+Catnip10 data are unchanged. These truth tools are optional; ordinary mapping
+still starts with `align_branches()` and the split-based Fast default.
+
+### Working with large gene collections (0.1.0.9006)
+
+Start with a reference tree and two files containing one named gene tree per
+line. In paired mode, use the same gene IDs in the same order in both files.
+Choose a new directory on a disk with space for the results.
+
+```r
+panel <- align_panel_to_disk("speciesTree302.nwk", "free.2275genes.nwk",
+                            "mammal-panel", mode = "paired",
+                            fixed_file = "fix.2275genes.nwk", batch_size = 32L)
+read_panel_matrix(panel, "paired_free", genes = c("AASDH", "ABCA1"),
+                  branches = c("B1", "B2"))
+patterns <- panel_fusion_patterns(panel)
+read_panel_groups(panel, genes = "ABCA12")
+```
+
+The first pass records each fusion pattern by its original reference branches
+and writes per-gene evidence to disk. The second pass reads the batches for
+the genes you request. A pattern discovered in the last batch is available
+in the same column for any selection. To see whether a pattern formed and
+was recovered, pass composite IDs to `read_panel_fusions()` and request
+`field = "recovery_status"`. For a temporary run, pass `tempfile("mammal-")`
+as the output directory and keep the returned path until you finish reading.
+
+The default fusion view uses complete current components. A group formed in a later batch can receive a sum in an earlier gene. Use `read_panel_fusion_cells(panel, genes, patterns)` for the source edges of each selected value, or `fusion_view = "direct"` when creating a panel for single-edge measurements. Older panels keep their recorded direct values.
+
+To export a whole matrix, stream the second pass to a new TSV file. Each row
+contains one gene, with the same reference and fusion columns throughout.
+
+```r
+export_panel_matrix(panel, "free-lengths.tsv", "free_length", include_fusions = TRUE)
+```
+
+Each new panel also writes `support.tsv` and `support.nwk` under `free/` or
+`fixed/`. In paired mode, open `free/support.nwk` for the free-tree Support
+percentages and `fixed/support.nwk` for the fixed-tree ones. The writer sums
+each branch's eligible and recovered gene counts across all batches before
+computing its label.
+
+The panel stores primitive lengths and states, paired tokens where requested,
+and per-gene fusion records. For full per-cell provenance, use
+`align_branches()` on the genes of interest. Reduce `batch_size` for wider
+reference trees. The reference, one batch, the gene and fusion indexes, and
+the slice you request need to fit in memory.
 
 ### Fusion members and their shared split
 

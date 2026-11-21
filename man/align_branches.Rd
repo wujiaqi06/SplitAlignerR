@@ -9,7 +9,8 @@ align_branches(
   gene_trees,
   mode = c("free", "fixed"),
   gene_ids = NULL,
-  ...
+  ...,
+  fusion_view = c("whole", "direct")
 )
 }
 \arguments{
@@ -20,7 +21,9 @@ annotation blocks are ignored with diagnostics.}
 \item{gene_trees}{One or more empirical gene trees supplied as Newick text,
 a SplitAligner line-based file, one \code{ape::phylo}, an \code{ape::multiPhylo}, or
 a list of \code{phylo} objects. A line-based record may be \code{gene_id(tree);} or a
-plain Newick tree.}
+plain Newick tree. A file ID may contain Unicode letters, marks, numbers,
+dots, underscores, and hyphens. For \code{phylo} objects, tip labels are taken
+literally and numeric edge lengths are preserved at double precision.}
 
 \item{mode}{Character; \code{"free"} for free-topology trees or \code{"fixed"} for
 topology-constrained trees. Both modes use the same state semantics;
@@ -29,19 +32,31 @@ fixed-mode topology mismatches are additionally diagnosed.}
 \item{gene_ids}{Optional character vector overriding inferred/file IDs.
 Explicit IDs must be non-missing, nonempty, unique, free of control
 characters, and have no leading or trailing whitespace. Unicode IDs are
-supported. Existing names on character vectors, \code{multiPhylo} objects,
-and lists follow the same content rules; only missing or empty object names
+supported. Existing names on character vectors, \code{multiPhylo} objects, and
+lists follow the same content rules; only missing or empty object names
 receive deterministic automatic IDs.}
 
 \item{...}{Reserved; additional arguments currently signal an error.}
+
+\item{fusion_view}{\code{"whole"} (default) sums complete recovered components
+in shared fusion columns when all lengths are available. \code{"direct"} fills
+only fusion groups represented by a single current branch in that gene.
+Use \code{\link{fusion_cells}} to inspect component membership and source edges.}
 }
 \value{
 A \code{splitaligner_result} list containing the primitive \code{state_matrix},
 primitive-plus-composite \code{numeric_matrix}, long state and composite
 ledgers, coordinate provenance, structured diagnostics, validated species
-tree, and versioned metadata.
+tree, and versioned metadata. Both modes return \code{support_table} with one row
+per original reference branch and \code{support_newick} with percentages on
+internal branches. Use \code{\link[=write_branch_support]{write_branch_support()}} to export both.
 }
 \description{
+The default mapping entry uses the split-based Fast backend in both free
+and fixed modes. Fixed input does not automatically select another algorithm.
+Use \code{\link{align_fixed_topology}} explicitly for the independent graph-based
+fixed-topology path; the Catnip10 oracle is a separate validation entry.
+
 Restrict the reference tree to each gene's retained taxa, classify every
 primitive coordinate by graph-first semantics, and then query the empirical
 gene-tree splits. Structural state is kept separate from finite numeric

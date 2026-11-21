@@ -119,12 +119,15 @@ LruLease HardBoundedLru::acquire(
         found->second.retained != retained) {
       fail(ErrorCode::pattern_mismatch, "LRU key retained bits mismatch");
     }
+    // Allocate the lease before changing the pin count so allocation failure
+    // cannot leave an entry pinned. Arm it when the mutation is complete.
+    auto cache = shared_from_this();
+    auto owner = std::make_shared<LeaseOwner>(nullptr, pattern_id, false, 0);
     if (found->second.pins == 0) unlink_lru(pattern_id);
     increment_counter(stats_.hits, "LRU hit counter");
     increment_counter(found->second.pins, "LRU pin counter");
     found->second.last_use = sequence_;
-    auto owner = std::make_shared<LeaseOwner>(shared_from_this(), pattern_id,
-                                              false, 0);
+    owner->cache = std::move(cache);
     return LruLease{std::static_pointer_cast<const void>(owner),
                     found->second.record, false};
   }
@@ -144,20 +147,19 @@ LruLease HardBoundedLru::acquire(
     increment_counter(stats_.oversized_bypasses,
                       "LRU oversized-bypass counter");
     lock.unlock();
-    std::shared_ptr<const std::vector<std::uint8_t>> record;
     try {
-      record = loader();
+      const auto record = loader();
       if (!record || record->size() != record_bytes) {
         fail(ErrorCode::io_failure, "scratch loader returned wrong record bytes");
       }
+      auto owner = std::make_shared<LeaseOwner>(shared_from_this(), pattern_id,
+                                                true, record_bytes);
+      return LruLease{std::static_pointer_cast<const void>(owner), record, true};
     } catch (...) {
       std::lock_guard<std::mutex> restore(mutex_);
       stats_.active_scratch_bytes = 0;
       throw;
     }
-    auto owner = std::make_shared<LeaseOwner>(shared_from_this(), pattern_id,
-                                              true, record_bytes);
-    return LruLease{std::static_pointer_cast<const void>(owner), record, true};
   }
 
   while (stats_.charged_cache_bytes > cache_budget_ - charge) {
@@ -176,33 +178,46 @@ LruLease HardBoundedLru::acquire(
     entries_.erase(victim);
     increment_counter(stats_.evictions, "LRU eviction counter");
   }
-  lock.unlock();
-  const auto record = loader();
-  if (!record || record->size() != record_bytes) {
-    fail(ErrorCode::io_failure, "cache loader returned wrong record bytes");
-  }
-  lock.lock();
-  if (entries_.count(pattern_id) != 0) {
-    fail(ErrorCode::internal_failure,
-         "concurrent duplicate LRU insertion is unsupported in ENGINE002");
-  }
-  Entry entry;
-  entry.retained = retained;
-  entry.record = record;
-  entry.charge = charge;
-  entry.lookup_fast_hash = fast_hash_bytes(
-      FastHashDomain::lru_key, retained, constant_fast_hash_);
-  entry.last_use = sequence_;
-  entry.pins = 1;
-  entries_.emplace(pattern_id, std::move(entry));
+  // Reserve the charge before unlocking for I/O. Another miss cannot spend
+  // the same bytes while this record is still being read.
   stats_.charged_cache_bytes += charge;
+  ++pending_cache_loads_;
   stats_.cache_high_water =
       std::max(stats_.cache_high_water, stats_.charged_cache_bytes);
-  increment_counter(stats_.insertions, "LRU insertion counter");
-  assert_bounds();
-  auto owner = std::make_shared<LeaseOwner>(shared_from_this(), pattern_id,
-                                            false, 0);
-  return LruLease{std::static_pointer_cast<const void>(owner), record, false};
+  lock.unlock();
+  try {
+    const auto record = loader();
+    if (!record || record->size() != record_bytes) {
+      fail(ErrorCode::io_failure, "cache loader returned wrong record bytes");
+    }
+    lock.lock();
+    if (entries_.count(pattern_id) != 0) {
+      fail(ErrorCode::internal_failure,
+           "concurrent duplicate LRU insertion is unsupported in ENGINE002");
+    }
+    Entry entry;
+    entry.retained = retained;
+    entry.record = record;
+    entry.charge = charge;
+    entry.lookup_fast_hash = fast_hash_bytes(
+        FastHashDomain::lru_key, retained, constant_fast_hash_);
+    entry.last_use = sequence_;
+    entry.pins = 1;
+    // Arm the lease only after insertion succeeds; rollback must not release
+    // another thread's entry or acquire this mutex recursively.
+    auto cache = shared_from_this();
+    auto owner = std::make_shared<LeaseOwner>(nullptr, pattern_id, false, 0);
+    entries_.emplace(pattern_id, std::move(entry));
+    owner->cache = std::move(cache);
+    ++stats_.insertions;  // bounded by the checked request sequence
+    --pending_cache_loads_;
+    return LruLease{std::static_pointer_cast<const void>(owner), record, false};
+  } catch (...) {
+    if (!lock.owns_lock()) lock.lock();
+    stats_.charged_cache_bytes -= charge;
+    --pending_cache_loads_;
+    throw;
+  }
 }
 
 void HardBoundedLru::release(std::uint64_t pattern_id, bool scratch,
@@ -228,6 +243,9 @@ LruStats HardBoundedLru::stats() const noexcept {
 
 void HardBoundedLru::clear() {
   std::lock_guard<std::mutex> lock(mutex_);
+  if (pending_cache_loads_ != 0) {
+    fail(ErrorCode::store_busy, "LRU cache has in-flight loads");
+  }
   for (const auto& item : entries_) {
     if (item.second.pins != 0) {
       fail(ErrorCode::store_busy, "LRU cache has active pins");

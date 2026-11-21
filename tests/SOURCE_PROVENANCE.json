@@ -91,7 +91,7 @@
       "git_blob": "341a6fada50a67d617a815e25e917b505e5d9dd5"
     }
   ],
-  "candidate_package_version": "0.1.0.9005",
+  "candidate_package_version": "0.1.0.9006",
   "candidate_core_version": "0.2.0-fast-abi2",
   "backend_source_commit": "4f2d0c699a62d45b4dd3fc44999e2e134f0cd9dc",
   "adapted_files": {
@@ -142,6 +142,18 @@
       "test_blocks": 4,
       "sha256": "7edc9c1fecacc3281285dd50884a2954e3a5a25dfae5e91f74156d0db6924076",
       "origin": "Development 9005 layered fusion-group reporting, paired finalization and explicit-unit topology accounting."
+    },
+    {
+      "path": "tests/testthat/test-disk-panel.R",
+      "test_blocks": 3,
+      "sha256": "2dee97c071e7aff0d7dd23c4d0eca8039971589b4a3229aea568e01153077613",
+      "origin": "Development 9006 disk panel, selective reads, fusion catalog and integrity."
+    },
+    {
+      "path": "tests/testthat/test-disk-export.R",
+      "test_blocks": 1,
+      "sha256": "9f99bdd124097a27b0d8fbcf07bbc99ef0b133007746e2552834db501ead7dda",
+      "origin": "Streaming TSV export with a late fusion pattern, numeric text round-trip, no-clobber and interruption."
     }
   ]
 }

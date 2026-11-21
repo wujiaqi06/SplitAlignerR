@@ -1,10 +1,20 @@
+# sprintf and formatC both follow LC_NUMERIC on some hosts, even when
+# formatC is given decimal.mark = ".". Inspect the formatter without changing
+# the host locale; only the decimal separator can occur between these digits.
+.dot_decimal <- function(text) {
+  probe <- sprintf("%.1f", 1.5)
+  if (identical(probe, "1.5")) return(text)
+  decimal <- substr(probe, 2L, nchar(probe) - 1L)
+  sub(decimal, ".", text, fixed = TRUE)
+}
+
 legacy_numeric_text <- function(value) {
   output <- rep("NA", length(value))
   finite <- is.finite(value)
   if (any(finite)) {
-    output[finite] <- trimws(formatC(
+    output[finite] <- .dot_decimal(trimws(formatC(
       value[finite], digits = 17L, format = "g", decimal.mark = "."
-    ))
+    )))
   }
   output
 }
@@ -116,8 +126,8 @@ validate_paired_fiber_invariance <- function(fixed, free) {
 }
 
 validate_paired_axes <- function(fixed, free) {
-  validate_splitaligner_result_object(fixed)
-  validate_splitaligner_result_object(free)
+  validate_splitaligner_result_object(fixed, check_fusion_matrix = FALSE)
+  validate_splitaligner_result_object(free, check_fusion_matrix = FALSE)
   if (!identical(fixed$metadata$mode, "fixed")) {
     stop("`fixed` must come from `align_branches(..., mode = \"fixed\")`.",
          call. = FALSE)
