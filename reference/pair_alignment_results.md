@@ -64,6 +64,8 @@ paired <- pair_alignment_results(fixed, free)
 paired$free_fusion_groups
 #>   gene_id composite_id projected_split recovery_status numeric_available
 #> 1       g  F[B7|B8|B9]      A..B||D..E     unrecovered             FALSE
-#>   numeric_value numeric_status primitive_members  graph_class  final_token
-#> 1            NA  not_recovered        B7, B8, B9 NA_fuse_topo NA_fuse_topo
+#>   numeric_value numeric_status source_nodes primitive_members  graph_class
+#> 1            NA  not_recovered         <NA>        B7, B8, B9 NA_fuse_topo
+#>    final_token
+#> 1 NA_fuse_topo
 ```

@@ -80,8 +80,8 @@ free <- align_branches(species, genes["discordant"], mode = "free",
 paired <- pair_alignment_results(fixed, free)
 paired$free_fusion_groups
 #>  [1] gene_id           composite_id      projected_split   recovery_status  
-#>  [5] numeric_available numeric_value     numeric_status    primitive_members
-#>  [9] graph_class       final_token      
+#>  [5] numeric_available numeric_value     numeric_status    source_nodes     
+#>  [9] primitive_members graph_class       final_token      
 #> <0 rows> (or 0-length row.names)
 paired$semantic_state_matrix
 #>    B1       B2       B3       B4       B5       
@@ -136,8 +136,8 @@ pruned$state_matrix
 pruned$composite_ledger
 #>    gene_id composite_id projected_split   recovery_status numeric_available
 #> 1 two_taxa     F[B1|B2]            A||B recovered_numeric              TRUE
-#>   numeric_value numeric_status
-#> 1             9 finite_numeric
+#>   numeric_value numeric_status source_nodes
+#> 1             9 finite_numeric          0,1
 coordinate_provenance(pruned, "F[B1|B2]")
 #>   coordinate_id coordinate_type branch_type canonical_reference_split
 #> 1      F[B1|B2]       composite   composite                      <NA>

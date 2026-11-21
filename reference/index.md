@@ -6,11 +6,28 @@ C++ graph-first alignment, result inspection, and persistence.
 
 - [`align_branches()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_branches.md)
   : Align gene trees to the species-tree branch-coordinate system
+- [`align_fixed_topology()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_fixed_topology.md)
+  : Align fixed-topology trees with separate reference and observation
+  records
+- [`reference_truth()`](https://wujiaqi06.github.io/SplitAlignerR/reference/reference_truth.md)
+  : Construct reference-only branch truth by pruning and contraction
+- [`align_panel_to_disk()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  [`export_panel_matrix()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  [`read_panel_fusion_cells()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  [`panel_fusion_patterns()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  [`read_panel_matrix()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  [`read_panel_groups()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  [`read_panel_fusions()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  : Align gene trees to disk and read selected genes
+- [`write_branch_support()`](https://wujiaqi06.github.io/SplitAlignerR/reference/write_branch_support.md)
+  : Write the branch support table and annotated reference tree
 - [`count_free_topology()`](https://wujiaqi06.github.io/SplitAlignerR/reference/count_free_topology.md)
   : Count the five free-tree topology outcomes using an explicit
   counting unit
 - [`free_fusion_groups()`](https://wujiaqi06.github.io/SplitAlignerR/reference/free_fusion_groups.md)
   : Inspect fusion groups on a free gene tree
+- [`fusion_cells()`](https://wujiaqi06.github.io/SplitAlignerR/reference/fusion_cells.md)
+  : Inspect the source of shared fusion-column values
 - [`coordinate_provenance()`](https://wujiaqi06.github.io/SplitAlignerR/reference/coordinate_provenance.md)
   : Query coordinate member-set provenance
 - [`summary(`*`<splitaligner_result>`*`)`](https://wujiaqi06.github.io/SplitAlignerR/reference/summary.splitaligner_result.md)

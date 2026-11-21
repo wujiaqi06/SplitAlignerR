@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SplitAlignerR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9005</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,8 +145,8 @@ agree.</p>
 <span><span class="va">paired</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pair_alignment_results.html">pair_alignment_results</a></span><span class="op">(</span><span class="va">fixed</span>, <span class="va">free</span><span class="op">)</span></span>
 <span><span class="va">paired</span><span class="op">$</span><span class="va">free_fusion_groups</span></span>
 <span><span class="co">#&gt;  [1] gene_id           composite_id      projected_split   recovery_status  </span></span>
-<span><span class="co">#&gt;  [5] numeric_available numeric_value     numeric_status    primitive_members</span></span>
-<span><span class="co">#&gt;  [9] graph_class       final_token      </span></span>
+<span><span class="co">#&gt;  [5] numeric_available numeric_value     numeric_status    source_nodes     </span></span>
+<span><span class="co">#&gt;  [9] primitive_members graph_class       final_token      </span></span>
 <span><span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></span>
 <span><span class="va">paired</span><span class="op">$</span><span class="va">semantic_state_matrix</span></span>
 <span><span class="co">#&gt;    B1       B2       B3       B4       B5       </span></span>
@@ -201,8 +201,8 @@ lost side become structural absence.</p>
 <span><span class="va">pruned</span><span class="op">$</span><span class="va">composite_ledger</span></span>
 <span><span class="co">#&gt;    gene_id composite_id projected_split   recovery_status numeric_available</span></span>
 <span><span class="co">#&gt; 1 two_taxa     F[B1|B2]            A||B recovered_numeric              TRUE</span></span>
-<span><span class="co">#&gt;   numeric_value numeric_status</span></span>
-<span><span class="co">#&gt; 1             9 finite_numeric</span></span>
+<span><span class="co">#&gt;   numeric_value numeric_status source_nodes</span></span>
+<span><span class="co">#&gt; 1             9 finite_numeric          0,1</span></span>
 <span><span class="fu"><a href="../reference/coordinate_provenance.html">coordinate_provenance</a></span><span class="op">(</span><span class="va">pruned</span>, <span class="st">"F[B1|B2]"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   coordinate_id coordinate_type branch_type canonical_reference_split</span></span>
 <span><span class="co">#&gt; 1      F[B1|B2]       composite   composite                      &lt;NA&gt;</span></span>

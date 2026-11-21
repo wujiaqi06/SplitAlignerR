@@ -1,5 +1,160 @@
 # Changelog
 
+## SplitAlignerR 0.1.0.9015 (development prerelease)
+
+- Native compact-vector initialization is retained when Rcpp attributes
+  are regenerated. CI checks generated registration on all three
+  platforms and with the distribution’s Rcpp package.
+- The compact-vector data-pointer callback supports R 4.6’s public API
+  while retaining compatibility with earlier R headers.
+- Release metadata checks and software citations identify the current
+  development prerelease. Historical release identities remain
+  unchanged.
+- The panel cleanup diagnostic test compares normalized paths on
+  Windows.
+- README relates current manuscript algorithm numbers to legacy software
+  identifiers. Numerical algorithms and result schemas are unchanged.
+
+## SplitAlignerR 0.1.0.9014 (local development candidate)
+
+- Default split alignment keeps projected-split ledger text in a compact
+  deferred character representation. Full taxon names are rendered when
+  requested, while branch identities, matrices and provenance remain
+  intact. Version-3 RDS serialization preserves the compact
+  representation and needs SplitAlignerR 0.1.0.9014 or later to read it.
+  Explicit version-2 RDS is an ordinary-character fallback for older
+  readers, at greater memory/file cost. Restored Unicode split labels
+  retain their character meaning when the reader’s native locale differs
+  from the writer’s.
+- Selected fusion-source queries render only the requested split
+  records. Requesting or modifying an entire text column can still
+  materialize it.
+- Fixed-topology graph assembly writes fusion-ledger columns directly
+  and avoids unused source tables for original-branch cells. It retains
+  the same observation, state, numerical and source-table schema.
+
+## SplitAlignerR 0.1.0.9013 (local development candidate)
+
+- Gene-specific S4 errors identify the gene without losing condition
+  metadata. Unrepresented ancestral stems are described relative to the
+  declared unrooted observation view; original input Newick remains
+  retained.
+- Direct fusion views exclude multi-component numerical construction
+  before overflow or missing-length checks, consistently with S4.
+- Disk readers accept empty fusion selections. Export diagnostics
+  distinguish occupied paths, including dangling symlinks, while
+  preserving no-clobber publication. Failed cleanup is reported without
+  replacing the primary error.
+
+## SplitAlignerR 0.1.0.9012 (local development candidate)
+
+- Empty disk-panel fusion catalogs now explicitly retain character
+  coordinate IDs on R versions whose default is
+  `stringsAsFactors = TRUE`. The reader continues to validate the same
+  schema; no fusion or matrix semantics change.
+
+## SplitAlignerR 0.1.0.9011 (local development candidate)
+
+- Native Linux validation found that R 3.6 lacks
+  `unlink(expand = FALSE)`. Disk-output cleanup now uses literal
+  filesystem paths across supported R versions, preserving neighboring
+  paths that contain wildcard characters.
+- Package checks now inspect every raw test event, including errors
+  followed by warnings, so a test reporter summary cannot conceal a
+  failed check.
+- The S4 reference, observation, numerical and mismatch contracts are
+  unchanged. This compatibility candidate preserves the 9010 source and
+  its check evidence.
+
+## SplitAlignerR 0.1.0.9010 (local development candidate)
+
+- S4 now separates `reference_semantics` from `gene_semantics`. Rooted
+  reference identity preserves the original root exactly as S3 does;
+  gene inputs default to unrooted observations, with `reference_rooted`
+  available by declaration.
+- The new `s4-observation-v1` result separates reference states and
+  components from empirical observations. Joint observations caused by
+  forgetting a root are recorded once, without inventing separate
+  root-child lengths or deletion fusions. Unrepresented stems remain in
+  reference truth and receive no length.
+- Observation provenance distinguishes one input edge from a complete
+  sum of input edges after normalization. Whole/direct fusion views
+  respect complete observation units and retain each target’s
+  contributing sources.
+- A fixed-topology mismatch skips that gene and records its ID and
+  reason. Reference rows cover all inputs; numeric rows cover successful
+  genes only. Counts and typed empty outputs remain available when every
+  gene is skipped. Other input errors still fail explicitly; there is no
+  S2 fallback.
+- The old `tree_semantics = "unrooted"` spelling is a deprecated alias.
+  The old rooted spelling raises a migration error because its MRCA-stem
+  convention differs from the new reference definition. New results have
+  no ambiguous `state_matrix` or `component_ledger` aliases. Historical
+  results are preserved.
+- S4 gene inputs may explicitly represent unary stem structure. Original
+  reference inputs retain the 9009 contract: every internal node,
+  including the root, must have at least two children. A unary root
+  created by S3 restriction remains valid; the S2 parser’s input
+  contract is unchanged.
+- S3 reference truth, S2/Fast mapping, Support and deletion-fusion
+  identities keep their existing definitions. This candidate is not a
+  published release.
+
+## SplitAlignerR 0.1.0.9009 (local development candidate)
+
+- [`reference_truth()`](https://wujiaqi06.github.io/SplitAlignerR/reference/reference_truth.md)
+  exposes the S3 graph algorithm for arbitrary reference trees and
+  retained-taxon sets, with separate original-branch and shared fusion
+  matrices, complete members and expected reference-length provenance.
+- Rooted S3 preserves the original root and its path to the retained-tip
+  MRCA. It never adopts S4’s MRCA promotion rule. Reference truth
+  accepts no empirical gene trees and makes no topology-recovery
+  classification.
+- Both graph paths share the optimized table builder. Existing unrooted
+  Catnip10 behavior and the default S2/Fast mapping entry are unchanged.
+
+## SplitAlignerR 0.1.0.9008 (local development candidate)
+
+- S4 assembles component and fusion ledgers by columns and indexes each
+  primitive’s current component once per gene. Complete provenance and
+  all existing whole/direct, rooted/unrooted output semantics are
+  retained.
+- Document the split-based
+  [`align_branches()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_branches.md)
+  path as the default for both free and fixed inputs. S4 remains an
+  explicit choice and the Catnip10 oracle remains a separate validation
+  entry. No automatic algorithm switching was introduced.
+
+## SplitAlignerR 0.1.0.9007 (local development candidate)
+
+- [`align_fixed_topology()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_fixed_topology.md)
+  implements Algorithm S4 independently of the Fast mapper: graph
+  restriction with complete member tracking, followed by exact
+  labeled-tree isomorphism and empirical edge-length assignment.
+- Explicit rooted and unrooted semantics, strict topology-mismatch
+  errors, primitive states, whole/direct fusion views, and source-edge
+  provenance are exposed in a separate `splitaligner_fixed_result`.
+  Existing S2 APIs retain their current behavior.
+- Rooted restriction promotes the root to the retained taxa’s MRCA.
+  Discarded stem members become `NA_struct`; root promotion is recorded
+  per gene. This differs from the historical rooted/global Catnip10
+  oracle’s retained stem, and the old benchmark artifacts remain
+  unchanged.
+
+## SplitAlignerR 0.1.0.9006 (development)
+
+- New panels record the whole-component or direct fusion view. Use
+  [`read_panel_fusion_cells()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md)
+  to trace each value to the original gene tree. Existing v1 panels
+  retain their original direct-only values.
+- Align large collections in batches with
+  [`align_panel_to_disk()`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.md).
+  Look up fusion patterns across all batches and read selected genes and
+  branches.
+- Fixed and free in-memory alignments return branch Support and an
+  annotated Newick reference tree. Each new disk panel also exports
+  support for the complete gene set using the totals from all batches.
+
 ## SplitAlignerR 0.1.0.9005 (development prerelease)
 
 - [`free_fusion_groups()`](https://wujiaqi06.github.io/SplitAlignerR/reference/free_fusion_groups.md)

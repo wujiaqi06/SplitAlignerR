@@ -1,5 +1,12 @@
 # Align gene trees to the species-tree branch-coordinate system
 
+The default mapping entry uses the split-based Fast backend in both free
+and fixed modes. Fixed input does not automatically select another
+algorithm. Use
+[`align_fixed_topology`](https://wujiaqi06.github.io/SplitAlignerR/reference/align_fixed_topology.md)
+explicitly for the independent graph-based fixed-topology path; the
+Catnip10 oracle is a separate validation entry.
+
 Restrict the reference tree to each gene's retained taxa, classify every
 primitive coordinate by graph-first semantics, and then query the
 empirical gene-tree splits. Structural state is kept separate from
@@ -14,7 +21,8 @@ align_branches(
   gene_trees,
   mode = c("free", "fixed"),
   gene_ids = NULL,
-  ...
+  ...,
+  fusion_view = c("whole", "direct")
 )
 ```
 
@@ -33,7 +41,10 @@ align_branches(
   SplitAligner line-based file, one
   [`ape::phylo`](https://rdrr.io/pkg/ape/man/read.tree.html), an
   `ape::multiPhylo`, or a list of `phylo` objects. A line-based record
-  may be `gene_id(tree);` or a plain Newick tree.
+  may be `gene_id(tree);` or a plain Newick tree. A file ID may contain
+  Unicode letters, marks, numbers, dots, underscores, and hyphens. For
+  `phylo` objects, tip labels are taken literally and numeric edge
+  lengths are preserved at double precision.
 
 - mode:
 
@@ -54,12 +65,24 @@ align_branches(
 
   Reserved; additional arguments currently signal an error.
 
+- fusion_view:
+
+  `"whole"` (default) sums complete recovered components in shared
+  fusion columns when all lengths are available. `"direct"` fills only
+  fusion groups represented by a single current branch in that gene. Use
+  [`fusion_cells`](https://wujiaqi06.github.io/SplitAlignerR/reference/fusion_cells.md)
+  to inspect component membership and source edges.
+
 ## Value
 
 A `splitaligner_result` list containing the primitive `state_matrix`,
 primitive-plus-composite `numeric_matrix`, long state and composite
 ledgers, coordinate provenance, structured diagnostics, validated
-species tree, and versioned metadata.
+species tree, and versioned metadata. Both modes return `support_table`
+with one row per original reference branch and `support_newick` with
+percentages on internal branches. Use
+[`write_branch_support()`](https://wujiaqi06.github.io/SplitAlignerR/reference/write_branch_support.md)
+to export both.
 
 ## Details
 

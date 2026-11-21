@@ -8,6 +8,8 @@
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/news/index.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/SplitAlignerR-package.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/align_branches.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/align_fixed_topology.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/align_panel_to_disk.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/catnip10_expected.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/catnip10_fusion_groups.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/catnip10_matrix.html</loc></url>
@@ -16,10 +18,12 @@
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/coordinate_provenance.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/count_free_topology.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/free_fusion_groups.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/fusion_cells.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/index.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/pair_alignment_results.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/read_splitaligner_result.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/recompute_catnip10_oracle.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/reference_truth.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/save_splitaligner_result.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/splitalignerR_scaffold.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/splitaligner_core_info.html</loc></url>
@@ -29,5 +33,6 @@
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/validate_branch_length_tokens.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/validate_catnip10_oracle.html</loc></url>
 <url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/validate_species_tree.html</loc></url>
+<url><loc>https://wujiaqi06.github.io/SplitAlignerR/reference/write_branch_support.html</loc></url>
 </urlset>
 
