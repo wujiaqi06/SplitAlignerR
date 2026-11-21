@@ -11,10 +11,15 @@ with_test_session_option_evidence <- function(values, code) {
   withCallingHandlers(
     options(values),
     warning = function(warning) {
+      message <- conditionMessage(warning)
       option_warnings <<- c(
         option_warnings,
-        gsub("[\t\r\n]+", " ", conditionMessage(warning))
+        gsub("[\t\r\n]+", " ", message)
       )
+      if (identical(as.numeric(values$scipen), -999) &&
+          identical(message, "invalid 'scipen' -999, used -9")) {
+        invokeRestart("muffleWarning")
+      }
     }
   )
   effective <- options("OutDec", "scipen")
@@ -229,16 +234,60 @@ test_that("optional scipen extreme records the effective boundary truthfully", {
   for (outdec in c(".", ",")) {
     evidence <- session_option_public_snapshot(outdec, -999L)
     expect_identical(evidence$requested_outdec, outdec)
+    expect_identical(evidence$effective_outdec, outdec)
     expect_identical(as.numeric(evidence$requested_scipen), -999)
     expect_identical(evidence$payload, reference)
     if (evidence$option_exactly_applied) {
       expect_identical(as.numeric(evidence$effective_scipen), -999)
+      expect_identical(evidence$option_warning, "")
     } else {
-      expect_false(identical(as.numeric(evidence$effective_scipen), -999))
-      expect_true(nzchar(evidence$option_warning))
+      expect_identical(as.numeric(evidence$effective_scipen), -9)
+      expect_identical(evidence$option_warning, "invalid 'scipen' -999, used -9")
     }
   }
 
+  expect_identical(options("OutDec", "scipen"), original)
+})
+
+test_that("only the expected option-boundary warning is muffled", {
+  original <- options("OutDec", "scipen")
+  expected <- "invalid 'scipen' -999, used -9"
+  simulate_option_warning <- function(message, code = "payload") {
+    simulated_options <- function(...) {
+      args <- list(...)
+      if (length(args) == 1L && is.list(args[[1L]]) &&
+          identical(args[[1L]]$scipen, -999L)) {
+        applied <- args[[1L]]
+        applied$scipen <- -9L
+        old <- base::options(applied)
+        warning(message, call. = FALSE)
+        return(old)
+      }
+      base::options(...)
+    }
+    run <- with_test_session_option_evidence
+    environment(run) <- list2env(
+      list(options = simulated_options), parent = environment(run)
+    )
+    run(list(OutDec = ",", scipen = -999L), code)
+  }
+
+  expect_no_warning(evidence <- simulate_option_warning(expected))
+  expect_identical(evidence$option_warning, expected)
+  expect_identical(as.numeric(evidence$effective_scipen), -9)
+  expect_false(evidence$option_exactly_applied)
+  expect_identical(evidence$payload, "payload")
+  expect_identical(options("OutDec", "scipen"), original)
+
+  expect_warning(
+    simulate_option_warning("sentinel unexpected option warning"),
+    "sentinel unexpected option warning", fixed = TRUE
+  )
+  # Even the same message must escape if emitted by the tested payload.
+  expect_warning(
+    simulate_option_warning(expected, warning(expected, call. = FALSE)),
+    expected, fixed = TRUE
+  )
   expect_identical(options("OutDec", "scipen"), original)
 })
 
